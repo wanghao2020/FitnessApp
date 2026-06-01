@@ -53,4 +53,37 @@ store.completeWorkout({
 });
 assert.equal(store.getState().workoutResult.status, "任务完成");
 
+const executionStore = createStore();
+assert.equal(executionStore.getState().activeStepIndex, 0);
+assert.equal(executionStore.getState().activeStep.id, "step-1");
+assert.equal(executionStore.getState().executionSummary.completedCount, 0);
+
+executionStore.recordWatchAction("完成");
+assert.equal(executionStore.getState().stepLogs["step-1"].status, "completed");
+assert.match(executionStore.getState().stepLogs["step-1"].note, /完成/);
+
+executionStore.nextStep();
+assert.equal(executionStore.getState().activeStep.id, "step-2");
+
+executionStore.recordWatchAction("过重");
+assert.equal(executionStore.getState().stepLogs["step-2"].status, "tooHeavy");
+assert.equal(executionStore.getState().executionSummary.hasLoadIssue, true);
+
+executionStore.nextStep();
+executionStore.recordWatchAction("跳过");
+assert.equal(executionStore.getState().stepLogs["step-3"].status, "skipped");
+
+executionStore.previousStep();
+assert.equal(executionStore.getState().activeStep.id, "step-2");
+
+executionStore.completeWorkout();
+assert.equal(executionStore.getState().workoutResult.status, "任务完成");
+assert.match(executionStore.getState().workoutResult.safetyFeedback, /降低|保守|安全/);
+assert.match(executionStore.getState().memoryDraft, /深厅校准/);
+
+executionStore.setScenario("green");
+assert.equal(executionStore.getState().activeStepIndex, 0);
+assert.equal(executionStore.getState().workoutResult, null);
+assert.equal(executionStore.getState().executionSummary.completedCount, 0);
+
 console.log("prototype contract ok");
