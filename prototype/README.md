@@ -31,8 +31,10 @@ python3 -m http.server 5173
 - 切换 `绿 / 黄 / 红` 状态场景。
 - 确认今日状态、世界状态、今日任务、安全边界和 Apple Watch 执行内容同步变化。
 - 确认黄色与红色状态会降低强度，并且恢复任务仍被叙事为正向进展。
+- 在 `Apple Watch 执行` 中使用 `上一项 / 下一项` 切换动作。
+- 对当前动作点击 `完成 / 过重 / 跳过 / RPE≤目标`，确认 `训练日志草稿` 同步更新。
 - 切换模型模式：`本地优先`、`本地 + 远程增强`、`禁用远程`。
-- 点击 `完成模拟训练`，查看中文训练结果与剧情结算。
+- 点击 `完成模拟训练`，查看中文训练结果、下一次建议与 `Memory 草稿`。
 
 ## 验证命令
 
@@ -43,6 +45,7 @@ node --check prototype/src/questEngine.js
 node --check prototype/src/readiness.js
 node --check prototype/src/render.js
 node --check prototype/src/state.js
+node --check prototype/src/execution.js
 node prototype/tests/prototypeContract.test.mjs
 curl -s http://localhost:5173
 ```
