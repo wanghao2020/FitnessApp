@@ -1,0 +1,13 @@
+.DS_Store
+DerivedData/
+.build/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.playground
+*.ipa
+*.dSYM
+secrets.*
+*.env
+.superpowers/
