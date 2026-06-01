@@ -55,6 +55,10 @@ button:hover {
 
 .loading-panel,
 .hero-strip {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -162,8 +166,58 @@ blockquote {
   color: #b8c8c0;
 }
 
+.scenario-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scenario-switcher button,
+.button-row button {
+  min-height: 40px;
+}
+
+button.active,
+button.primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #ffffff;
+}
+
+.metric-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 0;
+}
+
+.metric-list div {
+  padding: 10px;
+  background: var(--surface-2);
+  border-radius: 8px;
+}
+
+.metric-list dt {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.metric-list dd {
+  margin: 2px 0 0;
+  font-weight: 800;
+}
+
 @media (max-width: 760px) {
+  .hero-strip {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .panel {
     grid-column: 1 / -1;
+  }
+
+  .exercise-row {
+    grid-template-columns: 1fr;
   }
 }
