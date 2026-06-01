@@ -1,15 +1,18 @@
 :root {
   color-scheme: light;
-  --bg: #f5f7f3;
-  --surface: #ffffff;
-  --surface-2: #edf2ef;
-  --ink: #17211c;
-  --muted: #607067;
-  --line: #d8e0da;
-  --green: #27845f;
-  --yellow: #b7791f;
-  --red: #b7413e;
-  --blue: #2f6f9f;
+  --bg: #f4f7f4;
+  --surface: #fffdf8;
+  --surface-2: #eaf1ed;
+  --surface-3: #f7faf7;
+  --ink: #151d1b;
+  --muted: #5b6a62;
+  --line: #d7ded8;
+  --green: #287d62;
+  --yellow: #b07118;
+  --red: #b24846;
+  --blue: #276f9b;
+  --teal: #168276;
+  --watch: #0e1514;
   --radius: 8px;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -23,6 +26,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   overflow-x: hidden;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -38,10 +42,12 @@ button {
   background: var(--surface);
   color: var(--ink);
   cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease;
 }
 
 button:hover {
   border-color: var(--blue);
+  transform: translateY(-1px);
 }
 
 .app-shell {
@@ -51,7 +57,7 @@ button:hover {
 .page {
   width: min(1180px, calc(100vw - 32px));
   margin: 0 auto;
-  padding: 24px 0 40px;
+  padding: 22px 0 40px;
 }
 
 .loading-panel,
@@ -63,21 +69,23 @@ button:hover {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 24px;
+  padding: 22px;
+  box-shadow: 0 18px 45px rgba(28, 50, 42, 0.08);
 }
 
 .eyebrow {
   margin: 0 0 8px;
   color: var(--blue);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0;
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  line-height: 1;
+  font-size: clamp(2rem, 4.6vw, 3.25rem);
+  line-height: 1.05;
   letter-spacing: 0;
   max-width: 100%;
   overflow-wrap: break-word;
@@ -88,6 +96,7 @@ h1 {
   color: var(--muted);
   line-height: 1.55;
   overflow-wrap: anywhere;
+  margin-bottom: 0;
 }
 
 .panel p,
@@ -112,12 +121,15 @@ h1 {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 18px;
+  min-width: 0;
 }
 
 .panel h2 {
   margin: 0 0 8px;
-  font-size: 1.6rem;
+  font-size: clamp(1.28rem, 2.2vw, 1.58rem);
+  line-height: 1.16;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .readiness-green {
@@ -148,6 +160,39 @@ h1 {
   grid-column: 1 / -1;
 }
 
+.world-strip {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1px;
+  margin-top: 16px;
+  overflow: hidden;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.world-strip > div {
+  padding: 16px 18px;
+  background: var(--surface);
+  min-width: 0;
+}
+
+.world-strip strong,
+.world-strip span {
+  display: block;
+}
+
+.world-strip strong {
+  margin-bottom: 4px;
+  font-size: 1.05rem;
+}
+
+.world-strip span {
+  color: var(--muted);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
 .exercise-list {
   display: grid;
   gap: 8px;
@@ -155,11 +200,18 @@ h1 {
 
 .exercise-row {
   display: grid;
-  grid-template-columns: 1.4fr .7fr .7fr;
+  grid-template-columns: 1.4fr .7fr .7fr .7fr;
+  align-items: center;
   gap: 12px;
   padding: 10px;
   background: var(--surface-2);
   border-radius: 8px;
+  min-width: 0;
+}
+
+.exercise-row strong,
+.exercise-row span {
+  overflow-wrap: anywhere;
 }
 
 blockquote {
@@ -170,6 +222,47 @@ blockquote {
   line-height: 1.5;
 }
 
+.coach-note,
+.muted-copy {
+  color: var(--muted);
+}
+
+.coach-note {
+  margin-top: -4px;
+}
+
+.attribute-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.attribute-pill {
+  display: grid;
+  gap: 3px;
+  min-height: 76px;
+  padding: 10px;
+  background: var(--surface-2);
+  border: 1px solid rgba(22, 130, 118, 0.18);
+  border-radius: 8px;
+}
+
+.attribute-pill span {
+  color: var(--teal);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.attribute-pill strong {
+  font-size: 1rem;
+}
+
+.attribute-pill em {
+  color: var(--ink);
+  font-style: normal;
+  font-weight: 800;
+}
+
 .button-row {
   display: flex;
   flex-wrap: wrap;
@@ -178,10 +271,12 @@ blockquote {
 
 .button-row button {
   padding: 9px 12px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .watch-panel {
-  background: #101615;
+  background: var(--watch);
   color: #f5fbf7;
   border-color: #2a3934;
 }
@@ -206,7 +301,7 @@ blockquote {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   width: 100%;
-  max-width: 260px;
+  max-width: 330px;
 }
 
 .scenario-switcher button,
@@ -214,11 +309,32 @@ blockquote {
   min-height: 40px;
 }
 
+.scenario-switcher button {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: 9px 10px;
+}
+
+.scenario-switcher span {
+  font-weight: 800;
+}
+
+.scenario-switcher small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.15;
+}
+
 button.active,
 button.primary {
   background: var(--ink);
   border-color: var(--ink);
   color: #ffffff;
+}
+
+button.active small {
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .metric-list {
@@ -232,6 +348,7 @@ button.primary {
   padding: 10px;
   background: var(--surface-2);
   border-radius: 8px;
+  min-width: 0;
 }
 
 .metric-list dt {
@@ -242,12 +359,23 @@ button.primary {
 .metric-list dd {
   margin: 2px 0 0;
   font-weight: 800;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 760px) {
+  .page {
+    width: min(calc(100vw - 20px), 1180px);
+    padding-top: 10px;
+  }
+
   .hero-strip {
     align-items: stretch;
     flex-direction: column;
+    padding: 18px;
+  }
+
+  .world-strip {
+    grid-template-columns: 1fr;
   }
 
   .panel {
@@ -256,6 +384,19 @@ button.primary {
 
   .exercise-row {
     grid-template-columns: 1fr;
+  }
+
+  .attribute-grid,
+  .metric-list {
+    grid-template-columns: 1fr;
+  }
+
+  .scenario-switcher {
+    max-width: none;
+  }
+
+  .button-row button {
+    flex: 1 1 140px;
   }
 }
 
