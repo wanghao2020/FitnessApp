@@ -7,13 +7,26 @@ import {
   deriveExecutionState,
   recordStepAction
 } from "./execution.js";
+import { buildModelHarness } from "./modelHarness.js";
 
 function deriveState(base) {
   const summary = healthScenarios[base.scenarioId];
   const readiness = computeReadiness(summary);
   const quest = buildDailyQuest(readiness);
   const nextBase = { ...base, summary, readiness, quest };
-  return deriveExecutionState(nextBase);
+  const executionState = deriveExecutionState(nextBase);
+  return {
+    ...executionState,
+    modelHarness: buildModelHarness(executionState, executionState.modelMode)
+  };
+}
+
+function deriveRuntimeState(base) {
+  const executionState = deriveExecutionState(base);
+  return {
+    ...executionState,
+    modelHarness: buildModelHarness(executionState, executionState.modelMode)
+  };
 }
 
 export function createStore() {
@@ -55,21 +68,21 @@ export function createStore() {
       notify();
     },
     nextStep() {
-      state = deriveExecutionState({
+      state = deriveRuntimeState({
         ...state,
         activeStepIndex: Math.min(state.activeStepIndex + 1, state.quest.watchPayload.steps.length - 1)
       });
       notify();
     },
     previousStep() {
-      state = deriveExecutionState({
+      state = deriveRuntimeState({
         ...state,
         activeStepIndex: Math.max(state.activeStepIndex - 1, 0)
       });
       notify();
     },
     recordWatchAction(action) {
-      state = deriveExecutionState({
+      state = deriveRuntimeState({
         ...state,
         stepLogs: recordStepAction(
           state.stepLogs ?? createInitialStepLogs(state.quest.watchPayload.steps),
@@ -81,11 +94,11 @@ export function createStore() {
     },
     completeWorkout(result) {
       const workoutResult = result ?? buildWorkoutResult(state);
-      state = deriveExecutionState({ ...state, workoutResult });
+      state = deriveRuntimeState({ ...state, workoutResult });
       notify();
     },
     setModelMode(modelMode) {
-      state = { ...state, modelMode };
+      state = deriveRuntimeState({ ...state, modelMode });
       notify();
     }
   };
