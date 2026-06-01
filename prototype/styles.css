@@ -81,3 +81,42 @@ h1 {
   color: var(--muted);
   line-height: 1.55;
 }
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.panel {
+  grid-column: span 6;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+.panel h2 {
+  margin: 0 0 8px;
+  font-size: 1.6rem;
+  letter-spacing: 0;
+}
+
+.readiness-green {
+  border-left: 6px solid var(--green);
+}
+
+.readiness-yellow {
+  border-left: 6px solid var(--yellow);
+}
+
+.readiness-red {
+  border-left: 6px solid var(--red);
+}
+
+@media (max-width: 760px) {
+  .panel {
+    grid-column: 1 / -1;
+  }
+}
