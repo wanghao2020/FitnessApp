@@ -115,6 +115,53 @@ h1 {
   border-left: 6px solid var(--red);
 }
 
+.wide {
+  grid-column: 1 / -1;
+}
+
+.exercise-list {
+  display: grid;
+  gap: 8px;
+}
+
+.exercise-row {
+  display: grid;
+  grid-template-columns: 1.4fr .7fr .7fr;
+  gap: 12px;
+  padding: 10px;
+  background: var(--surface-2);
+  border-radius: 8px;
+}
+
+blockquote {
+  margin: 0 0 16px;
+  padding-left: 14px;
+  border-left: 4px solid var(--blue);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.button-row button {
+  padding: 9px 12px;
+}
+
+.watch-panel {
+  background: #101615;
+  color: #f5fbf7;
+  border-color: #2a3934;
+}
+
+.watch-panel .eyebrow,
+.watch-panel p {
+  color: #b8c8c0;
+}
+
 @media (max-width: 760px) {
   .panel {
     grid-column: 1 / -1;
