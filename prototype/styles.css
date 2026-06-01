@@ -477,6 +477,86 @@ button.active small {
   line-height: 1.5;
 }
 
+.harness-panel h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.panel-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.model-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 5px 10px;
+  color: var(--teal);
+  background: rgba(22, 130, 118, 0.1);
+  border: 1px solid rgba(22, 130, 118, 0.22);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.harness-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.harness-grid section {
+  min-width: 0;
+  padding: 12px;
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.harness-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.path-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.path-chips span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 5px 9px;
+  color: var(--blue);
+  background: rgba(39, 111, 155, 0.09);
+  border: 1px solid rgba(39, 111, 155, 0.18);
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.prompt-preview {
+  margin: 0;
+  padding: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  background: #f0f5f2;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+  line-height: 1.45;
+}
+
 @media (max-width: 760px) {
   .page {
     width: min(calc(100vw - 20px), 1180px);
@@ -507,6 +587,7 @@ button.active small {
   }
 
   .attribute-grid,
+  .harness-grid,
   .metric-list {
     grid-template-columns: 1fr;
   }
@@ -551,6 +632,15 @@ button.active small {
 
   .button-row button {
     flex: 1 1 calc(50% - 8px);
+  }
+
+  .panel-heading-row {
+    display: grid;
+  }
+
+  .model-badge {
+    justify-self: start;
+    white-space: normal;
   }
 
   .scenario-switcher button {

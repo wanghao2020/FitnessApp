@@ -34,6 +34,8 @@ python3 -m http.server 5173
 - 在 `Apple Watch 执行` 中使用 `上一项 / 下一项` 切换动作。
 - 对当前动作点击 `完成 / 过重 / 跳过 / RPE≤目标`，确认 `训练日志草稿` 同步更新。
 - 切换模型模式：`本地优先`、`本地 + 远程增强`、`禁用远程`。
+- 查看 `本地模型 Harness`，确认输入上下文、Skill 规则、生成路径、Fallback 和 Prompt 预览会随模型模式与训练日志变化。
+- 点击一次 `过重`，确认 Harness 中出现过重信号与降负规则。
 - 点击 `完成模拟训练`，查看中文训练结果、下一次建议与 `Memory 草稿`。
 
 ## 验证命令
@@ -46,6 +48,7 @@ node --check prototype/src/readiness.js
 node --check prototype/src/render.js
 node --check prototype/src/state.js
 node --check prototype/src/execution.js
+node --check prototype/src/modelHarness.js
 node prototype/tests/prototypeContract.test.mjs
 curl -s http://localhost:5173
 ```
