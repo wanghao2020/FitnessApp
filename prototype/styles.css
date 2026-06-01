@@ -37,6 +37,7 @@ textarea {
 }
 
 button {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
@@ -314,6 +315,7 @@ blockquote {
   gap: 2px;
   justify-items: center;
   padding: 9px 10px;
+  overflow: hidden;
 }
 
 .scenario-switcher span {
@@ -392,7 +394,16 @@ button.active small {
   }
 
   .scenario-switcher {
+    grid-template-columns: 1fr;
     max-width: none;
+  }
+
+  .scenario-switcher button {
+    padding: 8px 6px;
+  }
+
+  .scenario-switcher small {
+    font-size: 0.68rem;
   }
 
   .button-row button {
