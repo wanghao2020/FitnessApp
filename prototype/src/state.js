@@ -12,7 +12,7 @@ function deriveState(base) {
 export function createStore() {
   let state = deriveState({
     scenarioId: "yellow",
-    selectedAction: "Start Quest",
+    selectedAction: "开始任务",
     workoutResult: null,
     modelMode: "local"
   });
