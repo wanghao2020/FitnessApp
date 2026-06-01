@@ -1,7 +1,7 @@
 import { healthScenarios, modelModes } from "./mockData.js";
 
 function list(items) {
-  return items.map((item) => `<li>${item}</li>`).join("");
+  return [...new Set(items)].map((item) => `<li>${item}</li>`).join("");
 }
 
 function activeClass(value, current) {

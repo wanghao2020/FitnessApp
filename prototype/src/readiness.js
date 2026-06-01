@@ -5,7 +5,7 @@ const restrictionsByColor = {
 };
 
 export function computeReadiness(summary) {
-  let score = 85;
+  let score = 100;
   const drivers = [];
 
   if (summary.sleepHours < 6) {
@@ -49,7 +49,7 @@ export function computeReadiness(summary) {
   }
 
   const clampedScore = Math.max(0, Math.min(100, score));
-  const color = clampedScore >= 70 ? "Green" : clampedScore >= 45 ? "Yellow" : "Red";
+  const color = clampedScore >= 70 ? "Green" : clampedScore >= 35 ? "Yellow" : "Red";
 
   return {
     color,
