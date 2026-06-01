@@ -86,6 +86,15 @@ h1 {
   line-height: 1.55;
 }
 
+.panel p,
+.panel li {
+  line-height: 1.5;
+}
+
+.panel ul {
+  padding-left: 20px;
+}
+
 .panel-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
@@ -111,12 +120,24 @@ h1 {
   border-left: 6px solid var(--green);
 }
 
+.readiness-green h2 {
+  color: var(--green);
+}
+
 .readiness-yellow {
   border-left: 6px solid var(--yellow);
 }
 
+.readiness-yellow h2 {
+  color: var(--yellow);
+}
+
 .readiness-red {
   border-left: 6px solid var(--red);
+}
+
+.readiness-red h2 {
+  color: var(--red);
 }
 
 .wide {
@@ -164,6 +185,16 @@ blockquote {
 .watch-panel .eyebrow,
 .watch-panel p {
   color: #b8c8c0;
+}
+
+.watch-panel button {
+  background: #182522;
+  border-color: #31443e;
+  color: #f5fbf7;
+}
+
+.watch-panel button:hover {
+  border-color: #8bc7b0;
 }
 
 .scenario-switcher {
@@ -219,5 +250,30 @@ button.primary {
 
   .exercise-row {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .page {
+    width: min(100vw - 20px, 1180px);
+    padding-top: 10px;
+  }
+
+  .hero-strip,
+  .panel {
+    padding: 14px;
+  }
+
+  h1 {
+    font-size: 2.1rem;
+  }
+
+  .panel h2 {
+    font-size: 1.35rem;
+  }
+
+  .button-row button,
+  .scenario-switcher button {
+    flex: 1 1 auto;
   }
 }
