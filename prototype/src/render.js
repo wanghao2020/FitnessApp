@@ -5,6 +5,10 @@ function list(items) {
   return [...new Set(items)].map((item) => `<li>${item}</li>`).join("");
 }
 
+function lines(items) {
+  return items.map((item) => `<li>${item}</li>`).join("");
+}
+
 function activeClass(value, current) {
   return value === current ? "active" : "";
 }
@@ -182,6 +186,38 @@ export function renderApp(app, store) {
           <div class="button-row">
             ${modelModes.map((mode) => `<button class="${activeClass(mode.id, state.modelMode)}" data-model-mode="${mode.id}">${mode.label}</button>`).join("")}
           </div>
+        </article>
+
+        <article class="panel wide harness-panel">
+          <div class="panel-heading-row">
+            <div>
+              <p class="eyebrow">本地模型 Harness</p>
+              <h2>生成链路透明化</h2>
+            </div>
+            <span class="model-badge">${state.modelHarness.modeLabel}</span>
+          </div>
+          <div class="harness-grid">
+            <section>
+              <h3>输入上下文</h3>
+              <ul class="harness-list">${lines(state.modelHarness.inputContext)}</ul>
+            </section>
+            <section>
+              <h3>Skill 规则</h3>
+              <ul class="harness-list">${lines(state.modelHarness.skillRules)}</ul>
+            </section>
+            <section>
+              <h3>生成路径</h3>
+              <div class="path-chips">
+                ${state.modelHarness.generationPath.map((step) => `<span>${step}</span>`).join("")}
+              </div>
+            </section>
+            <section>
+              <h3>Fallback</h3>
+              <p>${state.modelHarness.fallbackPolicy}</p>
+            </section>
+          </div>
+          <h3>Prompt 预览</h3>
+          <pre class="prompt-preview">${state.modelHarness.promptPreview}</pre>
         </article>
 
         <article class="panel">
