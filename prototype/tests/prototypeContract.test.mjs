@@ -86,4 +86,25 @@ assert.equal(executionStore.getState().activeStepIndex, 0);
 assert.equal(executionStore.getState().workoutResult, null);
 assert.equal(executionStore.getState().executionSummary.completedCount, 0);
 
+const harnessStore = createStore();
+assert.equal(harnessStore.getState().modelHarness.modeLabel, "本地优先");
+assert.match(harnessStore.getState().modelHarness.inputContext.join("\n"), /深厅校准/);
+assert.match(harnessStore.getState().modelHarness.skillRules.join("\n"), /安全优先/);
+assert.match(harnessStore.getState().modelHarness.generationPath.join(" → "), /本地模型草稿/);
+assert.match(harnessStore.getState().modelHarness.fallbackPolicy, /确定性模板/);
+assert.match(harnessStore.getState().modelHarness.promptPreview, /HealthKit/);
+
+harnessStore.setModelMode("hybrid");
+assert.equal(harnessStore.getState().modelHarness.modeLabel, "本地 + 远程增强");
+assert.match(harnessStore.getState().modelHarness.fallbackPolicy, /远程只用于周报或剧情润色/);
+
+harnessStore.setModelMode("disabled");
+assert.equal(harnessStore.getState().modelHarness.modeLabel, "禁用远程");
+assert.doesNotMatch(harnessStore.getState().modelHarness.generationPath.join(" "), /远程增强/);
+assert.match(harnessStore.getState().modelHarness.fallbackPolicy, /不请求远程/);
+
+harnessStore.recordWatchAction("过重");
+assert.match(harnessStore.getState().modelHarness.inputContext.join("\n"), /过重/);
+assert.match(harnessStore.getState().modelHarness.skillRules.join("\n"), /降负/);
+
 console.log("prototype contract ok");
