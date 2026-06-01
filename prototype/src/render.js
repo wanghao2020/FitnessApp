@@ -1,4 +1,5 @@
 import { healthScenarios, modelModes } from "./mockData.js";
+import { getStatusLabel } from "./execution.js";
 
 function list(items) {
   return [...new Set(items)].map((item) => `<li>${item}</li>`).join("");
@@ -35,6 +36,7 @@ export function renderApp(app, store) {
   const state = store.getState();
   const { summary, readiness, quest } = state;
   const modelMode = modelModes.find((mode) => mode.id === state.modelMode);
+  const activeStepLog = state.stepLogs[state.activeStep.id];
 
   app.innerHTML = `
     <main class="page">
@@ -140,10 +142,36 @@ export function renderApp(app, store) {
 
         <article class="panel watch-panel">
           <p class="eyebrow">Apple Watch 执行</p>
+          <div class="watch-progress">
+            <span>${state.activeStepIndex + 1} / ${quest.watchPayload.steps.length}</span>
+            <strong>${getStatusLabel(activeStepLog.status)}</strong>
+          </div>
           <h2>${quest.watchPayload.questTitle}</h2>
-          <p>${quest.watchPayload.currentStep.exerciseName} · ${quest.watchPayload.currentStep.target}</p>
+          <p>${state.activeStep.exerciseName} · ${state.activeStep.target}</p>
+          <p class="watch-meta">RPE 上限 ${state.activeStep.rpeCap} · ${state.activeStep.restSeconds > 0 ? `休息 ${state.activeStep.restSeconds} 秒` : "连续执行"}</p>
+          <div class="button-row watch-nav">
+            <button data-previous-step="true" ${state.activeStepIndex === 0 ? "disabled" : ""}>上一项</button>
+            <button data-next-step="true" ${state.activeStepIndex === quest.watchPayload.steps.length - 1 ? "disabled" : ""}>下一项</button>
+          </div>
           <div class="button-row">
-            ${quest.watchPayload.currentStep.quickActions.map((action) => `<button data-watch-action="${action}">${action}</button>`).join("")}
+            ${state.activeStep.quickActions.map((action) => `<button data-watch-action="${action}">${action}</button>`).join("")}
+          </div>
+        </article>
+
+        <article class="panel wide">
+          <p class="eyebrow">训练日志草稿</p>
+          <div class="log-list">
+            ${quest.watchPayload.steps.map((step, index) => {
+              const log = state.stepLogs[step.id];
+              return `
+                <div class="log-row ${index === state.activeStepIndex ? "current" : ""}">
+                  <span class="status-pill status-${log.status}">${getStatusLabel(log.status)}</span>
+                  <strong>${index + 1}. ${step.exerciseName}</strong>
+                  <span>${step.target} · RPE≤${step.rpeCap}</span>
+                  <small>${log.note}</small>
+                </div>
+              `;
+            }).join("")}
           </div>
         </article>
 
@@ -161,10 +189,17 @@ export function renderApp(app, store) {
           ${state.workoutResult ? `
             <h2>${state.workoutResult.status}</h2>
             <p>${state.workoutResult.summary}</p>
+            ${state.workoutResult.safetyFeedback ? `<p class="result-note">${state.workoutResult.safetyFeedback}</p>` : ""}
+            ${state.workoutResult.nextRecommendation ? `<p class="result-note">${state.workoutResult.nextRecommendation}</p>` : ""}
           ` : `
             <p>尚未完成今日任务。</p>
             <button class="primary" data-complete-workout="true">完成模拟训练</button>
           `}
+        </article>
+
+        <article class="panel">
+          <p class="eyebrow">Memory 草稿</p>
+          <pre class="memory-draft">${state.memoryDraft}</pre>
         </article>
       </section>
     </main>
@@ -182,13 +217,22 @@ export function renderApp(app, store) {
     button.addEventListener("click", () => store.setModelMode(button.dataset.modelMode));
   });
 
+  app.querySelectorAll("[data-watch-action]").forEach((button) => {
+    button.addEventListener("click", () => store.recordWatchAction(button.dataset.watchAction));
+  });
+
+  const previousStepButton = app.querySelector("[data-previous-step]");
+  if (previousStepButton) {
+    previousStepButton.addEventListener("click", () => store.previousStep());
+  }
+
+  const nextStepButton = app.querySelector("[data-next-step]");
+  if (nextStepButton) {
+    nextStepButton.addEventListener("click", () => store.nextStep());
+  }
+
   const completeButton = app.querySelector("[data-complete-workout]");
   if (completeButton) {
-    completeButton.addEventListener("click", () => {
-      store.completeWorkout({
-        status: "任务完成",
-        summary: `${quest.questTitle} 已结算，平均 RPE ${readiness.color === "Green" ? 8 : readiness.color === "Yellow" ? 7 : 4}。剧情状态已更新，恢复型进展也计入成长。`
-      });
-    });
+    completeButton.addEventListener("click", () => store.completeWorkout());
   }
 }
