@@ -50,13 +50,18 @@ export function renderApp(app, store) {
           <h1>今日任务中枢</h1>
           <p class="summary">本地优先的每日任务循环：读取 HealthKit 恢复状态，生成安全训练边界，把剧情 RPG 任务同步到 Apple Watch 执行。</p>
         </div>
-        <div class="scenario-switcher" aria-label="状态场景">
-          ${Object.keys(healthScenarios).map((id) => `
-            <button class="${activeClass(id, state.scenarioId)}" data-scenario="${id}">
-              <span>${healthScenarios[id].label}</span>
-              <small>${healthScenarios[id].statusLabel}</small>
-            </button>
-          `).join("")}
+        <div class="hero-side">
+          <div class="ambient-visual ambient-${readiness.color.toLowerCase()}" data-asset-path="prototype/assets/resonance-hall.svg" aria-hidden="true">
+            <img src="./assets/resonance-hall.svg" alt="">
+          </div>
+          <div class="scenario-switcher" aria-label="状态场景">
+            ${Object.keys(healthScenarios).map((id) => `
+              <button class="${activeClass(id, state.scenarioId)}" data-scenario="${id}">
+                <span>${healthScenarios[id].label}</span>
+                <small>${healthScenarios[id].statusLabel}</small>
+              </button>
+            `).join("")}
+          </div>
         </div>
       </section>
 
