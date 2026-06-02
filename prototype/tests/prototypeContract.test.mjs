@@ -3,6 +3,7 @@ import { healthScenarios, modelModes } from "../src/mockData.js";
 import { computeReadiness } from "../src/readiness.js";
 import { buildDailyQuest } from "../src/questEngine.js";
 import { createStore } from "../src/state.js";
+import { renderApp } from "../src/render.js";
 
 const expectedScenarioLabels = {
   green: "绿",
@@ -106,5 +107,14 @@ assert.match(harnessStore.getState().modelHarness.fallbackPolicy, /不请求远�
 harnessStore.recordWatchAction("过重");
 assert.match(harnessStore.getState().modelHarness.inputContext.join("\n"), /过重/);
 assert.match(harnessStore.getState().modelHarness.skillRules.join("\n"), /降负/);
+
+const renderRoot = {
+  innerHTML: "",
+  querySelectorAll: () => [],
+  querySelector: () => null
+};
+renderApp(renderRoot, createStore());
+assert.match(renderRoot.innerHTML, /ambient-visual/);
+assert.match(renderRoot.innerHTML, /prototype\/assets\/resonance-hall/);
 
 console.log("prototype contract ok");
