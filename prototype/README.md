@@ -8,6 +8,7 @@
 - Apple Watch 作为训练中执行动作、记录 RPE 和快速反馈的表面。
 - HealthKit 恢复状态映射为 `绿 / 黄 / 红` 三种任务分支。
 - 剧情 RPG 作为训练动机层，但安全边界始终优先。
+- 顶部使用 `prototype/assets/resonance-hall.svg` 作为低干扰 RPG 氛围资产，并通过状态色 token 区分 `共振稳定 / 共振偏移 / 营火修复`。
 
 ## Open
 
@@ -30,6 +31,7 @@ python3 -m http.server 5173
 
 - 切换 `绿 / 黄 / 红` 状态场景。
 - 确认今日状态、世界状态、今日任务、安全边界和 Apple Watch 执行内容同步变化。
+- 确认顶部氛围图正常显示，且状态切换后视觉边框 token 随 readiness 更新。
 - 确认黄色与红色状态会降低强度，并且恢复任务仍被叙事为正向进展。
 - 在 `Apple Watch 执行` 中使用 `上一项 / 下一项` 切换动作。
 - 对当前动作点击 `完成 / 过重 / 跳过 / RPE≤目标`，确认 `训练日志草稿` 同步更新。
@@ -51,4 +53,5 @@ node --check prototype/src/execution.js
 node --check prototype/src/modelHarness.js
 node prototype/tests/prototypeContract.test.mjs
 curl -s http://localhost:5173
+test -f prototype/assets/resonance-hall.svg
 ```
