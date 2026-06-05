@@ -22,6 +22,14 @@ struct ModelHarnessPanel: View {
                     .font(.footnote)
             }
 
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Memory 草稿")
+                    .font(.subheadline.weight(.semibold))
+                Text("完成后记录训练反馈、降阶信号和下一次建议。")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
             Text(snapshot.promptPreview)
                 .font(.caption.monospaced())
                 .padding(10)
