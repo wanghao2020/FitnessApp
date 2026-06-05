@@ -36,6 +36,15 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertFalse(quest.objective.contains("冲刺"))
     }
 
+    func testMissingHealthKitDataUsesConservativeYellowReadiness() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.missing)
+
+        XCTAssertEqual(readiness.color, .yellow)
+        XCTAssertEqual(readiness.title, "共振偏移")
+        XCTAssertTrue(readiness.explanation.contains("HealthKit 数据缺失"))
+        XCTAssertTrue(readiness.safetyGuidance.contains("降低强度"))
+    }
+
     func testTooHeavyLogDowngradesResultAndHarness() {
         let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
         let quest = QuestEngine.quest(for: readiness, storyNode: "回声训练厅")
