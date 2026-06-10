@@ -1,0 +1,461 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01A000000000000000000001 /* FitnessRPGApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000001 /* FitnessRPGApp.swift */; };
+		01A000000000000000000002 /* TodayCommandCenterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000002 /* TodayCommandCenterView.swift */; };
+		01A000000000000000000003 /* ReadinessPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000003 /* ReadinessPanel.swift */; };
+		01A000000000000000000004 /* QuestPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000004 /* QuestPanel.swift */; };
+		01A000000000000000000005 /* ModelHarnessPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000005 /* ModelHarnessPanel.swift */; };
+		01A000000000000000000006 /* FitnessRPGWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000006 /* FitnessRPGWatchApp.swift */; };
+		01A000000000000000000007 /* WatchExecutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000007 /* WatchExecutionView.swift */; };
+		01A000000000000000000008 /* FitnessRPGCore in Frameworks */ = {isa = PBXBuildFile; productRef = 01C000000000000000000001 /* FitnessRPGCore */; };
+		01A000000000000000000009 /* FitnessRPGCore in Frameworks */ = {isa = PBXBuildFile; productRef = 01C000000000000000000002 /* FitnessRPGCore */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		01B000000000000000000001 /* FitnessRPGApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FitnessRPGApp.swift; sourceTree = "<group>"; };
+		01B000000000000000000002 /* TodayCommandCenterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCommandCenterView.swift; sourceTree = "<group>"; };
+		01B000000000000000000003 /* ReadinessPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadinessPanel.swift; sourceTree = "<group>"; };
+		01B000000000000000000004 /* QuestPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestPanel.swift; sourceTree = "<group>"; };
+		01B000000000000000000005 /* ModelHarnessPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelHarnessPanel.swift; sourceTree = "<group>"; };
+		01B000000000000000000006 /* FitnessRPGWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FitnessRPGWatchApp.swift; sourceTree = "<group>"; };
+		01B000000000000000000007 /* WatchExecutionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchExecutionView.swift; sourceTree = "<group>"; };
+		01B000000000000000000008 /* FitnessRPG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitnessRPG.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		01B000000000000000000009 /* FitnessRPGWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitnessRPGWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		01D000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				01A000000000000000000008 /* FitnessRPGCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		01D000000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				01A000000000000000000009 /* FitnessRPGCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		01E000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				01E000000000000000000002 /* AppSources */,
+				01E000000000000000000005 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		01E000000000000000000002 /* AppSources */ = {
+			isa = PBXGroup;
+			children = (
+				01E000000000000000000003 /* iOS */,
+				01E000000000000000000004 /* watchOS */,
+			);
+			path = AppSources;
+			sourceTree = "<group>";
+		};
+		01E000000000000000000003 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				01B000000000000000000001 /* FitnessRPGApp.swift */,
+				01B000000000000000000002 /* TodayCommandCenterView.swift */,
+				01B000000000000000000003 /* ReadinessPanel.swift */,
+				01B000000000000000000004 /* QuestPanel.swift */,
+				01B000000000000000000005 /* ModelHarnessPanel.swift */,
+			);
+			path = iOS;
+			sourceTree = "<group>";
+		};
+		01E000000000000000000004 /* watchOS */ = {
+			isa = PBXGroup;
+			children = (
+				01B000000000000000000006 /* FitnessRPGWatchApp.swift */,
+				01B000000000000000000007 /* WatchExecutionView.swift */,
+			);
+			path = watchOS;
+			sourceTree = "<group>";
+		};
+		01E000000000000000000005 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				01B000000000000000000008 /* FitnessRPG.app */,
+				01B000000000000000000009 /* FitnessRPGWatch.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		01F000000000000000000001 /* FitnessRPG */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 01AA00000000000000000002 /* Build configuration list for PBXNativeTarget "FitnessRPG" */;
+			buildPhases = (
+				01D000000000000000000003 /* Sources */,
+				01D000000000000000000001 /* Frameworks */,
+				01D000000000000000000005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FitnessRPG;
+			packageProductDependencies = (
+				01C000000000000000000001 /* FitnessRPGCore */,
+			);
+			productName = FitnessRPG;
+			productReference = 01B000000000000000000008 /* FitnessRPG.app */;
+			productType = "com.apple.product-type.application";
+		};
+		01F000000000000000000002 /* FitnessRPGWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 01AA00000000000000000003 /* Build configuration list for PBXNativeTarget "FitnessRPGWatch" */;
+			buildPhases = (
+				01D000000000000000000004 /* Sources */,
+				01D000000000000000000002 /* Frameworks */,
+				01D000000000000000000006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FitnessRPGWatch;
+			packageProductDependencies = (
+				01C000000000000000000002 /* FitnessRPGCore */,
+			);
+			productName = FitnessRPGWatch;
+			productReference = 01B000000000000000000009 /* FitnessRPGWatch.app */;
+			productType = "com.apple.product-type.application.watchapp2";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		01F000000000000000000000 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2650;
+				TargetAttributes = {
+					01F000000000000000000001 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+					01F000000000000000000002 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+				};
+			};
+			buildConfigurationList = 01AA00000000000000000001 /* Build configuration list for PBXProject "FitnessRPG" */;
+			compatibilityVersion = "Xcode 16.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 01E000000000000000000001;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				01C000000000000000000000 /* XCLocalSwiftPackageReference "FitnessRPGCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 01E000000000000000000005 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				01F000000000000000000001 /* FitnessRPG */,
+				01F000000000000000000002 /* FitnessRPGWatch */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		01D000000000000000000005 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		01D000000000000000000006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		01D000000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				01A000000000000000000001 /* FitnessRPGApp.swift in Sources */,
+				01A000000000000000000002 /* TodayCommandCenterView.swift in Sources */,
+				01A000000000000000000003 /* ReadinessPanel.swift in Sources */,
+				01A000000000000000000004 /* QuestPanel.swift in Sources */,
+				01A000000000000000000005 /* ModelHarnessPanel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		01D000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				01A000000000000000000006 /* FitnessRPGWatchApp.swift in Sources */,
+				01A000000000000000000007 /* WatchExecutionView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		01AA00000000000000000004 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = auto;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		01AA00000000000000000005 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = auto;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		01AA00000000000000000006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CFBundleDisplayName = "Fitness RPG";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hao.fitnessrpg;
+				PRODUCT_NAME = FitnessRPG;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		01AA00000000000000000007 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CFBundleDisplayName = "Fitness RPG";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hao.fitnessrpg;
+				PRODUCT_NAME = FitnessRPG;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		01AA00000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CFBundleDisplayName = "Fitness RPG Watch";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG Watch";
+				PRODUCT_BUNDLE_IDENTIFIER = com.hao.fitnessrpg.watch;
+				PRODUCT_NAME = FitnessRPGWatch;
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_VERSION = 6.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		01AA00000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CFBundleDisplayName = "Fitness RPG Watch";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG Watch";
+				PRODUCT_BUNDLE_IDENTIFIER = com.hao.fitnessrpg.watch;
+				PRODUCT_NAME = FitnessRPGWatch;
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_VERSION = 6.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		01AA00000000000000000001 /* Build configuration list for PBXProject "FitnessRPG" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				01AA00000000000000000004 /* Debug */,
+				01AA00000000000000000005 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		01AA00000000000000000002 /* Build configuration list for PBXNativeTarget "FitnessRPG" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				01AA00000000000000000006 /* Debug */,
+				01AA00000000000000000007 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		01AA00000000000000000003 /* Build configuration list for PBXNativeTarget "FitnessRPGWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				01AA00000000000000000008 /* Debug */,
+				01AA00000000000000000009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		01C000000000000000000000 /* XCLocalSwiftPackageReference "FitnessRPGCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = FitnessRPGCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		01C000000000000000000001 /* FitnessRPGCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 01C000000000000000000000 /* XCLocalSwiftPackageReference "FitnessRPGCore" */;
+			productName = FitnessRPGCore;
+		};
+		01C000000000000000000002 /* FitnessRPGCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 01C000000000000000000000 /* XCLocalSwiftPackageReference "FitnessRPGCore" */;
+			productName = FitnessRPGCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 01F000000000000000000000 /* Project object */;
+}
