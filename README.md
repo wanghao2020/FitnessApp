@@ -14,14 +14,22 @@ The project is local-first:
 ## Current Repository Areas
 
 - `prototype/`: browser Today Command Center prototype with Chinese Fitness RPG UI, readiness scenarios, Watch execution loop, local model harness, memory draft, and visual asset layer.
+- `native/FitnessRPG.xcodeproj/`: Xcode project with buildable iOS and watchOS app schemes.
 - `native/FitnessRPGCore/`: Swift Package containing shared deterministic domain models and engines.
-- `native/AppSources/`: SwiftUI iPhone and watchOS source scaffolds for future Xcode targets.
+- `native/AppSources/`: SwiftUI iPhone and watchOS source files used by the native app targets.
 - `docs/project-brief.md`: product and architecture brief.
 - `docs/superpowers/`: design specs and implementation plans used during development.
 - `records/`: migrated conversation archive and raw Codex thread sources.
 - `work/`: migration helper scripts kept for traceability.
 
 ## Current Verification
+
+Build native iOS and watchOS app targets:
+
+```bash
+xcodebuild -project native/FitnessRPG.xcodeproj -scheme FitnessRPG -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project native/FitnessRPG.xcodeproj -scheme FitnessRPGWatch -destination 'generic/platform=watchOS' CODE_SIGNING_ALLOWED=NO build
+```
 
 Run native shared core tests:
 
@@ -46,9 +54,9 @@ node prototype/tests/prototypeContract.test.mjs
 
 ## Native Status
 
-The native code is currently a Swift Package plus SwiftUI source scaffold. There is no committed `.xcodeproj` or `.xcworkspace` yet.
+The native code now includes `native/FitnessRPG.xcodeproj` with buildable iOS and watchOS app schemes, plus the shared `native/FitnessRPGCore` Swift Package.
 
-See `native/README.md` for how the scaffold should connect to future iPhone and watchOS targets.
+See `native/README.md` for native build commands and target structure.
 
 ## Migrated Context
 
@@ -64,9 +72,7 @@ These records are context, not runtime app assets.
 
 Recommended sequence:
 
-1. Create a real iOS / watchOS Xcode project or equivalent app target structure.
-2. Attach `FitnessRPGCore` and `native/AppSources` to the app targets.
-3. Add a HealthKit adapter that maps real data into `HealthSummary`.
-4. Add WatchConnectivity for quest payload and execution log sync.
-5. Add persistence for workout results, memory drafts, and story progression.
-6. Integrate local model runtime behind the deterministic harness and validator.
+1. Add a HealthKit adapter that maps real data into `HealthSummary`.
+2. Add WatchConnectivity for quest payload and execution log sync.
+3. Add persistence for workout results, memory drafts, and story progression.
+4. Integrate local model runtime behind the deterministic harness and validator.

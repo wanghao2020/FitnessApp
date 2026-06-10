@@ -1,27 +1,26 @@
-# Fitness RPG Native Scaffold
+# Fitness RPG Native App Targets
 
-This folder contains the first native iPhone / watchOS scaffold for Fitness RPG.
+This folder contains the native iPhone / watchOS app baseline for Fitness RPG.
 
 ## Structure
 
 - `FitnessRPGCore/`: compiled Swift Package for shared product logic.
-- `AppSources/iOS/`: SwiftUI source files for a future iPhone app target.
-- `AppSources/watchOS/`: SwiftUI source files for a future watchOS app target.
+- `FitnessRPG.xcodeproj/`: Xcode project with buildable iOS and watchOS app schemes.
+- `AppSources/iOS/`: SwiftUI source files used by the `FitnessRPG` iOS app target.
+- `AppSources/watchOS/`: SwiftUI source files used by the `FitnessRPGWatch` watchOS app target.
 
 ## Current Pass
 
-The shared core is the only compiled native target in this repository pass. It includes deterministic mock health profiles, readiness evaluation, quest selection, Watch execution result handling, and local model harness explanation.
+The repo now includes `native/FitnessRPG.xcodeproj` with buildable iOS and watchOS schemes. Both app targets use the local `FitnessRPGCore` Swift Package.
 
-The app source folders are intentionally not wired into an Xcode project yet. They are source scaffolds that should be copied or referenced by future Xcode app targets after the project file is created.
+The shared core includes deterministic mock health profiles, readiness evaluation, quest selection, Watch execution result handling, and local model harness explanation.
 
-## Future Xcode Target Setup
+## Xcode Targets
 
-1. Create an iOS app target named `FitnessRPG`.
-2. Add `FitnessRPGCore` as a local Swift Package dependency from `native/FitnessRPGCore`.
-3. Add `AppSources/iOS/*.swift` to the iOS target.
-4. Create a watchOS app target named `FitnessRPGWatch`.
-5. Add the same `FitnessRPGCore` package dependency to the watchOS target.
-6. Add `AppSources/watchOS/*.swift` to the watchOS target.
+- `FitnessRPG`: iOS app target that launches `FitnessRPGApp`.
+- `FitnessRPGWatch`: watchOS app target that launches `FitnessRPGWatchApp`.
+
+Both targets link the local `FitnessRPGCore` package product.
 
 ## Future Integration Points
 
@@ -31,6 +30,13 @@ The app source folders are intentionally not wired into an Xcode project yet. Th
 - Persistence adapter stores memory drafts and completed workouts.
 
 ## Verification
+
+Build the app targets:
+
+```bash
+xcodebuild -project native/FitnessRPG.xcodeproj -scheme FitnessRPG -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO build
+xcodebuild -project native/FitnessRPG.xcodeproj -scheme FitnessRPGWatch -destination 'generic/platform=watchOS' CODE_SIGNING_ALLOWED=NO build
+```
 
 Run the shared core tests:
 
