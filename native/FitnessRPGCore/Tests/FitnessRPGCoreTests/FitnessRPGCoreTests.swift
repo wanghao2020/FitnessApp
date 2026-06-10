@@ -537,6 +537,25 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(inProgressDay.executionSummary, "已同步 1 / 3 个 Watch 步骤。")
     }
 
+    func testTrainingHistoryDayUsesQuestStoryNodeForPendingProgressionMismatch() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.yellow)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.calibrationRune.title)
+        let progression = StoryProgression.initial(
+            updatedAt: Date(timeIntervalSince1970: 1_717_172_000)
+        )
+        let record = TrainingDayRecord(
+            date: "2026-06-10",
+            readiness: readiness,
+            quest: quest,
+            workoutResult: nil,
+            storyProgression: progression,
+            createdAt: Date(timeIntervalSince1970: 1_717_171_900),
+            updatedAt: Date(timeIntervalSince1970: 1_717_172_000)
+        )
+
+        XCTAssertEqual(TrainingHistoryDay(record: record).storyNodeTitle, StoryNode.calibrationRune.title)
+    }
+
     func testTrainingHistoryBuilderReturnsEmptyListForEmptyRecords() {
         XCTAssertEqual(TrainingHistoryBuilder.days(from: []), [])
     }

@@ -286,6 +286,7 @@ final class TodayPersistenceModel: ObservableObject {
     }
 
     private func publishHistory(from records: [TrainingDayRecord]) {
+        historyLoadErrorText = nil
         historyDays = TrainingHistoryBuilder.days(from: records)
     }
 

@@ -53,6 +53,10 @@ public struct TrainingHistoryDay: Equatable, Identifiable, Sendable {
     }
 
     public var storyNodeTitle: String {
+        guard record.workoutResult != nil else {
+            return record.quest.storyNode
+        }
+
         guard let progression = record.storyProgression else {
             return record.quest.storyNode
         }
