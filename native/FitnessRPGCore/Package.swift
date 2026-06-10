@@ -13,15 +13,27 @@ let package = Package(
         .library(
             name: "FitnessRPGCore",
             targets: ["FitnessRPGCore"]
+        ),
+        .library(
+            name: "FitnessRPGPersistence",
+            targets: ["FitnessRPGPersistence"]
         )
     ],
     targets: [
         .target(
             name: "FitnessRPGCore"
         ),
+        .target(
+            name: "FitnessRPGPersistence",
+            dependencies: ["FitnessRPGCore"]
+        ),
         .testTarget(
             name: "FitnessRPGCoreTests",
             dependencies: ["FitnessRPGCore"]
+        ),
+        .testTarget(
+            name: "FitnessRPGPersistenceTests",
+            dependencies: ["FitnessRPGCore", "FitnessRPGPersistence"]
         )
     ]
 )
