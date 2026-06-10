@@ -179,4 +179,132 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(readiness.color, .yellow)
         XCTAssertTrue(readiness.explanation.contains("HealthKit 数据缺失"))
     }
+
+    func testQuestSyncPayloadRoundTripsThroughEnvelope() throws {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: "回声训练厅")
+        let generatedAt = Date(timeIntervalSince1970: 1_717_171_200)
+        let encodedAt = Date(timeIntervalSince1970: 1_717_171_260)
+        let payload = QuestSyncPayload(
+            quest: quest,
+            readinessColor: readiness.color,
+            generatedAt: generatedAt
+        )
+
+        let envelope = try SyncEnvelope(
+            kind: .quest,
+            payload: payload,
+            encodedAt: encodedAt
+        )
+        let dictionary = try envelope.toDictionary()
+        let decodedEnvelope = try SyncEnvelope.fromDictionary(dictionary)
+        let decodedPayload = try decodedEnvelope.decodePayload(
+            QuestSyncPayload.self,
+            expectedKind: .quest
+        )
+
+        XCTAssertEqual(decodedEnvelope.schemaVersion, SyncEnvelope.currentSchemaVersion)
+        XCTAssertEqual(decodedEnvelope.kind, .quest)
+        XCTAssertEqual(decodedEnvelope.encodedAt, encodedAt)
+        XCTAssertEqual(decodedPayload, payload)
+    }
+
+    func testSyncEnvelopePreservesFractionalSecondDates() throws {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: "回声训练厅")
+        let generatedAt = Date(timeIntervalSince1970: 1_717_171_260.123456)
+        let encodedAt = Date(timeIntervalSince1970: 1_717_171_260.654321)
+        let payload = QuestSyncPayload(
+            quest: quest,
+            readinessColor: readiness.color,
+            generatedAt: generatedAt
+        )
+
+        let envelope = try SyncEnvelope(
+            kind: .quest,
+            payload: payload,
+            encodedAt: encodedAt
+        )
+        let decodedEnvelope = try SyncEnvelope.fromDictionary(try envelope.toDictionary())
+        let decodedPayload = try decodedEnvelope.decodePayload(
+            QuestSyncPayload.self,
+            expectedKind: .quest
+        )
+
+        XCTAssertEqual(decodedEnvelope.encodedAt, encodedAt)
+        XCTAssertEqual(decodedPayload.generatedAt, generatedAt)
+    }
+
+    func testExecutionLogSyncPayloadRoundTripsThroughEnvelope() throws {
+        let logs = [
+            ExecutionLog(action: .complete, order: 1, rpe: 5, note: "动态热身完成"),
+            ExecutionLog(action: .tooHeavy, order: 2, rpe: 9, note: "力量循环过重")
+        ]
+        let payload = ExecutionLogSyncPayload(
+            questTitle: "回声训练厅：力量共振",
+            logs: logs,
+            sentAt: Date(timeIntervalSince1970: 1_717_171_300)
+        )
+
+        let envelope = try SyncEnvelope(
+            kind: .executionLogs,
+            payload: payload,
+            encodedAt: Date(timeIntervalSince1970: 1_717_171_360)
+        )
+        let decodedPayload = try SyncEnvelope
+            .fromDictionary(try envelope.toDictionary())
+            .decodePayload(ExecutionLogSyncPayload.self, expectedKind: .executionLogs)
+
+        XCTAssertEqual(decodedPayload.questTitle, "回声训练厅：力量共振")
+        XCTAssertEqual(decodedPayload.logs, logs)
+        XCTAssertEqual(decodedPayload.sentAt, payload.sentAt)
+    }
+
+    func testSyncEnvelopeRejectsUnexpectedMessageKind() throws {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let payload = QuestSyncPayload(
+            quest: QuestEngine.quest(for: readiness, storyNode: "回声训练厅"),
+            readinessColor: readiness.color,
+            generatedAt: Date(timeIntervalSince1970: 1_717_171_200)
+        )
+        let envelope = try SyncEnvelope(kind: .quest, payload: payload)
+
+        XCTAssertThrowsError(
+            try envelope.decodePayload(
+                ExecutionLogSyncPayload.self,
+                expectedKind: .executionLogs
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? SyncPayloadError,
+                .unexpectedKind(expected: .executionLogs, actual: .quest)
+            )
+        }
+    }
+
+    func testSyncEnvelopeRejectsUnsupportedSchemaVersion() throws {
+        let payload = ExecutionLogSyncPayload(
+            questTitle: "灰烬坡道：降阶巡航",
+            logs: [ExecutionLog(action: .skip, order: 1, rpe: 2, note: "今日恢复优先")],
+            sentAt: Date(timeIntervalSince1970: 1_717_171_400)
+        )
+        let envelope = try SyncEnvelope(
+            schemaVersion: 999,
+            kind: .executionLogs,
+            encodedAt: Date(timeIntervalSince1970: 1_717_171_460),
+            payload: payload
+        )
+
+        XCTAssertThrowsError(
+            try envelope.decodePayload(
+                ExecutionLogSyncPayload.self,
+                expectedKind: .executionLogs
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? SyncPayloadError,
+                .unsupportedSchemaVersion(999)
+            )
+        }
+    }
 }

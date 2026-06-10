@@ -1,10 +1,10 @@
-public enum ReadinessColor: String, Equatable, Sendable {
+public enum ReadinessColor: String, Codable, Equatable, Sendable {
     case green
     case yellow
     case red
 }
 
-public struct HealthSummary: Equatable, Sendable {
+public struct HealthSummary: Codable, Equatable, Sendable {
     public let energy: Int
     public let recovery: Int
     public let strain: Int
@@ -29,7 +29,7 @@ public struct HealthSummary: Equatable, Sendable {
     }
 }
 
-public struct ReadinessResult: Equatable, Sendable {
+public struct ReadinessResult: Codable, Equatable, Sendable {
     public let score: Int
     public let color: ReadinessColor
     public let title: String
@@ -51,7 +51,7 @@ public struct ReadinessResult: Equatable, Sendable {
     }
 }
 
-public struct WatchStep: Equatable, Sendable {
+public struct WatchStep: Codable, Equatable, Sendable {
     public let instruction: String
     public let target: String
     public let duration: String
@@ -65,7 +65,7 @@ public struct WatchStep: Equatable, Sendable {
     }
 }
 
-public struct DailyQuest: Equatable, Sendable {
+public struct DailyQuest: Codable, Equatable, Sendable {
     public let title: String
     public let objective: String
     public let difficulty: String
@@ -90,14 +90,14 @@ public struct DailyQuest: Equatable, Sendable {
     }
 }
 
-public enum WatchAction: String, Equatable, Sendable {
+public enum WatchAction: String, Codable, Equatable, Sendable {
     case complete
     case tooHeavy
     case skip
     case rpeWithinTarget
 }
 
-public struct ExecutionLog: Equatable, Sendable {
+public struct ExecutionLog: Codable, Equatable, Sendable {
     public let action: WatchAction
     public let order: Int
     public let rpe: Int
@@ -111,13 +111,13 @@ public struct ExecutionLog: Equatable, Sendable {
     }
 }
 
-public enum CompletionState: String, Equatable, Sendable {
+public enum CompletionState: String, Codable, Equatable, Sendable {
     case completed
     case downgraded
     case skipped
 }
 
-public struct WorkoutResult: Equatable, Sendable {
+public struct WorkoutResult: Codable, Equatable, Sendable {
     public let completionState: CompletionState
     public let safetyFeedback: String
     public let nextRecommendation: String
@@ -136,13 +136,13 @@ public struct WorkoutResult: Equatable, Sendable {
     }
 }
 
-public enum ModelMode: String, Equatable, Sendable {
+public enum ModelMode: String, Codable, Equatable, Sendable {
     case localFirst
     case hybrid
     case remoteDisabled
 }
 
-public struct ModelHarnessSnapshot: Equatable, Sendable {
+public struct ModelHarnessSnapshot: Codable, Equatable, Sendable {
     public let inputContext: [String]
     public let skillRules: [String]
     public let generationPath: [String]
