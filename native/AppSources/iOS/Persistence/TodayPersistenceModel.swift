@@ -60,13 +60,14 @@ final class TodayPersistenceModel: ObservableObject {
     }
 
     func reloadHistory() {
-        guard let records = loadSafeTrainingDays() else {
-            historyLoadErrorText = storageStatusText
+        let loadedRecords = store.loadTrainingDays()
+        if let warning = loadedRecords.warning {
+            historyLoadErrorText = "本地训练记录读取失败：\(warning)"
             return
         }
 
         historyLoadErrorText = nil
-        publishHistory(from: records)
+        publishHistory(from: loadedRecords.value)
     }
 
     func loadOrCreateToday(readiness: ReadinessResult, date: Date = Date()) {

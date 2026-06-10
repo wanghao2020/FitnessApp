@@ -7,7 +7,7 @@ public struct TrainingHistoryDay: Equatable, Identifiable, Sendable {
         self.record = record
     }
 
-    public var id: String { "\(record.id)-\(record.updatedAt.timeIntervalSince1970)" }
+    public var id: String { "\(record.id)-\(record.createdAt.timeIntervalSince1970)" }
     public var date: String { record.date }
     public var questTitle: String { record.quest.title }
     public var readinessTitle: String { record.readiness.title }

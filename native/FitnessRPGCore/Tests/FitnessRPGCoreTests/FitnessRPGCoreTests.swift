@@ -513,6 +513,21 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertNotEqual(history[0].id, history[1].id)
     }
 
+    func testTrainingHistoryDayIDDoesNotChangeWhenRecordIsUpdated() {
+        var record = makeHistoryRecord(
+            date: "2026-06-10",
+            readinessColor: .green,
+            completionState: nil,
+            storyNode: .mainTrial,
+            updatedAt: Date(timeIntervalSince1970: 1_717_172_000)
+        )
+        let originalID = TrainingHistoryDay(record: record).id
+
+        record.updatedAt = Date(timeIntervalSince1970: 1_717_172_600)
+
+        XCTAssertEqual(TrainingHistoryDay(record: record).id, originalID)
+    }
+
     func testTrainingHistoryDayShowsPendingAndIntermediateStates() {
         let pending = makeHistoryRecord(
             date: "2026-06-10",
