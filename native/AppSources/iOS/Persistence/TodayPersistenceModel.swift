@@ -8,6 +8,7 @@ final class TodayPersistenceModel: ObservableObject {
     @Published private(set) var todayRecord: TrainingDayRecord?
     @Published private(set) var storyProgression: StoryProgression
     @Published private(set) var storageStatusText = "本地记录尚未加载。"
+    @Published private(set) var historyDays: [TrainingHistoryDay] = []
 
     private let store: JSONFitnessRPGStore
     private let calendar: Calendar
@@ -53,6 +54,21 @@ final class TodayPersistenceModel: ObservableObject {
         }
     }
 
+    var historyEmptyStateText: String {
+        "还没有历史记录。完成一次 Today 任务或同步一次 Watch 结果后，这里会显示训练回顾。"
+    }
+
+    func reloadHistory() {
+        guard let records = loadSafeTrainingDays() else {
+            return
+        }
+
+        publishHistory(from: records)
+        storageStatusText = statusText(
+            records.isEmpty ? "本地历史为空。" : "已加载 \(records.count) 条历史记录。"
+        )
+    }
+
     func loadOrCreateToday(readiness: ReadinessResult, date: Date = Date()) {
         let key = Self.dayKey(for: date, calendar: calendar)
         guard var records = loadSafeTrainingDays() else {
@@ -62,6 +78,7 @@ final class TodayPersistenceModel: ObservableObject {
         if let existing = records.first(where: { $0.date == key }) {
             todayRecord = existing
             reconcileStoryProgression(with: existing)
+            publishHistory(from: records)
             storageStatusText = statusText("已恢复今日任务。")
             return
         }
@@ -81,6 +98,7 @@ final class TodayPersistenceModel: ObservableObject {
         do {
             try store.saveTrainingDays(records)
             todayRecord = record
+            publishHistory(from: records)
             storageStatusText = statusText("已保存今日任务。")
         } catch {
             storageStatusText = "今日任务保存失败：\(error.localizedDescription)"
@@ -184,6 +202,7 @@ final class TodayPersistenceModel: ObservableObject {
 
         do {
             try store.saveTrainingDays(records)
+            publishHistory(from: records)
             if shouldPublishRecord {
                 todayRecord = record
             }
@@ -192,6 +211,7 @@ final class TodayPersistenceModel: ObservableObject {
             let didRollback = rollbackRecords(oldRecords)
             todayRecord = oldRecord
             if didRollback {
+                publishHistory(from: oldRecords)
                 storageStatusText = "Watch 训练快照保存失败，已尽量恢复本地记录：\(error.localizedDescription)"
             } else {
                 storageStatusText = "Watch 训练快照保存失败，且回滚未完全成功：\(error.localizedDescription)"
@@ -239,6 +259,7 @@ final class TodayPersistenceModel: ObservableObject {
                 try store.saveStoryProgression(progression)
             }
             try store.saveMemoryEntries(memoryEntries)
+            publishHistory(from: records)
             if shouldPublishRecord {
                 todayRecord = record
             }
@@ -256,11 +277,16 @@ final class TodayPersistenceModel: ObservableObject {
             todayRecord = oldRecord
             storyProgression = oldPublishedProgression
             if didRollback {
+                publishHistory(from: oldRecords)
                 storageStatusText = "训练结果保存失败，已尽量恢复本地记录：\(error.localizedDescription)"
             } else {
                 storageStatusText = "训练结果保存失败，且回滚未完全成功：\(error.localizedDescription)"
             }
         }
+    }
+
+    private func publishHistory(from records: [TrainingDayRecord]) {
+        historyDays = TrainingHistoryBuilder.days(from: records)
     }
 
     private func loadSafeTrainingDays() -> [TrainingDayRecord]? {
