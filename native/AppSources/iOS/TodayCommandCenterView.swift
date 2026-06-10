@@ -5,6 +5,7 @@ struct TodayCommandCenterView: View {
     let readiness: ReadinessResult
     let modelMode: ModelMode
     let sourceNote: String?
+    @ObservedObject var watchSyncModel: WatchQuestSyncModel
 
     private var quest: DailyQuest {
         QuestEngine.quest(for: readiness, storyNode: "回声训练厅")
@@ -33,15 +34,49 @@ struct TodayCommandCenterView: View {
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
+                        Text(watchSyncModel.statusText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
 
                     ReadinessPanel(readiness: readiness)
                     QuestPanel(quest: quest)
+
+                    Button("发送到 Watch") {
+                        watchSyncModel.send(quest: quest, readinessColor: readiness.color)
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    if let result = watchSyncModel.latestResult {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Watch 回传")
+                                .font(.headline)
+                            Text(result.safetyFeedback)
+                            Text(result.nextRecommendation)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding()
+                        .background(.thinMaterial)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+
                     ModelHarnessPanel(snapshot: harness)
                 }
                 .padding()
             }
             .navigationTitle("Fitness RPG")
+            .onAppear {
+                watchSyncModel.send(quest: quest, readinessColor: readiness.color)
+            }
+            .onChange(of: readiness.score) { _, _ in
+                watchSyncModel.send(quest: quest, readinessColor: readiness.color)
+            }
+            .onChange(of: readiness.color) { _, _ in
+                watchSyncModel.send(quest: quest, readinessColor: readiness.color)
+            }
+            .onChange(of: readiness.title) { _, _ in
+                watchSyncModel.send(quest: quest, readinessColor: readiness.color)
+            }
         }
     }
 }
@@ -50,6 +85,7 @@ struct TodayCommandCenterView: View {
     TodayCommandCenterView(
         readiness: ReadinessEngine.evaluate(MockHealthProfiles.green),
         modelMode: .localFirst,
-        sourceNote: "已读取 HealthKit 今日健康摘要。"
+        sourceNote: "已读取 HealthKit 今日健康摘要。",
+        watchSyncModel: WatchQuestSyncModel(session: nil)
     )
 }
