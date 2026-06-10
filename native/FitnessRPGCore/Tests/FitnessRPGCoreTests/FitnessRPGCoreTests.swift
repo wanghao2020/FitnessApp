@@ -461,4 +461,109 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(progression.lastOutcome, .recovered)
         XCTAssertTrue(progression.lastReason.contains("恢复"))
     }
+
+    func testTrainingHistoryDaysSortNewestFirstAndExposeCompletedDetail() {
+        let older = makeHistoryRecord(
+            date: "2026-06-09",
+            readinessColor: .yellow,
+            completionState: .downgraded,
+            storyNode: .safetyDowngrade,
+            updatedAt: Date(timeIntervalSince1970: 1_717_170_000)
+        )
+        let newer = makeHistoryRecord(
+            date: "2026-06-10",
+            readinessColor: .green,
+            completionState: .completed,
+            storyNode: .mainTrial,
+            updatedAt: Date(timeIntervalSince1970: 1_717_172_000)
+        )
+
+        let history = TrainingHistoryBuilder.days(from: [older, newer])
+
+        XCTAssertEqual(history.map(\.date), ["2026-06-10", "2026-06-09"])
+        XCTAssertEqual(history[0].questTitle, "回声训练厅：力量共振")
+        XCTAssertEqual(history[0].readinessTitle, "共振稳定")
+        XCTAssertEqual(history[0].completionLabel, "已完成")
+        XCTAssertEqual(history[0].memoryDraft, "2026-06-10 的 Memory 草稿")
+        XCTAssertEqual(history[0].storyNodeTitle, StoryNode.mainTrial.title)
+        XCTAssertTrue(history[0].stepSummary.contains("动态热身"))
+    }
+
+    func testTrainingHistoryDayShowsPendingAndIntermediateStates() {
+        let pending = makeHistoryRecord(
+            date: "2026-06-10",
+            readinessColor: .yellow,
+            completionState: nil,
+            storyNode: .calibrationRune,
+            updatedAt: Date(timeIntervalSince1970: 1_717_172_000)
+        )
+        var inProgress = pending
+        inProgress.executionLogs = [
+            ExecutionLog(action: .complete, order: 1, rpe: 5, note: "热身完成")
+        ]
+
+        let pendingDay = TrainingHistoryDay(record: pending)
+        let inProgressDay = TrainingHistoryDay(record: inProgress)
+
+        XCTAssertEqual(pendingDay.completionLabel, "待执行")
+        XCTAssertEqual(pendingDay.executionSummary, "尚未收到 Watch 执行结果。")
+        XCTAssertEqual(pendingDay.memoryDraft, "Memory 草稿尚未生成。")
+        XCTAssertEqual(pendingDay.storyNodeTitle, StoryNode.calibrationRune.title)
+        XCTAssertEqual(inProgressDay.completionLabel, "同步中")
+        XCTAssertEqual(inProgressDay.executionSummary, "已同步 1 / 3 个 Watch 步骤。")
+    }
+
+    func testTrainingHistoryBuilderReturnsEmptyListForEmptyRecords() {
+        XCTAssertEqual(TrainingHistoryBuilder.days(from: []), [])
+    }
+
+    private func makeHistoryRecord(
+        date: String,
+        readinessColor: ReadinessColor,
+        completionState: CompletionState?,
+        storyNode: StoryNode,
+        updatedAt: Date
+    ) -> TrainingDayRecord {
+        let readiness: ReadinessResult
+        switch readinessColor {
+        case .green:
+            readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        case .yellow:
+            readiness = ReadinessEngine.evaluate(MockHealthProfiles.yellow)
+        case .red:
+            readiness = ReadinessEngine.evaluate(MockHealthProfiles.red)
+        }
+
+        let quest = QuestEngine.quest(for: readiness, storyNode: storyNode.title)
+        let logs = completionState == nil
+            ? []
+            : [ExecutionLog(action: .complete, order: 1, rpe: 6, note: "完成")]
+        let result = completionState.map { state in
+            WorkoutResult(
+                completionState: state,
+                safetyFeedback: "\(date) safety",
+                nextRecommendation: "\(date) recommendation",
+                memoryDraft: "\(date) 的 Memory 草稿"
+            )
+        }
+        let progression = StoryProgression(
+            currentChapterID: storyNode.chapterID,
+            currentNodeID: storyNode.id,
+            completedNodeIDs: result == nil ? [] : [storyNode.id],
+            lastOutcome: completionState == .downgraded ? .downgraded : .advanced,
+            lastReason: "\(date) story reason",
+            updatedAt: updatedAt
+        )
+
+        return TrainingDayRecord(
+            date: date,
+            readiness: readiness,
+            quest: quest,
+            executionLogs: logs,
+            workoutResult: result,
+            storyProgression: progression,
+            createdAt: updatedAt,
+            updatedAt: updatedAt
+        )
+    }
 }
