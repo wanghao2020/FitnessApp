@@ -158,4 +158,25 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(readiness.color, .yellow)
         XCTAssertTrue(readiness.explanation.contains("HealthKit 数据缺失"))
     }
+
+    func testIncompleteSignalsUseConservativeHealthKitFallback() {
+        let summary = HealthSummaryMapper.summary(
+            from: HealthSignals(
+                sleepHours: 8.0,
+                hrvSDNN: nil,
+                restingHeartRate: nil,
+                restingHeartRateBaseline: nil,
+                activeEnergyKcal: nil,
+                exerciseMinutes: nil,
+                stepCount: nil,
+                workoutCount: nil
+            )
+        )
+
+        XCTAssertEqual(summary, MockHealthProfiles.missing)
+
+        let readiness = ReadinessEngine.evaluate(summary)
+        XCTAssertEqual(readiness.color, .yellow)
+        XCTAssertTrue(readiness.explanation.contains("HealthKit 数据缺失"))
+    }
 }

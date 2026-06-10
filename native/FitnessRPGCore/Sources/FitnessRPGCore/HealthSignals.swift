@@ -80,15 +80,15 @@ public enum HealthSummaryMapper {
     }
 
     private static func hasUsableData(_ signals: HealthSignals) -> Bool {
-        [
-            signals.sleepHours,
-            signals.hrvSDNN,
-            signals.restingHeartRate,
-            signals.restingHeartRateBaseline,
+        let hasSleep = signals.sleepHours != nil
+        let hasRecovery = signals.hrvSDNN != nil || signals.restingHeartRate != nil
+        let hasStrain = [
             signals.activeEnergyKcal,
             signals.exerciseMinutes,
             signals.stepCount
         ].contains { $0 != nil } || signals.workoutCount != nil
+
+        return hasSleep && hasRecovery && hasStrain
     }
 
     private static func sleepScore(hours: Double?) -> Int {
