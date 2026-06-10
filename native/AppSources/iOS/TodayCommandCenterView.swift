@@ -97,6 +97,13 @@ struct TodayCommandCenterView: View {
                 .padding()
             }
             .navigationTitle("Fitness RPG")
+            .toolbar {
+                NavigationLink {
+                    HistoryView(persistenceModel: persistenceModel)
+                } label: {
+                    Label("History", systemImage: "clock.arrow.circlepath")
+                }
+            }
             .onChange(of: watchSyncModel.latestExecutionPayload, initial: true) { _, payload in
                 guard let payload else { return }
                 persistenceModel.applyExecutionPayload(payload)
