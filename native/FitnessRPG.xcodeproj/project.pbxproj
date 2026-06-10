@@ -23,6 +23,8 @@
 		01A00000000000000000000E /* WatchQuestSyncModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B00000000000000000000F /* WatchQuestSyncModel.swift */; };
 		01A00000000000000000000F /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000010 /* WatchConnectivity.framework */; };
 		01A000000000000000000010 /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000010 /* WatchConnectivity.framework */; };
+		01A000000000000000000011 /* FitnessRPGPersistence in Frameworks */ = {isa = PBXBuildFile; productRef = 01C000000000000000000003 /* FitnessRPGPersistence */; };
+		01A000000000000000000012 /* TodayPersistenceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000011 /* TodayPersistenceModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +44,7 @@
 		01B00000000000000000000E /* WatchQuestSyncModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchQuestSyncModel.swift; sourceTree = "<group>"; };
 		01B00000000000000000000F /* WatchQuestSyncModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchQuestSyncModel.swift; sourceTree = "<group>"; };
 		01B000000000000000000010 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
+		01B000000000000000000011 /* TodayPersistenceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayPersistenceModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +53,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				01A000000000000000000008 /* FitnessRPGCore in Frameworks */,
+				01A000000000000000000011 /* FitnessRPGPersistence in Frameworks */,
 				01A00000000000000000000C /* HealthKit.framework in Frameworks */,
 				01A00000000000000000000F /* WatchConnectivity.framework in Frameworks */,
 			);
@@ -96,6 +100,7 @@
 				01B000000000000000000005 /* ModelHarnessPanel.swift */,
 				01B00000000000000000000C /* FitnessRPG.entitlements */,
 				01E000000000000000000006 /* HealthKit */,
+				01E000000000000000000009 /* Persistence */,
 				01E000000000000000000008 /* WatchConnectivity */,
 			);
 			path = iOS;
@@ -145,6 +150,14 @@
 			path = WatchConnectivity;
 			sourceTree = "<group>";
 		};
+		01E000000000000000000009 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				01B000000000000000000011 /* TodayPersistenceModel.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -163,6 +176,7 @@
 			name = FitnessRPG;
 			packageProductDependencies = (
 				01C000000000000000000001 /* FitnessRPGCore */,
+				01C000000000000000000003 /* FitnessRPGPersistence */,
 			);
 			productName = FitnessRPG;
 			productReference = 01B000000000000000000008 /* FitnessRPG.app */;
@@ -259,6 +273,7 @@
 				01A000000000000000000004 /* QuestPanel.swift in Sources */,
 				01A000000000000000000005 /* ModelHarnessPanel.swift in Sources */,
 				01A00000000000000000000B /* HealthKitHealthSummaryProvider.swift in Sources */,
+				01A000000000000000000012 /* TodayPersistenceModel.swift in Sources */,
 				01A00000000000000000000D /* WatchQuestSyncModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -520,6 +535,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 01C000000000000000000000 /* XCLocalSwiftPackageReference "FitnessRPGCore" */;
 			productName = FitnessRPGCore;
+		};
+		01C000000000000000000003 /* FitnessRPGPersistence */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 01C000000000000000000000 /* XCLocalSwiftPackageReference "FitnessRPGCore" */;
+			productName = FitnessRPGPersistence;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
