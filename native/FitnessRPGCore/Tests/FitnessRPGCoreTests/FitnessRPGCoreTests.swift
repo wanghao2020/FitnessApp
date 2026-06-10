@@ -364,4 +364,101 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(try SyncEnvelope.makeDecoder().decode(StoryProgression.self, from: progressionData), progression)
         XCTAssertEqual(try SyncEnvelope.makeDecoder().decode(MemoryEntry.self, from: memoryData), memory)
     }
+
+    func testStoryProgressionAdvancesMainLineForGreenCompletion() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)
+        let result = WorkoutResult(
+            completionState: .completed,
+            safetyFeedback: "训练完成且未记录过重信号。",
+            nextRecommendation: "保持当前节奏。",
+            memoryDraft: "主线推进。"
+        )
+
+        let progression = StoryProgressionEngine.progression(
+            after: .initial(updatedAt: Date(timeIntervalSince1970: 1)),
+            readinessColor: readiness.color,
+            quest: quest,
+            result: result,
+            updatedAt: Date(timeIntervalSince1970: 2)
+        )
+
+        XCTAssertEqual(progression.currentChapterID, StoryChapter.mainLine.id)
+        XCTAssertEqual(progression.currentNodeID, StoryNode.mainTrial.id)
+        XCTAssertEqual(progression.lastOutcome, .advanced)
+        XCTAssertTrue(progression.completedNodeIDs.contains(StoryNode.mainTrial.id))
+        XCTAssertTrue(progression.lastReason.contains("主线"))
+    }
+
+    func testStoryProgressionRecordsCalibrationForYellowCompletion() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.yellow)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.calibrationRune.title)
+        let result = WorkoutResult(
+            completionState: .completed,
+            safetyFeedback: "技术训练完成。",
+            nextRecommendation: "继续观察恢复。",
+            memoryDraft: "校准推进。"
+        )
+
+        let progression = StoryProgressionEngine.progression(
+            after: .initial(updatedAt: Date(timeIntervalSince1970: 1)),
+            readinessColor: readiness.color,
+            quest: quest,
+            result: result,
+            updatedAt: Date(timeIntervalSince1970: 2)
+        )
+
+        XCTAssertEqual(progression.currentChapterID, StoryChapter.calibration.id)
+        XCTAssertEqual(progression.currentNodeID, StoryNode.calibrationRune.id)
+        XCTAssertEqual(progression.lastOutcome, .calibrated)
+        XCTAssertTrue(progression.lastReason.contains("校准"))
+    }
+
+    func testStoryProgressionRecordsSafetyDowngrade() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)
+        let result = WorkoutResult(
+            completionState: .downgraded,
+            safetyFeedback: "检测到过重信号。",
+            nextRecommendation: "下一次降阶。",
+            memoryDraft: "安全降阶。"
+        )
+
+        let progression = StoryProgressionEngine.progression(
+            after: .initial(updatedAt: Date(timeIntervalSince1970: 1)),
+            readinessColor: readiness.color,
+            quest: quest,
+            result: result,
+            updatedAt: Date(timeIntervalSince1970: 2)
+        )
+
+        XCTAssertEqual(progression.currentChapterID, StoryChapter.recovery.id)
+        XCTAssertEqual(progression.currentNodeID, StoryNode.safetyDowngrade.id)
+        XCTAssertEqual(progression.lastOutcome, .downgraded)
+        XCTAssertFalse(progression.completedNodeIDs.contains(StoryNode.mainTrial.id))
+    }
+
+    func testStoryProgressionRecordsRecoveryForRedOrSkippedResult() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.red)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.recoveryCharm.title)
+        let result = WorkoutResult(
+            completionState: .skipped,
+            safetyFeedback: "恢复优先。",
+            nextRecommendation: "下一次重新评估。",
+            memoryDraft: "恢复进度。"
+        )
+
+        let progression = StoryProgressionEngine.progression(
+            after: .initial(updatedAt: Date(timeIntervalSince1970: 1)),
+            readinessColor: readiness.color,
+            quest: quest,
+            result: result,
+            updatedAt: Date(timeIntervalSince1970: 2)
+        )
+
+        XCTAssertEqual(progression.currentChapterID, StoryChapter.recovery.id)
+        XCTAssertEqual(progression.currentNodeID, StoryNode.recoveryCharm.id)
+        XCTAssertEqual(progression.lastOutcome, .recovered)
+        XCTAssertTrue(progression.lastReason.contains("恢复"))
+    }
 }
