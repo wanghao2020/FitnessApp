@@ -510,6 +510,7 @@ final class FitnessRPGCoreTests: XCTestCase {
         let history = TrainingHistoryBuilder.days(from: [earlier, later])
 
         XCTAssertEqual(history.map(\.record.updatedAt), [laterUpdate, earlierUpdate])
+        XCTAssertNotEqual(history[0].id, history[1].id)
     }
 
     func testTrainingHistoryDayShowsPendingAndIntermediateStates() {
