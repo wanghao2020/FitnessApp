@@ -16,6 +16,9 @@
 		01A000000000000000000007 /* WatchExecutionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000007 /* WatchExecutionView.swift */; };
 		01A000000000000000000008 /* FitnessRPGCore in Frameworks */ = {isa = PBXBuildFile; productRef = 01C000000000000000000001 /* FitnessRPGCore */; };
 		01A000000000000000000009 /* FitnessRPGCore in Frameworks */ = {isa = PBXBuildFile; productRef = 01C000000000000000000002 /* FitnessRPGCore */; };
+		01A00000000000000000000A /* TodayHealthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B00000000000000000000A /* TodayHealthViewModel.swift */; };
+		01A00000000000000000000B /* HealthKitHealthSummaryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B00000000000000000000B /* HealthKitHealthSummaryProvider.swift */; };
+		01A00000000000000000000C /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01B00000000000000000000D /* HealthKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +31,10 @@
 		01B000000000000000000007 /* WatchExecutionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchExecutionView.swift; sourceTree = "<group>"; };
 		01B000000000000000000008 /* FitnessRPG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitnessRPG.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		01B000000000000000000009 /* FitnessRPGWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitnessRPGWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		01B00000000000000000000A /* TodayHealthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayHealthViewModel.swift; sourceTree = "<group>"; };
+		01B00000000000000000000B /* HealthKitHealthSummaryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitHealthSummaryProvider.swift; sourceTree = "<group>"; };
+		01B00000000000000000000C /* FitnessRPG.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FitnessRPG.entitlements; sourceTree = "<group>"; };
+		01B00000000000000000000D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +43,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				01A000000000000000000008 /* FitnessRPGCore in Frameworks */,
+				01A00000000000000000000C /* HealthKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -54,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				01E000000000000000000002 /* AppSources */,
+				01E000000000000000000007 /* Frameworks */,
 				01E000000000000000000005 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -72,9 +81,12 @@
 			children = (
 				01B000000000000000000001 /* FitnessRPGApp.swift */,
 				01B000000000000000000002 /* TodayCommandCenterView.swift */,
+				01B00000000000000000000A /* TodayHealthViewModel.swift */,
 				01B000000000000000000003 /* ReadinessPanel.swift */,
 				01B000000000000000000004 /* QuestPanel.swift */,
 				01B000000000000000000005 /* ModelHarnessPanel.swift */,
+				01B00000000000000000000C /* FitnessRPG.entitlements */,
+				01E000000000000000000006 /* HealthKit */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -95,6 +107,22 @@
 				01B000000000000000000009 /* FitnessRPGWatch.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		01E000000000000000000006 /* HealthKit */ = {
+			isa = PBXGroup;
+			children = (
+				01B00000000000000000000B /* HealthKitHealthSummaryProvider.swift */,
+			);
+			path = HealthKit;
+			sourceTree = "<group>";
+		};
+		01E000000000000000000007 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				01B00000000000000000000D /* HealthKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -206,9 +234,11 @@
 			files = (
 				01A000000000000000000001 /* FitnessRPGApp.swift in Sources */,
 				01A000000000000000000002 /* TodayCommandCenterView.swift in Sources */,
+				01A00000000000000000000A /* TodayHealthViewModel.swift in Sources */,
 				01A000000000000000000003 /* ReadinessPanel.swift in Sources */,
 				01A000000000000000000004 /* QuestPanel.swift in Sources */,
 				01A000000000000000000005 /* ModelHarnessPanel.swift in Sources */,
+				01A00000000000000000000B /* HealthKitHealthSummaryProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -343,9 +373,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CFBundleDisplayName = "Fitness RPG";
+				CODE_SIGN_ENTITLEMENTS = AppSources/iOS/FitnessRPG.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Fitness RPG uses Apple Health data to estimate readiness and adapt training intensity.";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hao.fitnessrpg;
 				PRODUCT_NAME = FitnessRPG;
@@ -360,9 +392,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CFBundleDisplayName = "Fitness RPG";
+				CODE_SIGN_ENTITLEMENTS = AppSources/iOS/FitnessRPG.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Fitness RPG uses Apple Health data to estimate readiness and adapt training intensity.";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hao.fitnessrpg;
 				PRODUCT_NAME = FitnessRPG;

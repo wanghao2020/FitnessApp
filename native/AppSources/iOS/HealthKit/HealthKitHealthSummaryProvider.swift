@@ -7,6 +7,7 @@ enum HealthKitHealthSummaryProviderError: Error, Equatable {
     case authorizationFailed
 }
 
+@MainActor
 final class HealthKitHealthSummaryProvider {
     private let healthStore: HKHealthStore
     private let calendar: Calendar
