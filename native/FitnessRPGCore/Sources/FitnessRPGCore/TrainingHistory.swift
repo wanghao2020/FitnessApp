@@ -65,7 +65,11 @@ public struct TrainingHistoryDay: Equatable, Identifiable, Sendable {
     }
 
     public var storyReason: String {
-        record.storyProgression?.lastReason ?? "故事节点尚未更新。"
+        guard record.workoutResult != nil else {
+            return "故事节点尚未更新。"
+        }
+
+        return record.storyProgression?.lastReason ?? "故事节点尚未更新。"
     }
 
     public var stepSummary: String {

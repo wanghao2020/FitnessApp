@@ -553,7 +553,9 @@ final class FitnessRPGCoreTests: XCTestCase {
             updatedAt: Date(timeIntervalSince1970: 1_717_172_000)
         )
 
-        XCTAssertEqual(TrainingHistoryDay(record: record).storyNodeTitle, StoryNode.calibrationRune.title)
+        let historyDay = TrainingHistoryDay(record: record)
+        XCTAssertEqual(historyDay.storyNodeTitle, StoryNode.calibrationRune.title)
+        XCTAssertEqual(historyDay.storyReason, "故事节点尚未更新。")
     }
 
     func testTrainingHistoryBuilderReturnsEmptyListForEmptyRecords() {
