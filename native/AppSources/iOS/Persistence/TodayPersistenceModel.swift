@@ -9,6 +9,7 @@ final class TodayPersistenceModel: ObservableObject {
     @Published private(set) var storyProgression: StoryProgression
     @Published private(set) var storageStatusText = "本地记录尚未加载。"
     @Published private(set) var historyDays: [TrainingHistoryDay] = []
+    @Published private(set) var historyLoadErrorText: String?
 
     private let store: JSONFitnessRPGStore
     private let calendar: Calendar
@@ -60,13 +61,12 @@ final class TodayPersistenceModel: ObservableObject {
 
     func reloadHistory() {
         guard let records = loadSafeTrainingDays() else {
+            historyLoadErrorText = storageStatusText
             return
         }
 
+        historyLoadErrorText = nil
         publishHistory(from: records)
-        storageStatusText = statusText(
-            records.isEmpty ? "本地历史为空。" : "已加载 \(records.count) 条历史记录。"
-        )
     }
 
     func loadOrCreateToday(readiness: ReadinessResult, date: Date = Date()) {
