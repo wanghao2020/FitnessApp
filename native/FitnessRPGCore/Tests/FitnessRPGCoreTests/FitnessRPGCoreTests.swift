@@ -83,4 +83,79 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertFalse(harness.generationPath.joined(separator: " ").contains("远程"))
         XCTAssertTrue(harness.promptPreview.contains("禁用远程"))
     }
+
+    func testHealthySignalsMapToGreenLeaningSummary() {
+        let summary = HealthSummaryMapper.summary(
+            from: HealthSignals(
+                sleepHours: 8.1,
+                hrvSDNN: 68,
+                restingHeartRate: 56,
+                restingHeartRateBaseline: 58,
+                activeEnergyKcal: 420,
+                exerciseMinutes: 38,
+                stepCount: 9200,
+                workoutCount: 1
+            )
+        )
+
+        XCTAssertGreaterThanOrEqual(summary.energy, 75)
+        XCTAssertGreaterThanOrEqual(summary.recovery, 75)
+        XCTAssertLessThan(summary.strain, 70)
+        XCTAssertGreaterThanOrEqual(summary.sleep, 80)
+        XCTAssertEqual(summary.heartRateTrend, 0)
+        XCTAssertTrue(summary.drivers.contains("睡眠稳定"))
+        XCTAssertTrue(summary.drivers.contains("恢复良好"))
+    }
+
+    func testHighStrainSignalsMapToYellowLeaningSummary() {
+        let summary = HealthSummaryMapper.summary(
+            from: HealthSignals(
+                sleepHours: 6.6,
+                hrvSDNN: 45,
+                restingHeartRate: 64,
+                restingHeartRateBaseline: 58,
+                activeEnergyKcal: 960,
+                exerciseMinutes: 96,
+                stepCount: 16800,
+                workoutCount: 2
+            )
+        )
+
+        let readiness = ReadinessEngine.evaluate(summary)
+        XCTAssertEqual(readiness.color, .yellow)
+        XCTAssertGreaterThan(summary.strain, 72)
+        XCTAssertTrue(summary.drivers.contains("昨日负荷偏高"))
+    }
+
+    func testPoorSleepAndElevatedHeartRateMapToRedLeaningSummary() {
+        let summary = HealthSummaryMapper.summary(
+            from: HealthSignals(
+                sleepHours: 4.2,
+                hrvSDNN: 24,
+                restingHeartRate: 76,
+                restingHeartRateBaseline: 60,
+                activeEnergyKcal: 280,
+                exerciseMinutes: 18,
+                stepCount: 4200,
+                workoutCount: 0
+            )
+        )
+
+        let readiness = ReadinessEngine.evaluate(summary)
+        XCTAssertEqual(readiness.color, .red)
+        XCTAssertLessThan(summary.sleep, 50)
+        XCTAssertGreaterThanOrEqual(summary.heartRateTrend, 12)
+        XCTAssertTrue(summary.drivers.contains("睡眠不足"))
+        XCTAssertTrue(summary.drivers.contains("心率趋势偏高"))
+    }
+
+    func testMissingSignalsUseConservativeHealthKitFallback() {
+        let summary = HealthSummaryMapper.summary(from: .missing)
+
+        XCTAssertEqual(summary, MockHealthProfiles.missing)
+
+        let readiness = ReadinessEngine.evaluate(summary)
+        XCTAssertEqual(readiness.color, .yellow)
+        XCTAssertTrue(readiness.explanation.contains("HealthKit 数据缺失"))
+    }
 }
