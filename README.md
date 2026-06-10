@@ -58,6 +58,8 @@ The native code now includes `native/FitnessRPG.xcodeproj` with buildable iOS an
 
 The iOS target includes a read-only HealthKit MVP that maps available Apple Health sleep, heart-rate, activity, and workout data into `HealthSummary`. Missing, denied, unavailable, or incomplete HealthKit data falls back to the conservative yellow readiness path.
 
+The native app now includes a first-pass WatchConnectivity sync layer. The iOS app can package the current `DailyQuest` into a versioned Core payload and send it to the watchOS app; the watchOS app records `ExecutionLog` feedback and returns it to iPhone for deterministic `ExecutionEngine` resolution. When WatchConnectivity is unavailable, both app surfaces keep safe fallback behavior.
+
 See `native/README.md` for native build commands and target structure.
 
 ## Migrated Context
@@ -74,7 +76,7 @@ These records are context, not runtime app assets.
 
 Recommended sequence:
 
-1. Add WatchConnectivity for quest payload and execution log sync.
-2. Add persistence for workout results, memory drafts, and story progression.
+1. Add persistence for workout results, memory drafts, and story progression.
+2. Improve real-device WatchConnectivity companion configuration and diagnostics after device testing.
 3. Integrate local model runtime behind the deterministic harness and validator.
 4. Harden HealthKit data coverage, diagnostics, and onboarding copy after device testing.

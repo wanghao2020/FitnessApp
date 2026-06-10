@@ -15,6 +15,8 @@ The repo now includes `native/FitnessRPG.xcodeproj` with buildable iOS and watch
 
 The shared core includes deterministic mock health profiles, readiness evaluation, quest selection, Watch execution result handling, and local model harness explanation.
 
+The current native pass also includes first-pass WatchConnectivity source adapters. iOS sends versioned quest payloads derived from `ReadinessEngine` and `QuestEngine`; watchOS receives those payloads, records step feedback as `ExecutionLog` values, and sends logs back for `ExecutionEngine` resolution on iPhone.
+
 ## HealthKit MVP
 
 The iOS target requests read-only HealthKit access for sleep, heart-rate, activity, and workout signals. The app maps available samples into `HealthSummary` and falls back to conservative yellow readiness when HealthKit is unavailable, denied, or incomplete.
@@ -30,9 +32,9 @@ Both targets link the local `FitnessRPGCore` package product.
 
 ## Future Integration Points
 
-- WatchConnectivity adapter syncs `DailyQuest` and `ExecutionLog`.
+- Persistence adapter stores workout results, memory drafts, and story progression.
 - LiteRT-LM / Gemma adapter drafts coach text before deterministic safety validation.
-- Persistence adapter stores memory drafts and completed workouts.
+- Real-device WatchConnectivity diagnostics and companion target configuration can be hardened after device testing.
 
 ## Verification
 
