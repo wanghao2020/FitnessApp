@@ -56,6 +56,8 @@ node prototype/tests/prototypeContract.test.mjs
 
 The native code now includes `native/FitnessRPG.xcodeproj` with buildable iOS and watchOS app schemes, plus the shared `native/FitnessRPGCore` Swift Package.
 
+The iOS target includes a read-only HealthKit MVP that maps available Apple Health sleep, heart-rate, activity, and workout data into `HealthSummary`. Missing, denied, unavailable, or incomplete HealthKit data falls back to the conservative yellow readiness path.
+
 See `native/README.md` for native build commands and target structure.
 
 ## Migrated Context
@@ -72,7 +74,7 @@ These records are context, not runtime app assets.
 
 Recommended sequence:
 
-1. Add a HealthKit adapter that maps real data into `HealthSummary`.
-2. Add WatchConnectivity for quest payload and execution log sync.
-3. Add persistence for workout results, memory drafts, and story progression.
-4. Integrate local model runtime behind the deterministic harness and validator.
+1. Add WatchConnectivity for quest payload and execution log sync.
+2. Add persistence for workout results, memory drafts, and story progression.
+3. Integrate local model runtime behind the deterministic harness and validator.
+4. Harden HealthKit data coverage, diagnostics, and onboarding copy after device testing.
