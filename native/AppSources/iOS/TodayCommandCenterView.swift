@@ -6,14 +6,28 @@ struct TodayCommandCenterView: View {
     let modelMode: ModelMode
     let sourceNote: String?
     @ObservedObject var watchSyncModel: WatchQuestSyncModel
+    @ObservedObject var persistenceModel: TodayPersistenceModel
+
+    private var fallbackQuest: DailyQuest {
+        let storyNode = StoryProgressionEngine.displayNode(for: readiness.color).title
+        return QuestEngine.quest(for: readiness, storyNode: storyNode)
+    }
 
     private var quest: DailyQuest {
-        QuestEngine.quest(for: readiness, storyNode: "回声训练厅")
+        persistenceModel.todayQuest ?? fallbackQuest
+    }
+
+    private var questReadiness: ReadinessResult {
+        persistenceModel.todayRecord?.readiness ?? readiness
+    }
+
+    private var questReadinessColor: ReadinessColor {
+        questReadiness.color
     }
 
     private var harness: ModelHarnessSnapshot {
         ModelHarnessBuilder.snapshot(
-            readiness: readiness,
+            readiness: questReadiness,
             quest: quest,
             mode: modelMode,
             logs: []
@@ -43,16 +57,19 @@ struct TodayCommandCenterView: View {
                     QuestPanel(quest: quest)
 
                     Button("发送到 Watch") {
-                        watchSyncModel.send(quest: quest, readinessColor: readiness.color)
+                        watchSyncModel.send(quest: quest, readinessColor: questReadinessColor)
                     }
                     .buttonStyle(.borderedProminent)
 
-                    if let result = watchSyncModel.latestResult {
+                    if let result = persistenceModel.latestResult ?? watchSyncModel.latestResult {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Watch 回传")
                                 .font(.headline)
                             Text(result.safetyFeedback)
                             Text(result.nextRecommendation)
+                                .foregroundStyle(.secondary)
+                            Text(result.memoryDraft)
+                                .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
                         .padding()
@@ -60,22 +77,29 @@ struct TodayCommandCenterView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
 
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("故事进度")
+                            .font(.headline)
+                        Text(persistenceModel.currentStoryNodeTitle)
+                        Text(persistenceModel.storyProgression.lastReason)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                        Text(persistenceModel.storageStatusText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                    .background(.thinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+
                     ModelHarnessPanel(snapshot: harness)
                 }
                 .padding()
             }
             .navigationTitle("Fitness RPG")
-            .onAppear {
-                watchSyncModel.send(quest: quest, readinessColor: readiness.color)
-            }
-            .onChange(of: readiness.score) { _, _ in
-                watchSyncModel.send(quest: quest, readinessColor: readiness.color)
-            }
-            .onChange(of: readiness.color) { _, _ in
-                watchSyncModel.send(quest: quest, readinessColor: readiness.color)
-            }
-            .onChange(of: readiness.title) { _, _ in
-                watchSyncModel.send(quest: quest, readinessColor: readiness.color)
+            .onChange(of: watchSyncModel.latestExecutionPayload, initial: true) { _, payload in
+                guard let payload else { return }
+                persistenceModel.applyExecutionPayload(payload)
             }
         }
     }
@@ -86,6 +110,7 @@ struct TodayCommandCenterView: View {
         readiness: ReadinessEngine.evaluate(MockHealthProfiles.green),
         modelMode: .localFirst,
         sourceNote: "已读取 HealthKit 今日健康摘要。",
-        watchSyncModel: WatchQuestSyncModel(session: nil)
+        watchSyncModel: WatchQuestSyncModel(session: nil),
+        persistenceModel: TodayPersistenceModel()
     )
 }

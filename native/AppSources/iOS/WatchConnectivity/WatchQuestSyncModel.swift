@@ -7,6 +7,7 @@ import FitnessRPGCore
 final class WatchQuestSyncModel: NSObject, ObservableObject {
     @Published private(set) var statusText = "Watch 同步尚未启动。"
     @Published private(set) var latestResult: WorkoutResult?
+    @Published private(set) var latestExecutionPayload: ExecutionLogSyncPayload?
 
     private let session: WCSession?
     private var currentQuest: DailyQuest?
@@ -69,9 +70,10 @@ final class WatchQuestSyncModel: NSObject, ObservableObject {
                 ExecutionLogSyncPayload.self,
                 expectedKind: .executionLogs
             )
+            latestExecutionPayload = payload
 
             guard let currentQuest else {
-                statusText = "已收到 Watch 记录，但当前 iPhone 没有匹配任务。"
+                statusText = "已收到 Watch 记录，正在尝试本地持久化匹配。"
                 return
             }
 
