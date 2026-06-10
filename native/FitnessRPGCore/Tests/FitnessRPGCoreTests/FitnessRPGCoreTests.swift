@@ -489,6 +489,29 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertTrue(history[0].stepSummary.contains("动态热身"))
     }
 
+    func testTrainingHistoryDaysUseUpdatedAtTieBreakerForSameDate() {
+        let earlierUpdate = Date(timeIntervalSince1970: 1_717_172_000)
+        let laterUpdate = Date(timeIntervalSince1970: 1_717_172_600)
+        let earlier = makeHistoryRecord(
+            date: "2026-06-10",
+            readinessColor: .yellow,
+            completionState: .downgraded,
+            storyNode: .safetyDowngrade,
+            updatedAt: earlierUpdate
+        )
+        let later = makeHistoryRecord(
+            date: "2026-06-10",
+            readinessColor: .green,
+            completionState: .completed,
+            storyNode: .mainTrial,
+            updatedAt: laterUpdate
+        )
+
+        let history = TrainingHistoryBuilder.days(from: [earlier, later])
+
+        XCTAssertEqual(history.map(\.record.updatedAt), [laterUpdate, earlierUpdate])
+    }
+
     func testTrainingHistoryDayShowsPendingAndIntermediateStates() {
         let pending = makeHistoryRecord(
             date: "2026-06-10",
