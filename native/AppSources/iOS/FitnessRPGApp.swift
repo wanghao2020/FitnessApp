@@ -3,12 +3,18 @@ import FitnessRPGCore
 
 @main
 struct FitnessRPGApp: App {
+    @StateObject private var healthViewModel = TodayHealthViewModel()
+
     var body: some Scene {
         WindowGroup {
             TodayCommandCenterView(
-                readiness: ReadinessEngine.evaluate(MockHealthProfiles.green),
-                modelMode: .localFirst
+                readiness: healthViewModel.readiness,
+                modelMode: .localFirst,
+                sourceNote: healthViewModel.sourceNote
             )
+            .task {
+                await healthViewModel.loadHealthSummary()
+            }
         }
     }
 }
