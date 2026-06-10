@@ -307,4 +307,61 @@ final class FitnessRPGCoreTests: XCTestCase {
             )
         }
     }
+
+    func testTrainingDayRecordRoundTripsThroughJSON() throws {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: "破障试炼")
+        let result = ExecutionEngine.resolve(
+            quest: quest,
+            logs: [ExecutionLog(action: .complete, order: 1, rpe: 6, note: "热身完成")]
+        )
+        let progression = StoryProgression(
+            currentChapterID: StoryChapter.mainLine.id,
+            currentNodeID: StoryNode.mainTrial.id,
+            completedNodeIDs: [StoryNode.mainTrial.id],
+            lastOutcome: .advanced,
+            lastReason: "绿色任务完成，主线推进。",
+            updatedAt: Date(timeIntervalSince1970: 1_717_172_000)
+        )
+        let record = TrainingDayRecord(
+            date: "2026-06-10",
+            readiness: readiness,
+            quest: quest,
+            executionLogs: [ExecutionLog(action: .complete, order: 1, rpe: 6, note: "热身完成")],
+            workoutResult: result,
+            storyProgression: progression,
+            createdAt: Date(timeIntervalSince1970: 1_717_171_900),
+            updatedAt: Date(timeIntervalSince1970: 1_717_172_000)
+        )
+
+        let data = try SyncEnvelope.makeEncoder().encode(record)
+        let decoded = try SyncEnvelope.makeDecoder().decode(TrainingDayRecord.self, from: data)
+
+        XCTAssertEqual(decoded, record)
+        XCTAssertEqual(decoded.id, "2026-06-10")
+    }
+
+    func testStoryModelsAndMemoryEntryRoundTripThroughJSON() throws {
+        let memory = MemoryEntry(
+            date: "2026-06-10",
+            questTitle: "回声训练厅：力量共振",
+            completionState: .completed,
+            storyNodeID: StoryNode.mainTrial.id,
+            draft: "任务完成，力量属性成长。",
+            createdAt: Date(timeIntervalSince1970: 1_717_172_100)
+        )
+        let progression = StoryProgression.initial(
+            updatedAt: Date(timeIntervalSince1970: 1_717_172_000)
+        )
+
+        let chapterData = try SyncEnvelope.makeEncoder().encode(StoryChapter.mainLine)
+        let nodeData = try SyncEnvelope.makeEncoder().encode(StoryNode.mainTrial)
+        let progressionData = try SyncEnvelope.makeEncoder().encode(progression)
+        let memoryData = try SyncEnvelope.makeEncoder().encode(memory)
+
+        XCTAssertEqual(try SyncEnvelope.makeDecoder().decode(StoryChapter.self, from: chapterData), .mainLine)
+        XCTAssertEqual(try SyncEnvelope.makeDecoder().decode(StoryNode.self, from: nodeData), .mainTrial)
+        XCTAssertEqual(try SyncEnvelope.makeDecoder().decode(StoryProgression.self, from: progressionData), progression)
+        XCTAssertEqual(try SyncEnvelope.makeDecoder().decode(MemoryEntry.self, from: memoryData), memory)
+    }
 }
