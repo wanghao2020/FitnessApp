@@ -58,9 +58,13 @@ final class WatchQuestSyncModel: NSObject, ObservableObject {
         }
     }
 
-    private func receive(_ dictionary: [String: Any]) {
+    private func receiveEnvelopeData(_ data: Data?) {
         do {
-            let envelope = try SyncEnvelope.fromDictionary(dictionary)
+            guard let data else {
+                throw SyncPayloadError.missingEnvelopeData
+            }
+
+            let envelope = try SyncEnvelope.makeDecoder().decode(SyncEnvelope.self, from: data)
             let payload = try envelope.decodePayload(
                 ExecutionLogSyncPayload.self,
                 expectedKind: .executionLogs
@@ -113,14 +117,18 @@ extension WatchQuestSyncModel: WCSessionDelegate {
     }
 
     nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        let data = message[SyncEnvelope.dictionaryPayloadKey] as? Data
+
         Task { @MainActor in
-            receive(message)
+            receiveEnvelopeData(data)
         }
     }
 
     nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
+        let data = userInfo[SyncEnvelope.dictionaryPayloadKey] as? Data
+
         Task { @MainActor in
-            receive(userInfo)
+            receiveEnvelopeData(data)
         }
     }
 }

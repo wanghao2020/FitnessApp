@@ -19,6 +19,10 @@
 		01A00000000000000000000A /* TodayHealthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B00000000000000000000A /* TodayHealthViewModel.swift */; };
 		01A00000000000000000000B /* HealthKitHealthSummaryProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B00000000000000000000B /* HealthKitHealthSummaryProvider.swift */; };
 		01A00000000000000000000C /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01B00000000000000000000D /* HealthKit.framework */; };
+		01A00000000000000000000D /* WatchQuestSyncModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B00000000000000000000E /* WatchQuestSyncModel.swift */; };
+		01A00000000000000000000E /* WatchQuestSyncModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B00000000000000000000F /* WatchQuestSyncModel.swift */; };
+		01A00000000000000000000F /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000010 /* WatchConnectivity.framework */; };
+		01A000000000000000000010 /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000010 /* WatchConnectivity.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +39,9 @@
 		01B00000000000000000000B /* HealthKitHealthSummaryProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitHealthSummaryProvider.swift; sourceTree = "<group>"; };
 		01B00000000000000000000C /* FitnessRPG.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FitnessRPG.entitlements; sourceTree = "<group>"; };
 		01B00000000000000000000D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		01B00000000000000000000E /* WatchQuestSyncModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchQuestSyncModel.swift; sourceTree = "<group>"; };
+		01B00000000000000000000F /* WatchQuestSyncModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchQuestSyncModel.swift; sourceTree = "<group>"; };
+		01B000000000000000000010 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +51,7 @@
 			files = (
 				01A000000000000000000008 /* FitnessRPGCore in Frameworks */,
 				01A00000000000000000000C /* HealthKit.framework in Frameworks */,
+				01A00000000000000000000F /* WatchConnectivity.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -52,6 +60,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				01A000000000000000000009 /* FitnessRPGCore in Frameworks */,
+				01A000000000000000000010 /* WatchConnectivity.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +96,7 @@
 				01B000000000000000000005 /* ModelHarnessPanel.swift */,
 				01B00000000000000000000C /* FitnessRPG.entitlements */,
 				01E000000000000000000006 /* HealthKit */,
+				01E000000000000000000008 /* WatchConnectivity */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -96,6 +106,7 @@
 			children = (
 				01B000000000000000000006 /* FitnessRPGWatchApp.swift */,
 				01B000000000000000000007 /* WatchExecutionView.swift */,
+				01B00000000000000000000F /* WatchQuestSyncModel.swift */,
 			);
 			path = watchOS;
 			sourceTree = "<group>";
@@ -121,8 +132,17 @@
 			isa = PBXGroup;
 			children = (
 				01B00000000000000000000D /* HealthKit.framework */,
+				01B000000000000000000010 /* WatchConnectivity.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		01E000000000000000000008 /* WatchConnectivity */ = {
+			isa = PBXGroup;
+			children = (
+				01B00000000000000000000E /* WatchQuestSyncModel.swift */,
+			);
+			path = WatchConnectivity;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -239,6 +259,7 @@
 				01A000000000000000000004 /* QuestPanel.swift in Sources */,
 				01A000000000000000000005 /* ModelHarnessPanel.swift in Sources */,
 				01A00000000000000000000B /* HealthKitHealthSummaryProvider.swift in Sources */,
+				01A00000000000000000000D /* WatchQuestSyncModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -248,6 +269,7 @@
 			files = (
 				01A000000000000000000006 /* FitnessRPGWatchApp.swift in Sources */,
 				01A000000000000000000007 /* WatchExecutionView.swift in Sources */,
+				01A00000000000000000000E /* WatchQuestSyncModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
