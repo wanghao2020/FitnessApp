@@ -17,6 +17,8 @@ The shared core includes deterministic mock health profiles, readiness evaluatio
 
 The current native pass also includes first-pass WatchConnectivity source adapters. iOS sends versioned quest payloads derived from `ReadinessEngine` and `QuestEngine`; watchOS receives those payloads, records step feedback as `ExecutionLog` values, and sends logs back for `ExecutionEngine` resolution on iPhone.
 
+The iOS target now owns local durable state through a JSON persistence store. It restores the same daily quest for the local day, persists Watch execution logs and resolved workout results, stores memory drafts, and advances deterministic RPG story progression. The watchOS target stays non-persistent in this pass.
+
 ## HealthKit MVP
 
 The iOS target requests read-only HealthKit access for sleep, heart-rate, activity, and workout signals. The app maps available samples into `HealthSummary` and falls back to conservative yellow readiness when HealthKit is unavailable, denied, or incomplete.
@@ -28,12 +30,12 @@ The watchOS target does not read HealthKit in this pass.
 - `FitnessRPG`: iOS app target that launches `FitnessRPGApp`.
 - `FitnessRPGWatch`: watchOS app target that launches `FitnessRPGWatchApp`.
 
-Both targets link the local `FitnessRPGCore` package product.
+Both targets link the local `FitnessRPGCore` package product; the iOS target also links `FitnessRPGPersistence` for JSON-backed durable state.
 
 ## Future Integration Points
 
-- Persistence adapter stores workout results, memory drafts, and story progression.
-- LiteRT-LM / Gemma adapter drafts coach text before deterministic safety validation.
+- Native history and memory review UI can expose persisted workout results and memory entries.
+- LiteRT-LM / Gemma adapter can use persisted memory entries before deterministic safety validation.
 - Real-device WatchConnectivity diagnostics and companion target configuration can be hardened after device testing.
 
 ## Verification
