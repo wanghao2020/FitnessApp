@@ -9,6 +9,8 @@ struct TodayCommandCenterView: View {
     @ObservedObject var watchSyncModel: WatchQuestSyncModel
     @ObservedObject var persistenceModel: TodayPersistenceModel
     let showsDiagnostics: Bool
+    let modelRuntimeFixtureMode: ModelRuntimeDebugFixtureMode?
+    @State private var modelRuntimeResponse: ModelRuntimeResponse?
     @State private var navigationPath: [AppLaunchDestination]
 
     init(
@@ -19,7 +21,8 @@ struct TodayCommandCenterView: View {
         watchSyncModel: WatchQuestSyncModel,
         persistenceModel: TodayPersistenceModel,
         initialDestination: AppLaunchDestination = .today,
-        showsDiagnostics: Bool = false
+        showsDiagnostics: Bool = false,
+        modelRuntimeFixtureMode: ModelRuntimeDebugFixtureMode? = nil
     ) {
         self.readiness = readiness
         self.modelMode = modelMode
@@ -28,6 +31,7 @@ struct TodayCommandCenterView: View {
         self.watchSyncModel = watchSyncModel
         self.persistenceModel = persistenceModel
         self.showsDiagnostics = showsDiagnostics
+        self.modelRuntimeFixtureMode = modelRuntimeFixtureMode
         _navigationPath = State(initialValue: initialDestination == .today ? [] : [initialDestination])
     }
 
@@ -66,10 +70,23 @@ struct TodayCommandCenterView: View {
     }
 
     private var modelRuntimeDiagnostics: ModelRuntimeDiagnosticsSummary {
-        ModelRuntimeDiagnosticsBuilder.summary(
-            providerDiagnostics: LocalModelResourceBundleObserver().diagnostics,
-            response: nil
+        let observer = modelRuntimeResourceObserver
+        let diagnostics = modelRuntimeResponse?.providerDiagnostics ?? observer.provider.diagnostics
+
+        return ModelRuntimeDiagnosticsBuilder.summary(
+            providerDiagnostics: diagnostics,
+            response: modelRuntimeResponse
         )
+    }
+
+    private var modelRuntimeResourceObserver: LocalModelResourceBundleObserver {
+        #if DEBUG
+        if let modelRuntimeFixtureMode {
+            return .debugFixture(mode: modelRuntimeFixtureMode)
+        }
+        #endif
+
+        return LocalModelResourceBundleObserver()
     }
 
     var body: some View {
@@ -170,7 +187,28 @@ struct TodayCommandCenterView: View {
                 guard let payload else { return }
                 persistenceModel.applyExecutionPayload(payload)
             }
+            .task(id: modelRuntimeFixtureMode) {
+                await refreshModelRuntimeFixtureResponse()
+            }
         }
+    }
+
+    @MainActor
+    private func refreshModelRuntimeFixtureResponse() async {
+        guard showsDiagnostics, modelRuntimeFixtureMode != nil else {
+            modelRuntimeResponse = nil
+            return
+        }
+
+        let context = ModelRuntimeContextBuilder.context(
+            readiness: questReadiness,
+            quest: quest,
+            memories: []
+        )
+        modelRuntimeResponse = await ModelRuntimeRunner.response(
+            context: context,
+            provider: modelRuntimeResourceObserver.provider
+        )
     }
 }
 

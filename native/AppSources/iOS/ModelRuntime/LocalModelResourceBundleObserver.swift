@@ -6,17 +6,20 @@ struct LocalModelResourceBundleObserver {
     let fileManager: FileManager
     let profile: ModelRuntimeResourceProfile
     let adapter: any GemmaLocalModelAdapting
+    let resourceStatusOverride: ModelRuntimeResourcePreflightResult?
 
     init(
         bundle: Bundle = .main,
         fileManager: FileManager = .default,
         profile: ModelRuntimeResourceProfile = ModelRuntimeResourceCatalog.gemmaE2B,
-        adapter: any GemmaLocalModelAdapting = GemmaLocalModelAdapter()
+        adapter: any GemmaLocalModelAdapting = GemmaLocalModelAdapter(),
+        resourceStatusOverride: ModelRuntimeResourcePreflightResult? = nil
     ) {
         self.bundle = bundle
         self.fileManager = fileManager
         self.profile = profile
         self.adapter = adapter
+        self.resourceStatusOverride = resourceStatusOverride
     }
 
     var provider: ResourceBackedModelDraftProvider {
@@ -42,7 +45,11 @@ struct LocalModelResourceBundleObserver {
     }
 
     private var resourceStatus: ModelRuntimeResourcePreflightResult {
-        ModelRuntimeResourcePreflight.evaluate(
+        if let resourceStatusOverride {
+            return resourceStatusOverride
+        }
+
+        return ModelRuntimeResourcePreflight.evaluate(
             providerID: profile.providerID,
             displayName: profile.displayName,
             requirements: profile.requirements,
@@ -92,3 +99,29 @@ struct LocalModelResourceBundleObserver {
         return size.intValue
     }
 }
+
+#if DEBUG
+extension LocalModelResourceBundleObserver {
+    static func debugFixture(mode: ModelRuntimeDebugFixtureMode) -> LocalModelResourceBundleObserver {
+        let profile = ModelRuntimeResourceCatalog.gemmaE2B
+        let resourceStatus = ModelRuntimeResourcePreflight.evaluate(
+            providerID: profile.providerID,
+            displayName: profile.displayName,
+            requirements: profile.requirements,
+            observations: profile.requirements.map { requirement in
+                ModelRuntimeResourceObservation(
+                    requirementID: requirement.id,
+                    fileName: requirement.fileName,
+                    byteSize: max(requirement.minimumByteSize, 4_096)
+                )
+            }
+        )
+
+        return LocalModelResourceBundleObserver(
+            profile: profile,
+            adapter: DebugGemmaLocalModelAdapter(mode: mode),
+            resourceStatusOverride: resourceStatus
+        )
+    }
+}
+#endif

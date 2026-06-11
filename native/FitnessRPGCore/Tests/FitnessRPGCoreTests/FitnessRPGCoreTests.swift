@@ -774,6 +774,28 @@ final class FitnessRPGCoreTests: XCTestCase {
         )
     }
 
+    func testAppLaunchOptionsParseModelRuntimeDebugFixtureModes() {
+        XCTAssertNil(
+            AppLaunchOptions.modelRuntimeDebugFixtureMode(arguments: ["FitnessRPG"])
+        )
+        XCTAssertEqual(
+            AppLaunchOptions.modelRuntimeDebugFixtureMode(arguments: ["FitnessRPG", "--fitnessrpg-model-fixture-ready"]),
+            .ready
+        )
+        XCTAssertEqual(
+            AppLaunchOptions.modelRuntimeDebugFixtureMode(arguments: ["FitnessRPG", "--fitnessrpg-model-fixture-parsing-failure"]),
+            .parsingFailure
+        )
+        XCTAssertEqual(
+            AppLaunchOptions.modelRuntimeDebugFixtureMode(arguments: ["FitnessRPG", "--fitnessrpg-model-fixture-adapter-failure"]),
+            .adapterFailure
+        )
+        XCTAssertEqual(
+            AppLaunchOptions.modelRuntimeDebugFixtureMode(arguments: ["FitnessRPG", "--fitnessrpg-model-fixture-validator-failure"]),
+            .validatorFailure
+        )
+    }
+
     func testAppNavigationDisplayUsesLocalizedHistoryLabels() {
         XCTAssertEqual(AppNavigationDisplay.todayTitle, "Fitness RPG")
         XCTAssertEqual(AppNavigationDisplay.historyTitle, "训练历史")

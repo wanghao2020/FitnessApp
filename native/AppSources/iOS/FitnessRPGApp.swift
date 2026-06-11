@@ -17,7 +17,8 @@ struct FitnessRPGApp: App {
                 watchSyncModel: watchSyncModel,
                 persistenceModel: persistenceModel,
                 initialDestination: Self.debugInitialDestination,
-                showsDiagnostics: Self.debugShowsDiagnostics
+                showsDiagnostics: Self.debugShowsDiagnostics,
+                modelRuntimeFixtureMode: Self.debugModelRuntimeFixtureMode
             )
             .task {
                 await healthViewModel.loadHealthSummary()
@@ -42,6 +43,14 @@ struct FitnessRPGApp: App {
         AppLaunchOptions.showsDiagnostics(arguments: ProcessInfo.processInfo.arguments)
         #else
         false
+        #endif
+    }
+
+    private static var debugModelRuntimeFixtureMode: ModelRuntimeDebugFixtureMode? {
+        #if DEBUG
+        AppLaunchOptions.modelRuntimeDebugFixtureMode(arguments: ProcessInfo.processInfo.arguments)
+        #else
+        nil
         #endif
     }
 }

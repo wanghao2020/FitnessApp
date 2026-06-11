@@ -19,6 +19,8 @@ The current native pass also includes first-pass WatchConnectivity source adapte
 
 DEBUG diagnostics can also show WatchConnectivity support, activation, pairing, Watch App installation, reachability, recent send/receive path, local model Runtime provider status, Bundle resource preflight, per-file model/tokenizer resource rows, validator state, and fallback paths from the Today surface.
 
+DEBUG builds also support local model Runtime fixture launch arguments. These simulate ready resources and deterministic adapter output without linking LiteRT/Gemma or packaging model files, so the Runtime panel can exercise ready, parsing failure, adapter failure, and validator fallback paths.
+
 The iOS target now owns local durable state through a JSON persistence store. It restores the same daily quest for the local day, persists Watch execution logs and resolved workout results, stores memory drafts, and advances deterministic RPG story progression. History and Memory Review expose those persisted records in the app. The watchOS target stays non-persistent in this pass.
 
 The shared core also includes a local model runtime scaffold, adapter boundary, SDK-independent resource preflight layer, resource-backed provider facade, raw text output parser, and a Gemma E2B resource catalog. It turns current readiness, the active quest, and recent Memory Review entries into bounded prompt context, checks provider resource requirements from platform observations, lets future SDK adapters return raw text or structured drafts, validates draft coach text for safety, and returns deterministic fallback copy when model output is missing, unavailable, or unsafe. The iOS DEBUG diagnostics path uses the Core catalog to scan `Bundle.main/ModelResources` for `gemma-e2b.task` and `tokenizer.model`, combines that result with the iOS `GemmaLocalModelAdapting` placeholder, routes the result through the Core provider facade, then shows resource, adapter, parsing, validator, and fallback signals in the Runtime panel. No LiteRT-LM / Gemma SDK or model file is linked in this pass.
@@ -42,6 +44,10 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 - `--fitnessrpg-open-latest-history-detail`: launch History and open the latest day detail.
 - `--fitnessrpg-open-memory-review`: launch directly into Memory Review.
 - `--fitnessrpg-show-diagnostics`: show the Today WatchConnectivity and model Runtime/resource diagnostics panels in DEBUG builds.
+- `--fitnessrpg-model-fixture-ready`: in DEBUG diagnostics, run a successful local model fixture response.
+- `--fitnessrpg-model-fixture-parsing-failure`: in DEBUG diagnostics, run a fixture response that fails raw text parsing.
+- `--fitnessrpg-model-fixture-adapter-failure`: in DEBUG diagnostics, run a fixture response that fails at the adapter layer.
+- `--fitnessrpg-model-fixture-validator-failure`: in DEBUG diagnostics, run a fixture response rejected by the safety validator.
 
 ## Future Integration Points
 

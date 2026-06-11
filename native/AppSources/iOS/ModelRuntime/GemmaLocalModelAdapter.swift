@@ -29,3 +29,38 @@ enum GemmaLocalModelAdapterError: Error, Equatable, LocalizedError, Sendable {
         }
     }
 }
+
+#if DEBUG
+struct DebugGemmaLocalModelAdapter: GemmaLocalModelAdapting {
+    let mode: ModelRuntimeDebugFixtureMode
+
+    var isAvailable: Bool {
+        true
+    }
+
+    func generateText(for context: ModelRuntimeContext) async throws -> String {
+        switch mode {
+        case .ready:
+            return """
+            {
+              "title": "Fixture 本地建议",
+              "body": "保持稳定节奏，按 Watch 步骤完成今日训练。",
+              "nextAction": "发送到 Watch"
+            }
+            """
+        case .parsingFailure:
+            return "   \n\t"
+        case .adapterFailure:
+            throw GemmaLocalModelAdapterError.sdkNotLinked
+        case .validatorFailure:
+            return """
+            {
+              "title": "Fixture 高强度建议",
+              "body": "今天直接冲刺 PR，追求最大重量和力竭。",
+              "nextAction": "发送到 Watch"
+            }
+            """
+        }
+    }
+}
+#endif
