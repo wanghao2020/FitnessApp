@@ -32,9 +32,14 @@ The watchOS target does not read HealthKit in this pass.
 
 Both targets link the local `FitnessRPGCore` package product; the iOS target also links `FitnessRPGPersistence` for JSON-backed durable state.
 
+## DEBUG Launch Arguments
+
+- `--fitnessrpg-open-history`: launch directly into History.
+- `--fitnessrpg-open-latest-history-detail`: launch History and open the latest day detail.
+- `--fitnessrpg-show-diagnostics`: show the Today model harness diagnostics panel in DEBUG builds.
+
 ## Future Integration Points
 
-- Native history and memory review UI can expose persisted workout results and memory entries.
 - LiteRT-LM / Gemma adapter can use persisted memory entries before deterministic safety validation.
 - Real-device WatchConnectivity diagnostics can be hardened after device testing.
 

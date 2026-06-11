@@ -1,5 +1,30 @@
 import Foundation
 
+public struct TrainingHistoryWatchLogRow: Equatable, Identifiable, Sendable {
+    public let id: String
+    public let stepTitle: String
+    public let actionLabel: String
+    public let actionSymbolName: String
+    public let rpeLabel: String
+    public let note: String
+
+    public init(
+        id: String,
+        stepTitle: String,
+        actionLabel: String,
+        actionSymbolName: String,
+        rpeLabel: String,
+        note: String
+    ) {
+        self.id = id
+        self.stepTitle = stepTitle
+        self.actionLabel = actionLabel
+        self.actionSymbolName = actionSymbolName
+        self.rpeLabel = rpeLabel
+        self.note = note
+    }
+}
+
 public struct TrainingHistoryDay: Equatable, Identifiable, Sendable {
     public let record: TrainingDayRecord
 
@@ -17,6 +42,23 @@ public struct TrainingHistoryDay: Equatable, Identifiable, Sendable {
         "\(record.readiness.title) · \(record.readiness.score)"
     }
 
+    public var rewardSummary: String {
+        guard !record.quest.attributeRewards.isEmpty else {
+            return "暂无奖励"
+        }
+
+        return record.quest.attributeRewards.joined(separator: " / ")
+    }
+
+    public var storyContextLabel: String {
+        "\(storyNodeTitle) · \(record.quest.difficulty)"
+    }
+
+    public var watchProgressLabel: String {
+        let totalSteps = max(record.quest.watchSteps.count, record.executionLogs.count)
+        return "\(record.executionLogs.count)/\(totalSteps) 步骤"
+    }
+
     public var completionLabel: String {
         guard let result = record.workoutResult else {
             return record.executionLogs.isEmpty ? "待执行" : "同步中"
@@ -30,6 +72,25 @@ public struct TrainingHistoryDay: Equatable, Identifiable, Sendable {
         case .skipped:
             return "已跳过"
         }
+    }
+
+    public var completionSymbolName: String {
+        guard let result = record.workoutResult else {
+            return record.executionLogs.isEmpty ? "clock.circle.fill" : "arrow.triangle.2.circlepath.circle.fill"
+        }
+
+        switch result.completionState {
+        case .completed:
+            return "checkmark.circle.fill"
+        case .downgraded:
+            return "arrow.down.circle.fill"
+        case .skipped:
+            return "minus.circle.fill"
+        }
+    }
+
+    public var resultSummary: String {
+        "\(completionLabel) · \(watchProgressLabel)"
     }
 
     public var executionSummary: String {
@@ -75,6 +136,22 @@ public struct TrainingHistoryDay: Equatable, Identifiable, Sendable {
     public var stepSummary: String {
         record.quest.watchSteps.map(\.instruction).joined(separator: " / ")
     }
+
+    public var watchLogRows: [TrainingHistoryWatchLogRow] {
+        record.executionLogs
+            .sorted { $0.order < $1.order }
+            .map { log in
+                let stepTitle = record.quest.watchSteps[safeOneBased: log.order]?.instruction ?? "步骤 \(log.order)"
+                return TrainingHistoryWatchLogRow(
+                    id: "\(log.order)-\(log.action.rawValue)-\(log.rpe)-\(log.note)",
+                    stepTitle: stepTitle,
+                    actionLabel: TrainingHistoryBuilder.actionLabel(for: log.action),
+                    actionSymbolName: TrainingHistoryBuilder.actionSymbolName(for: log.action),
+                    rpeLabel: "RPE \(log.rpe)",
+                    note: log.note
+                )
+            }
+    }
 }
 
 public enum TrainingHistoryBuilder {
@@ -102,5 +179,41 @@ public enum TrainingHistoryBuilder {
         default:
             return "未知节点"
         }
+    }
+
+    public static func actionLabel(for action: WatchAction) -> String {
+        switch action {
+        case .complete:
+            return "完成"
+        case .tooHeavy:
+            return "过重"
+        case .skip:
+            return "跳过"
+        case .rpeWithinTarget:
+            return "RPE 达标"
+        }
+    }
+
+    public static func actionSymbolName(for action: WatchAction) -> String {
+        switch action {
+        case .complete:
+            return "checkmark.circle.fill"
+        case .tooHeavy:
+            return "exclamationmark.triangle.fill"
+        case .skip:
+            return "minus.circle.fill"
+        case .rpeWithinTarget:
+            return "scope"
+        }
+    }
+}
+
+private extension Array {
+    subscript(safeOneBased index: Int) -> Element? {
+        let zeroBasedIndex = index - 1
+        guard indices.contains(zeroBasedIndex) else {
+            return nil
+        }
+        return self[zeroBasedIndex]
     }
 }

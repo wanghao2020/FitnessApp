@@ -14,7 +14,9 @@ struct FitnessRPGApp: App {
                 modelMode: .localFirst,
                 sourceNote: healthViewModel.sourceNote,
                 watchSyncModel: watchSyncModel,
-                persistenceModel: persistenceModel
+                persistenceModel: persistenceModel,
+                initialDestination: Self.debugInitialDestination,
+                showsDiagnostics: Self.debugShowsDiagnostics
             )
             .task {
                 await healthViewModel.loadHealthSummary()
@@ -24,5 +26,21 @@ struct FitnessRPGApp: App {
                 }
             }
         }
+    }
+
+    private static var debugInitialDestination: AppLaunchDestination {
+        #if DEBUG
+        AppLaunchOptions.initialDestination(arguments: ProcessInfo.processInfo.arguments)
+        #else
+        .today
+        #endif
+    }
+
+    private static var debugShowsDiagnostics: Bool {
+        #if DEBUG
+        AppLaunchOptions.showsDiagnostics(arguments: ProcessInfo.processInfo.arguments)
+        #else
+        false
+        #endif
     }
 }

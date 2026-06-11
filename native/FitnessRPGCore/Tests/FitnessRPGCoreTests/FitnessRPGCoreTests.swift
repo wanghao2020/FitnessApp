@@ -84,6 +84,57 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertTrue(harness.promptPreview.contains("禁用远程"))
     }
 
+    func testAppLaunchOptionsOpenHistoryFromArguments() {
+        XCTAssertEqual(
+            AppLaunchOptions.initialDestination(arguments: ["FitnessRPG"]),
+            .today
+        )
+        XCTAssertEqual(
+            AppLaunchOptions.initialDestination(arguments: ["FitnessRPG", "--fitnessrpg-open-history"]),
+            .history
+        )
+        XCTAssertEqual(
+            AppLaunchOptions.initialDestination(arguments: ["FitnessRPG", "--fitnessrpg-open-latest-history-detail"]),
+            .latestHistoryDetail
+        )
+    }
+
+    func testAppLaunchOptionsShowDiagnosticsFromArguments() {
+        XCTAssertFalse(
+            AppLaunchOptions.showsDiagnostics(arguments: ["FitnessRPG"])
+        )
+        XCTAssertTrue(
+            AppLaunchOptions.showsDiagnostics(arguments: ["FitnessRPG", "--fitnessrpg-show-diagnostics"])
+        )
+    }
+
+    func testAppNavigationDisplayUsesLocalizedHistoryLabels() {
+        XCTAssertEqual(AppNavigationDisplay.todayTitle, "Fitness RPG")
+        XCTAssertEqual(AppNavigationDisplay.historyTitle, "训练历史")
+        XCTAssertEqual(AppNavigationDisplay.historyEntryLabel, "历史")
+        XCTAssertEqual(AppNavigationDisplay.historyEntrySystemImage, "clock.arrow.circlepath")
+    }
+
+    func testTodayCommandCenterSummaryBuildsHeroAndQuestLabels() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.yellow)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.calibrationRune.title)
+
+        let summary = TodayCommandCenterSummary(
+            readiness: readiness,
+            quest: quest,
+            executionLogCount: 2
+        )
+
+        XCTAssertEqual(summary.readinessLabel, "\(readiness.title) · \(readiness.score)")
+        XCTAssertEqual(summary.readinessScoreLabel, "\(readiness.score)")
+        XCTAssertEqual(summary.watchProgressLabel, "2/3")
+        XCTAssertEqual(summary.watchStatusLabel, "已收到 2 条 Watch 记录")
+        XCTAssertEqual(summary.questContextLabel, "\(StoryNode.calibrationRune.title) · 降阶")
+        XCTAssertEqual(summary.rewardSummary, "CON +8 / AGI +5 / INT +4")
+        XCTAssertEqual(summary.primaryActionLabel, "发送到 Watch")
+        XCTAssertEqual(summary.primaryActionSystemImage, "applewatch")
+    }
+
     func testHealthySignalsMapToGreenLeaningSummary() {
         let summary = HealthSummaryMapper.summary(
             from: HealthSignals(
@@ -579,6 +630,35 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertTrue(history[0].stepSummary.contains("动态热身"))
     }
 
+    func testTrainingHistoryDaySummarizesWatchProgressAndRows() {
+        let logs = [
+            ExecutionLog(action: .complete, order: 1, rpe: 6, note: "动态热身 完成"),
+            ExecutionLog(action: .rpeWithinTarget, order: 2, rpe: 5, note: "力量循环 RPE 在目标内"),
+            ExecutionLog(action: .skip, order: 3, rpe: 2, note: "冷却记录 跳过")
+        ]
+        let record = makeHistoryRecord(
+            date: "2026-06-10",
+            readinessColor: .green,
+            completionState: .completed,
+            storyNode: .mainTrial,
+            updatedAt: Date(timeIntervalSince1970: 1_717_172_000),
+            logs: logs
+        )
+
+        let day = TrainingHistoryDay(record: record)
+
+        XCTAssertEqual(day.watchProgressLabel, "3/3 步骤")
+        XCTAssertEqual(day.resultSummary, "已完成 · 3/3 步骤")
+        XCTAssertEqual(day.rewardSummary, "STR +10 / END +12 / CON +6")
+        XCTAssertEqual(day.storyContextLabel, "\(StoryNode.mainTrial.title) · 标准")
+        XCTAssertEqual(day.completionSymbolName, "checkmark.circle.fill")
+        XCTAssertEqual(day.watchLogRows.map(\.stepTitle), ["动态热身", "力量循环", "冷却记录"])
+        XCTAssertEqual(day.watchLogRows.map(\.actionLabel), ["完成", "RPE 达标", "跳过"])
+        XCTAssertEqual(day.watchLogRows.map(\.actionSymbolName), ["checkmark.circle.fill", "scope", "minus.circle.fill"])
+        XCTAssertEqual(day.watchLogRows.map(\.rpeLabel), ["RPE 6", "RPE 5", "RPE 2"])
+        XCTAssertEqual(day.watchLogRows[1].note, "力量循环 RPE 在目标内")
+    }
+
     func testTrainingHistoryDaysUseUpdatedAtTieBreakerForSameDate() {
         let earlierUpdate = Date(timeIntervalSince1970: 1_717_172_000)
         let laterUpdate = Date(timeIntervalSince1970: 1_717_172_600)
@@ -635,10 +715,14 @@ final class FitnessRPGCoreTests: XCTestCase {
         let inProgressDay = TrainingHistoryDay(record: inProgress)
 
         XCTAssertEqual(pendingDay.completionLabel, "待执行")
+        XCTAssertEqual(pendingDay.watchProgressLabel, "0/3 步骤")
+        XCTAssertEqual(pendingDay.resultSummary, "待执行 · 0/3 步骤")
         XCTAssertEqual(pendingDay.executionSummary, "尚未收到 Watch 执行结果。")
         XCTAssertEqual(pendingDay.memoryDraft, "Memory 草稿尚未生成。")
         XCTAssertEqual(pendingDay.storyNodeTitle, StoryNode.calibrationRune.title)
         XCTAssertEqual(inProgressDay.completionLabel, "同步中")
+        XCTAssertEqual(inProgressDay.watchProgressLabel, "1/3 步骤")
+        XCTAssertEqual(inProgressDay.resultSummary, "同步中 · 1/3 步骤")
         XCTAssertEqual(inProgressDay.executionSummary, "已同步 1 / 3 个 Watch 步骤。")
     }
 
@@ -672,7 +756,8 @@ final class FitnessRPGCoreTests: XCTestCase {
         readinessColor: ReadinessColor,
         completionState: CompletionState?,
         storyNode: StoryNode,
-        updatedAt: Date
+        updatedAt: Date,
+        logs customLogs: [ExecutionLog]? = nil
     ) -> TrainingDayRecord {
         let readiness: ReadinessResult
         switch readinessColor {
@@ -685,9 +770,9 @@ final class FitnessRPGCoreTests: XCTestCase {
         }
 
         let quest = QuestEngine.quest(for: readiness, storyNode: storyNode.title)
-        let logs = completionState == nil
+        let logs = customLogs ?? (completionState == nil
             ? []
-            : [ExecutionLog(action: .complete, order: 1, rpe: 6, note: "完成")]
+            : [ExecutionLog(action: .complete, order: 1, rpe: 6, note: "完成")])
         let result = completionState.map { state in
             WorkoutResult(
                 completionState: state,
