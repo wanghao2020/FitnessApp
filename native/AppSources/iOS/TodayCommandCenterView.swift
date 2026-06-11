@@ -114,10 +114,25 @@ struct TodayCommandCenterView: View {
                     HistoryView(persistenceModel: persistenceModel)
                 case .latestHistoryDetail:
                     HistoryView(persistenceModel: persistenceModel, initialDisplay: .latestDetail)
+                case .memoryReview:
+                    MemoryReviewView(persistenceModel: persistenceModel)
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    NavigationLink(value: AppLaunchDestination.memoryReview) {
+                        HStack(spacing: 4) {
+                            Image(systemName: AppNavigationDisplay.memoryReviewEntrySystemImage)
+                            Text(AppNavigationDisplay.memoryReviewEntryLabel)
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(.regularMaterial, in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(AppNavigationDisplay.memoryReviewTitle)
+
                     NavigationLink(value: AppLaunchDestination.history) {
                         HStack(spacing: 4) {
                             Image(systemName: AppNavigationDisplay.historyEntrySystemImage)

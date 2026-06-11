@@ -60,7 +60,7 @@ The iOS target includes a read-only HealthKit MVP that maps available Apple Heal
 
 The native app now includes a first-pass WatchConnectivity sync layer. The iOS app can package the current `DailyQuest` into a versioned Core payload and send it to the watchOS app; the watchOS app records `ExecutionLog` feedback and returns it to iPhone for deterministic `ExecutionEngine` resolution. When WatchConnectivity is unavailable, both app surfaces keep safe fallback behavior.
 
-The native iOS app now has a JSON-backed persistence MVP. iPhone restores the same local-day quest after relaunch, saves Watch-returned execution logs and deterministic workout results, stores memory drafts, and advances lightweight RPG chapter/node progression locally. The watchOS target remains an execution surface and does not write durable history.
+The native iOS app now has a JSON-backed persistence MVP. iPhone restores the same local-day quest after relaunch, saves Watch-returned execution logs and deterministic workout results, stores memory drafts, and advances lightweight RPG chapter/node progression locally. History and Memory Review surfaces expose persisted training days and memory drafts for review. The watchOS target remains an execution surface and does not write durable history.
 
 See `native/README.md` for native build commands and target structure.
 
@@ -78,7 +78,7 @@ These records are context, not runtime app assets.
 
 Recommended sequence:
 
-1. Add a compact native history and memory review surface.
-2. Improve real-device WatchConnectivity companion configuration and diagnostics after device testing.
-3. Integrate local model runtime behind persisted memory context and deterministic validator.
-4. Harden HealthKit data coverage, diagnostics, and onboarding copy after device testing.
+1. Improve real-device WatchConnectivity diagnostics after paired-device testing.
+2. Harden HealthKit data coverage, permission UX, diagnostics, and onboarding copy after device testing.
+3. Integrate local model runtime behind persisted Memory Review context and deterministic validator.
+4. Add deterministic weekly summaries and next-week plan scaffolding before model-generated weekly copy.

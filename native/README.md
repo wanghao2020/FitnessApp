@@ -17,7 +17,7 @@ The shared core includes deterministic mock health profiles, readiness evaluatio
 
 The current native pass also includes first-pass WatchConnectivity source adapters. iOS sends versioned quest payloads derived from `ReadinessEngine` and `QuestEngine`; watchOS receives those payloads, records step feedback as `ExecutionLog` values, and sends logs back for `ExecutionEngine` resolution on iPhone. The iOS target embeds the watchOS app in `FitnessRPG.app/Watch`, and the watchOS target declares `com.hao.fitnessrpg` as its companion bundle identifier.
 
-The iOS target now owns local durable state through a JSON persistence store. It restores the same daily quest for the local day, persists Watch execution logs and resolved workout results, stores memory drafts, and advances deterministic RPG story progression. The watchOS target stays non-persistent in this pass.
+The iOS target now owns local durable state through a JSON persistence store. It restores the same daily quest for the local day, persists Watch execution logs and resolved workout results, stores memory drafts, and advances deterministic RPG story progression. History and Memory Review expose those persisted records in the app. The watchOS target stays non-persistent in this pass.
 
 ## HealthKit MVP
 
@@ -36,12 +36,14 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 
 - `--fitnessrpg-open-history`: launch directly into History.
 - `--fitnessrpg-open-latest-history-detail`: launch History and open the latest day detail.
+- `--fitnessrpg-open-memory-review`: launch directly into Memory Review.
 - `--fitnessrpg-show-diagnostics`: show the Today model harness diagnostics panel in DEBUG builds.
 
 ## Future Integration Points
 
-- LiteRT-LM / Gemma adapter can use persisted memory entries before deterministic safety validation.
 - Real-device WatchConnectivity diagnostics can be hardened after device testing.
+- HealthKit permission UX, diagnostics, and onboarding copy can be hardened after device testing.
+- LiteRT-LM / Gemma adapter can use persisted Memory Review entries before deterministic safety validation.
 
 ## Verification
 

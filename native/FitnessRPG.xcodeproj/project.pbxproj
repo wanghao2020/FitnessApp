@@ -28,6 +28,7 @@
 		01A000000000000000000013 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000012 /* HistoryView.swift */; };
 		01A000000000000000000014 /* FitnessRPGWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000009 /* FitnessRPGWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		01A000000000000000000015 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000013 /* LaunchScreen.storyboard */; };
+		01A000000000000000000016 /* MemoryReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000014 /* MemoryReviewView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +75,7 @@
 		01B000000000000000000011 /* TodayPersistenceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayPersistenceModel.swift; sourceTree = "<group>"; };
 		01B000000000000000000012 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		01B000000000000000000013 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		01B000000000000000000014 /* MemoryReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryReviewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,6 +133,7 @@
 				01B00000000000000000000C /* FitnessRPG.entitlements */,
 				01E000000000000000000006 /* HealthKit */,
 				01E00000000000000000000A /* History */,
+				01E00000000000000000000B /* Memory */,
 				01E000000000000000000009 /* Persistence */,
 				01E000000000000000000008 /* WatchConnectivity */,
 			);
@@ -195,6 +198,14 @@
 				01B000000000000000000012 /* HistoryView.swift */,
 			);
 			path = History;
+			sourceTree = "<group>";
+		};
+		01E00000000000000000000B /* Memory */ = {
+			isa = PBXGroup;
+			children = (
+				01B000000000000000000014 /* MemoryReviewView.swift */,
+			);
+			path = Memory;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -316,6 +327,7 @@
 				01A000000000000000000005 /* ModelHarnessPanel.swift in Sources */,
 				01A00000000000000000000B /* HealthKitHealthSummaryProvider.swift in Sources */,
 				01A000000000000000000013 /* HistoryView.swift in Sources */,
+				01A000000000000000000016 /* MemoryReviewView.swift in Sources */,
 				01A000000000000000000012 /* TodayPersistenceModel.swift in Sources */,
 				01A00000000000000000000D /* WatchQuestSyncModel.swift in Sources */,
 			);

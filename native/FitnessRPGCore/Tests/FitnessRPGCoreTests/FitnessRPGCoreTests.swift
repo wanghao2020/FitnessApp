@@ -97,6 +97,10 @@ final class FitnessRPGCoreTests: XCTestCase {
             AppLaunchOptions.initialDestination(arguments: ["FitnessRPG", "--fitnessrpg-open-latest-history-detail"]),
             .latestHistoryDetail
         )
+        XCTAssertEqual(
+            AppLaunchOptions.initialDestination(arguments: ["FitnessRPG", "--fitnessrpg-open-memory-review"]),
+            .memoryReview
+        )
     }
 
     func testAppLaunchOptionsShowDiagnosticsFromArguments() {
@@ -113,6 +117,9 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(AppNavigationDisplay.historyTitle, "训练历史")
         XCTAssertEqual(AppNavigationDisplay.historyEntryLabel, "历史")
         XCTAssertEqual(AppNavigationDisplay.historyEntrySystemImage, "clock.arrow.circlepath")
+        XCTAssertEqual(AppNavigationDisplay.memoryReviewTitle, "记忆回顾")
+        XCTAssertEqual(AppNavigationDisplay.memoryReviewEntryLabel, "记忆")
+        XCTAssertEqual(AppNavigationDisplay.memoryReviewEntrySystemImage, "book.closed")
     }
 
     func testTodayCommandCenterSummaryBuildsHeroAndQuestLabels() {
@@ -504,6 +511,79 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(try SyncEnvelope.makeDecoder().decode(StoryNode.self, from: nodeData), .mainTrial)
         XCTAssertEqual(try SyncEnvelope.makeDecoder().decode(StoryProgression.self, from: progressionData), progression)
         XCTAssertEqual(try SyncEnvelope.makeDecoder().decode(MemoryEntry.self, from: memoryData), memory)
+    }
+
+    func testMemoryReviewEntriesSortNewestFirstAndUseTrainingRecordContext() {
+        let olderMemory = MemoryEntry(
+            id: "memory-older",
+            date: "2026-06-09",
+            questTitle: "灰烬坡道：降阶巡航",
+            completionState: .downgraded,
+            storyNodeID: StoryNode.safetyDowngrade.id,
+            draft: "过重信号触发安全降阶。",
+            createdAt: Date(timeIntervalSince1970: 1_717_171_000)
+        )
+        let newerMemory = MemoryEntry(
+            id: "memory-newer",
+            date: "2026-06-10",
+            questTitle: "回声训练厅：力量共振",
+            completionState: .completed,
+            storyNodeID: StoryNode.mainTrial.id,
+            draft: "主线训练完成，力量共振稳定。",
+            createdAt: Date(timeIntervalSince1970: 1_717_172_000)
+        )
+        let fullLogs = [
+            ExecutionLog(action: .complete, order: 1, rpe: 6, note: "动态热身 完成"),
+            ExecutionLog(action: .complete, order: 2, rpe: 6, note: "力量循环 完成"),
+            ExecutionLog(action: .complete, order: 3, rpe: 6, note: "冷却记录 完成")
+        ]
+        let matchingRecord = makeHistoryRecord(
+            date: "2026-06-10",
+            readinessColor: .green,
+            completionState: .completed,
+            storyNode: .mainTrial,
+            updatedAt: Date(timeIntervalSince1970: 1_717_172_100),
+            logs: fullLogs
+        )
+
+        let entries = MemoryReviewBuilder.entries(
+            from: [olderMemory, newerMemory],
+            records: [matchingRecord]
+        )
+
+        XCTAssertEqual(entries.map(\.id), ["memory-newer", "memory-older"])
+        XCTAssertEqual(entries[0].date, "2026-06-10")
+        XCTAssertEqual(entries[0].questTitle, "回声训练厅：力量共振")
+        XCTAssertEqual(entries[0].completionLabel, "已完成")
+        XCTAssertEqual(entries[0].completionSymbolName, "checkmark.circle.fill")
+        XCTAssertEqual(entries[0].storyContextLabel, "\(StoryNode.mainTrial.title) · 标准")
+        XCTAssertEqual(entries[0].sourceSummary, "已完成 · 3/3 步骤")
+        XCTAssertEqual(entries[0].rewardSummary, "STR +10 / END +12 / CON +6")
+        XCTAssertEqual(entries[0].draft, "主线训练完成，力量共振稳定。")
+    }
+
+    func testMemoryReviewEntriesKeepFallbackContextWithoutTrainingRecord() {
+        let memory = MemoryEntry(
+            id: "memory-unmatched",
+            date: "2026-06-08",
+            questTitle: "北境营地：恢复护符",
+            completionState: .skipped,
+            storyNodeID: StoryNode.recoveryCharm.id,
+            draft: "恢复日保留体力，完成营地叙事。",
+            createdAt: Date(timeIntervalSince1970: 1_717_170_000)
+        )
+
+        let entries = MemoryReviewBuilder.entries(from: [memory], records: [])
+
+        XCTAssertEqual(entries.count, 1)
+        XCTAssertEqual(entries[0].id, "memory-unmatched")
+        XCTAssertEqual(entries[0].completionLabel, "已跳过")
+        XCTAssertEqual(entries[0].completionSymbolName, "minus.circle.fill")
+        XCTAssertEqual(entries[0].storyNodeTitle, StoryNode.recoveryCharm.title)
+        XCTAssertEqual(entries[0].storyContextLabel, StoryNode.recoveryCharm.title)
+        XCTAssertEqual(entries[0].sourceSummary, "已跳过 · 2026-06-08")
+        XCTAssertEqual(entries[0].rewardSummary, "暂无训练奖励")
+        XCTAssertEqual(entries[0].draft, "恢复日保留体力，完成营地叙事。")
     }
 
     func testStoryProgressionAdvancesMainLineForGreenCompletion() {

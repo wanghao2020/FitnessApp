@@ -10,6 +10,8 @@ final class TodayPersistenceModel: ObservableObject {
     @Published private(set) var storageStatusText = "本地记录尚未加载。"
     @Published private(set) var historyDays: [TrainingHistoryDay] = []
     @Published private(set) var historyLoadErrorText: String?
+    @Published private(set) var memoryReviewEntries: [MemoryReviewEntry] = []
+    @Published private(set) var memoryReviewLoadErrorText: String?
 
     private let store: JSONFitnessRPGStore
     private let calendar: Calendar
@@ -59,6 +61,10 @@ final class TodayPersistenceModel: ObservableObject {
         "还没有历史记录。完成一次 Today 任务或同步一次 Watch 结果后，这里会显示训练回顾。"
     }
 
+    var memoryReviewEmptyStateText: String {
+        "还没有记忆草稿。完成一次 Watch 回传并生成训练结果后，这里会显示可回顾的故事记忆。"
+    }
+
     func reloadHistory() {
         let loadedRecords = store.loadTrainingDays()
         if let warning = loadedRecords.warning {
@@ -68,6 +74,24 @@ final class TodayPersistenceModel: ObservableObject {
 
         historyLoadErrorText = nil
         publishHistory(from: loadedRecords.value)
+    }
+
+    func reloadMemoryReview() {
+        let loadedMemoryEntries = store.loadMemoryEntries()
+        if let warning = loadedMemoryEntries.warning {
+            memoryReviewLoadErrorText = "本地记忆记录读取失败：\(warning)"
+            memoryReviewEntries = []
+            return
+        }
+
+        let loadedRecords = store.loadTrainingDays()
+        let records = loadedRecords.warning == nil ? loadedRecords.value : []
+        memoryReviewLoadErrorText = nil
+        publishMemoryReview(from: loadedMemoryEntries.value, records: records)
+
+        if let warning = loadedRecords.warning {
+            storageStatusText = "本地训练记录读取失败，记忆来源信息可能不完整：\(warning)"
+        }
     }
 
     func loadOrCreateToday(readiness: ReadinessResult, date: Date = Date()) {
@@ -248,6 +272,7 @@ final class TodayPersistenceModel: ObservableObject {
             }
             try store.saveMemoryEntries(memoryEntries)
             publishHistory(from: records)
+            publishMemoryReview(from: memoryEntries, records: records)
             if shouldPublishRecord {
                 todayRecord = record
             }
@@ -266,6 +291,7 @@ final class TodayPersistenceModel: ObservableObject {
             storyProgression = oldPublishedProgression
             if didRollback {
                 publishHistory(from: oldRecords)
+                publishMemoryReview(from: oldMemoryEntries, records: oldRecords)
                 storageStatusText = "训练结果保存失败，已尽量恢复本地记录：\(error.localizedDescription)"
             } else {
                 storageStatusText = "训练结果保存失败，且回滚未完全成功：\(error.localizedDescription)"
@@ -276,6 +302,11 @@ final class TodayPersistenceModel: ObservableObject {
     private func publishHistory(from records: [TrainingDayRecord]) {
         historyLoadErrorText = nil
         historyDays = TrainingHistoryBuilder.days(from: records)
+    }
+
+    private func publishMemoryReview(from memories: [MemoryEntry], records: [TrainingDayRecord]) {
+        memoryReviewLoadErrorText = nil
+        memoryReviewEntries = MemoryReviewBuilder.entries(from: memories, records: records)
     }
 
     private func loadSafeTrainingDays() -> [TrainingDayRecord]? {
