@@ -27,6 +27,7 @@
 		01A000000000000000000012 /* TodayPersistenceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000011 /* TodayPersistenceModel.swift */; };
 		01A000000000000000000013 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000012 /* HistoryView.swift */; };
 		01A000000000000000000014 /* FitnessRPGWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000009 /* FitnessRPGWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		01A000000000000000000015 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000013 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +73,7 @@
 		01B000000000000000000010 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
 		01B000000000000000000011 /* TodayPersistenceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayPersistenceModel.swift; sourceTree = "<group>"; };
 		01B000000000000000000012 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		01B000000000000000000013 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +127,7 @@
 				01B000000000000000000003 /* ReadinessPanel.swift */,
 				01B000000000000000000004 /* QuestPanel.swift */,
 				01B000000000000000000005 /* ModelHarnessPanel.swift */,
+				01B000000000000000000013 /* LaunchScreen.storyboard */,
 				01B00000000000000000000C /* FitnessRPG.entitlements */,
 				01E000000000000000000006 /* HealthKit */,
 				01E00000000000000000000A /* History */,
@@ -287,6 +290,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01A000000000000000000015 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -462,6 +466,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Fitness RPG uses Apple Health data to estimate readiness and adapt training intensity.";
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hao.fitnessrpg;
 				PRODUCT_NAME = FitnessRPG;
@@ -481,6 +486,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Fitness RPG uses Apple Health data to estimate readiness and adapt training intensity.";
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hao.fitnessrpg;
 				PRODUCT_NAME = FitnessRPG;
