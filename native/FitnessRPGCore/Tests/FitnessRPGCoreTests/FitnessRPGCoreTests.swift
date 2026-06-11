@@ -108,6 +108,39 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertFalse(context.promptPreview.contains("2026-06-07"))
     }
 
+    func testModelRuntimePromptFormatterBuildsLiteRTLMJsonPrompt() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.yellow)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.calibrationRune.title)
+        let context = ModelRuntimeContextBuilder.context(
+            readiness: readiness,
+            quest: quest,
+            memories: [
+                makeMemoryReviewEntry(
+                    id: "recent-overload",
+                    date: "2026-06-10",
+                    completionLabel: "降阶完成",
+                    draft: "第 2 步过重，已降低强度。",
+                    createdAt: Date(timeIntervalSince1970: 4)
+                )
+            ]
+        )
+
+        let prompt = ModelRuntimePromptFormatter.prompt(for: context)
+
+        XCTAssertTrue(prompt.systemInstruction.contains("只返回 JSON"))
+        XCTAssertTrue(prompt.systemInstruction.contains(#""title""#))
+        XCTAssertTrue(prompt.systemInstruction.contains(#""body""#))
+        XCTAssertTrue(prompt.systemInstruction.contains(#""nextAction""#))
+        XCTAssertTrue(prompt.userMessage.contains("Readiness：\(context.readinessTitle) \(context.readinessScore)"))
+        XCTAssertTrue(prompt.userMessage.contains("Quest：\(quest.title)"))
+        XCTAssertTrue(prompt.userMessage.contains("Watch Steps："))
+        XCTAssertTrue(prompt.userMessage.contains(quest.watchSteps[0].instruction))
+        XCTAssertTrue(prompt.userMessage.contains("Memory：2026-06-10 · 降阶完成"))
+        XCTAssertTrue(prompt.userMessage.contains("非绿灯状态必须降低强度或进入恢复任务。"))
+        XCTAssertTrue(prompt.rawText.contains(prompt.systemInstruction))
+        XCTAssertTrue(prompt.rawText.contains(prompt.userMessage))
+    }
+
     func testModelRuntimeRejectsUnsafeHighIntensityDraftForRedReadiness() {
         let readiness = ReadinessEngine.evaluate(MockHealthProfiles.red)
         let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.recoveryCharm.title)
@@ -195,16 +228,10 @@ final class FitnessRPGCoreTests: XCTestCase {
         let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.calibrationRune.title)
         let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
         let resourceStatus = ModelRuntimeResourcePreflight.evaluate(
-            providerID: "gemma-e2b",
-            displayName: "Gemma E2B Local",
+            providerID: "gemma-4-e2b-litertlm",
+            displayName: "Gemma 4 E2B LiteRT-LM",
             requirements: gemmaResourceRequirements,
-            observations: [
-                ModelRuntimeResourceObservation(
-                    requirementID: "model",
-                    fileName: "gemma-e2b.task",
-                    byteSize: 64_000_000
-                )
-            ]
+            observations: []
         )
         let provider = ResourceBackedModelDraftProvider(resourceStatus: resourceStatus)
 
@@ -212,7 +239,7 @@ final class FitnessRPGCoreTests: XCTestCase {
 
         XCTAssertTrue(response.usedFallback)
         XCTAssertEqual(response.providerDiagnostics?.state, .unavailable)
-        XCTAssertEqual(response.providerDiagnostics?.message, "缺少 Tokenizer：tokenizer.model")
+        XCTAssertEqual(response.providerDiagnostics?.message, "缺少 LiteRT-LM 模型包：gemma-4-E2B-it.litertlm")
         XCTAssertEqual(response.providerDiagnostics?.resourceStatus, resourceStatus)
         XCTAssertTrue(response.validation.issues.contains(.providerUnavailable))
     }
@@ -545,8 +572,8 @@ final class FitnessRPGCoreTests: XCTestCase {
         let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.recoveryCharm.title)
         let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
         let diagnostics = ModelRuntimeProviderDiagnostics(
-            providerID: "gemma-e2b",
-            displayName: "Gemma E2B Local",
+            providerID: "gemma-4-e2b-litertlm",
+            displayName: "Gemma 4 E2B LiteRT-LM",
             state: .ready,
             message: "模型资源与执行 adapter 已就绪"
         )
@@ -575,95 +602,73 @@ final class FitnessRPGCoreTests: XCTestCase {
 
     func testModelRuntimeResourcePreflightReportsReadyResources() {
         let result = ModelRuntimeResourcePreflight.evaluate(
-            providerID: "gemma-e2b",
-            displayName: "Gemma E2B Local",
+            providerID: "gemma-4-e2b-litertlm",
+            displayName: "Gemma 4 E2B LiteRT-LM",
             requirements: gemmaResourceRequirements,
             observations: [
                 ModelRuntimeResourceObservation(
                     requirementID: "model",
-                    fileName: "gemma-e2b.task",
+                    fileName: "gemma-4-E2B-it.litertlm",
                     byteSize: 64_000_000
-                ),
-                ModelRuntimeResourceObservation(
-                    requirementID: "tokenizer",
-                    fileName: "tokenizer.model",
-                    byteSize: 16_384
                 )
             ]
         )
 
         XCTAssertEqual(result.state, .ready)
-        XCTAssertEqual(result.message, "2 个模型资源就绪")
-        XCTAssertEqual(result.statuses.map(\.state), [.ready, .ready])
+        XCTAssertEqual(result.message, "1 个模型资源就绪")
+        XCTAssertEqual(result.statuses.map(\.state), [.ready])
 
         let diagnostics = ModelRuntimeProviderDiagnostics(
-            providerID: "gemma-e2b",
-            displayName: "Gemma E2B Local",
+            providerID: "gemma-4-e2b-litertlm",
+            displayName: "Gemma 4 E2B LiteRT-LM",
             resourceStatus: result
         )
         XCTAssertEqual(diagnostics.state, .ready)
-        XCTAssertEqual(diagnostics.message, "2 个模型资源就绪")
+        XCTAssertEqual(diagnostics.message, "1 个模型资源就绪")
     }
 
-    func testModelRuntimeResourcePreflightReportsMissingTokenizer() {
+    func testModelRuntimeResourcePreflightReportsMissingLiteRTLMContainer() {
         let result = ModelRuntimeResourcePreflight.evaluate(
-            providerID: "gemma-e2b",
-            displayName: "Gemma E2B Local",
+            providerID: "gemma-4-e2b-litertlm",
+            displayName: "Gemma 4 E2B LiteRT-LM",
             requirements: gemmaResourceRequirements,
-            observations: [
-                ModelRuntimeResourceObservation(
-                    requirementID: "model",
-                    fileName: "gemma-e2b.task",
-                    byteSize: 64_000_000
-                )
-            ]
+            observations: []
         )
 
         XCTAssertEqual(result.state, .unavailable)
-        XCTAssertEqual(result.message, "缺少 Tokenizer：tokenizer.model")
-        XCTAssertEqual(result.statuses.first { $0.requirementID == "tokenizer" }?.state, .missing)
+        XCTAssertEqual(result.message, "缺少 LiteRT-LM 模型包：gemma-4-E2B-it.litertlm")
+        XCTAssertEqual(result.statuses.first { $0.requirementID == "model" }?.state, .missing)
     }
 
     func testModelRuntimeResourcePreflightReportsUndersizedModelFile() {
         let result = ModelRuntimeResourcePreflight.evaluate(
-            providerID: "gemma-e2b",
-            displayName: "Gemma E2B Local",
+            providerID: "gemma-4-e2b-litertlm",
+            displayName: "Gemma 4 E2B LiteRT-LM",
             requirements: gemmaResourceRequirements,
             observations: [
                 ModelRuntimeResourceObservation(
                     requirementID: "model",
-                    fileName: "gemma-e2b.task",
+                    fileName: "gemma-4-E2B-it.litertlm",
                     byteSize: 512
-                ),
-                ModelRuntimeResourceObservation(
-                    requirementID: "tokenizer",
-                    fileName: "tokenizer.model",
-                    byteSize: 16_384
                 )
             ]
         )
 
         XCTAssertEqual(result.state, .unavailable)
-        XCTAssertEqual(result.message, "Model 文件过小：512 / 1024 bytes")
+        XCTAssertEqual(result.message, "LiteRT-LM 模型包过小：512 / 1024 bytes")
         XCTAssertEqual(result.statuses.first { $0.requirementID == "model" }?.state, .invalid)
     }
 
     func testModelRuntimeDiagnosticsIncludesResourcePreflightRow() {
         let resourceStatus = ModelRuntimeResourcePreflight.evaluate(
-            providerID: "gemma-e2b",
-            displayName: "Gemma E2B Local",
+            providerID: "gemma-4-e2b-litertlm",
+            displayName: "Gemma 4 E2B LiteRT-LM",
             requirements: gemmaResourceRequirements,
-            observations: [
-                ModelRuntimeResourceObservation(
-                    requirementID: "model",
-                    fileName: "gemma-e2b.task",
-                    byteSize: 64_000_000
-                )
-            ]
+            observations: []
         )
         let diagnostics = ModelRuntimeProviderDiagnostics(
-            providerID: "gemma-e2b",
-            displayName: "Gemma E2B Local",
+            providerID: "gemma-4-e2b-litertlm",
+            displayName: "Gemma 4 E2B LiteRT-LM",
             resourceStatus: resourceStatus
         )
 
@@ -675,27 +680,27 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(summary.headline, "本地模型 Provider 不可用")
         XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
             title: "资源",
-            value: "缺少 Tokenizer：tokenizer.model",
+            value: "缺少 LiteRT-LM 模型包：gemma-4-E2B-it.litertlm",
             systemImageName: "externaldrive.fill"
         )))
     }
 
     func testModelRuntimeDiagnosticsIncludesEachResourceStatusRow() {
         let resourceStatus = ModelRuntimeResourcePreflight.evaluate(
-            providerID: "gemma-e2b",
-            displayName: "Gemma E2B Local",
+            providerID: "gemma-4-e2b-litertlm",
+            displayName: "Gemma 4 E2B LiteRT-LM",
             requirements: ModelRuntimeResourceCatalog.gemmaE2B.requirements,
             observations: [
                 ModelRuntimeResourceObservation(
                     requirementID: "model",
-                    fileName: "ModelResources/gemma-e2b.task",
+                    fileName: "ModelResources/gemma-4-E2B-it.litertlm",
                     byteSize: 512
                 )
             ]
         )
         let diagnostics = ModelRuntimeProviderDiagnostics(
-            providerID: "gemma-e2b",
-            displayName: "Gemma E2B Local",
+            providerID: "gemma-4-e2b-litertlm",
+            displayName: "Gemma 4 E2B LiteRT-LM",
             resourceStatus: resourceStatus
         )
 
@@ -705,14 +710,9 @@ final class FitnessRPGCoreTests: XCTestCase {
         )
 
         XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
-            title: "资源 · Model 文件",
-            value: "Model 文件过小：512 / 1024 bytes",
+            title: "资源 · LiteRT-LM 模型包",
+            value: "LiteRT-LM 模型包过小：512 / 1024 bytes",
             systemImageName: "exclamationmark.triangle.fill"
-        )))
-        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
-            title: "资源 · Tokenizer 文件",
-            value: "缺少 Tokenizer 文件：ModelResources/tokenizer.model",
-            systemImageName: "xmark.circle.fill"
         )))
     }
 
@@ -720,21 +720,15 @@ final class FitnessRPGCoreTests: XCTestCase {
         let observations = ModelRuntimeResourceObservationBuilder.observations(
             requirements: gemmaResourceRequirements,
             files: [
-                ModelRuntimeResourceFileSnapshot(fileName: "gemma-e2b.task", byteSize: 64_000_000),
-                ModelRuntimeResourceFileSnapshot(fileName: "tokenizer.model", byteSize: 16_384)
+                ModelRuntimeResourceFileSnapshot(fileName: "gemma-4-E2B-it.litertlm", byteSize: 64_000_000)
             ]
         )
 
         XCTAssertEqual(observations, [
             ModelRuntimeResourceObservation(
                 requirementID: "model",
-                fileName: "gemma-e2b.task",
+                fileName: "gemma-4-E2B-it.litertlm",
                 byteSize: 64_000_000
-            ),
-            ModelRuntimeResourceObservation(
-                requirementID: "tokenizer",
-                fileName: "tokenizer.model",
-                byteSize: 16_384
             )
         ])
     }
@@ -744,14 +738,14 @@ final class FitnessRPGCoreTests: XCTestCase {
             requirements: gemmaResourceRequirements,
             files: [
                 ModelRuntimeResourceFileSnapshot(fileName: "unused.bin", byteSize: 4_096),
-                ModelRuntimeResourceFileSnapshot(fileName: "gemma-e2b.task", byteSize: 64_000_000)
+                ModelRuntimeResourceFileSnapshot(fileName: "gemma-4-E2B-it.litertlm", byteSize: 64_000_000)
             ]
         )
 
         XCTAssertEqual(observations, [
             ModelRuntimeResourceObservation(
                 requirementID: "model",
-                fileName: "gemma-e2b.task",
+                fileName: "gemma-4-E2B-it.litertlm",
                 byteSize: 64_000_000
             )
         ])
@@ -760,22 +754,15 @@ final class FitnessRPGCoreTests: XCTestCase {
     func testModelRuntimeResourceCatalogDefinesGemmaE2BBundleRequirements() {
         let profile = ModelRuntimeResourceCatalog.gemmaE2B
 
-        XCTAssertEqual(profile.providerID, "gemma-e2b")
-        XCTAssertEqual(profile.displayName, "Gemma E2B Local")
+        XCTAssertEqual(profile.providerID, "gemma-4-e2b-litertlm")
+        XCTAssertEqual(profile.displayName, "Gemma 4 E2B LiteRT-LM")
         XCTAssertEqual(profile.requirements, [
             ModelRuntimeResourceRequirement(
                 id: "model",
-                displayName: "Model 文件",
+                displayName: "LiteRT-LM 模型包",
                 kind: .model,
-                fileName: "ModelResources/gemma-e2b.task",
+                fileName: "ModelResources/gemma-4-E2B-it.litertlm",
                 minimumByteSize: 1_024
-            ),
-            ModelRuntimeResourceRequirement(
-                id: "tokenizer",
-                displayName: "Tokenizer 文件",
-                kind: .tokenizer,
-                fileName: "ModelResources/tokenizer.model",
-                minimumByteSize: 1
             )
         ])
     }
@@ -2066,36 +2053,24 @@ final class FitnessRPGCoreTests: XCTestCase {
         [
             ModelRuntimeResourceRequirement(
                 id: "model",
-                displayName: "Model",
+                displayName: "LiteRT-LM 模型包",
                 kind: .model,
-                fileName: "gemma-e2b.task",
+                fileName: "gemma-4-E2B-it.litertlm",
                 minimumByteSize: 1_024
-            ),
-            ModelRuntimeResourceRequirement(
-                id: "tokenizer",
-                displayName: "Tokenizer",
-                kind: .tokenizer,
-                fileName: "tokenizer.model",
-                minimumByteSize: 1
             )
         ]
     }
 
     private var readyGemmaResourceStatus: ModelRuntimeResourcePreflightResult {
         ModelRuntimeResourcePreflight.evaluate(
-            providerID: "gemma-e2b",
-            displayName: "Gemma E2B Local",
+            providerID: "gemma-4-e2b-litertlm",
+            displayName: "Gemma 4 E2B LiteRT-LM",
             requirements: gemmaResourceRequirements,
             observations: [
                 ModelRuntimeResourceObservation(
                     requirementID: "model",
-                    fileName: "gemma-e2b.task",
+                    fileName: "gemma-4-E2B-it.litertlm",
                     byteSize: 64_000_000
-                ),
-                ModelRuntimeResourceObservation(
-                    requirementID: "tokenizer",
-                    fileName: "tokenizer.model",
-                    byteSize: 16_384
                 )
             ]
         )

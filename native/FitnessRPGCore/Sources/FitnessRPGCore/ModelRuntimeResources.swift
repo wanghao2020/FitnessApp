@@ -53,22 +53,15 @@ public struct ModelRuntimeResourceProfile: Codable, Equatable, Sendable {
 
 public enum ModelRuntimeResourceCatalog {
     public static let gemmaE2B = ModelRuntimeResourceProfile(
-        providerID: "gemma-e2b",
-        displayName: "Gemma E2B Local",
+        providerID: "gemma-4-e2b-litertlm",
+        displayName: "Gemma 4 E2B LiteRT-LM",
         requirements: [
             ModelRuntimeResourceRequirement(
                 id: "model",
-                displayName: "Model 文件",
+                displayName: "LiteRT-LM 模型包",
                 kind: .model,
-                fileName: "ModelResources/gemma-e2b.task",
+                fileName: "ModelResources/gemma-4-E2B-it.litertlm",
                 minimumByteSize: 1_024
-            ),
-            ModelRuntimeResourceRequirement(
-                id: "tokenizer",
-                displayName: "Tokenizer 文件",
-                kind: .tokenizer,
-                fileName: "ModelResources/tokenizer.model",
-                minimumByteSize: 1
             )
         ]
     )
@@ -236,7 +229,7 @@ public enum ModelRuntimeResourcePreflight {
     }
 
     private static func undersizedDetailName(for requirement: ModelRuntimeResourceRequirement) -> String {
-        if requirement.displayName.hasSuffix("文件") {
+        if requirement.displayName.hasSuffix("文件") || requirement.displayName.hasSuffix("包") {
             return requirement.displayName
         }
 

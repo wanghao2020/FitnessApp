@@ -12,13 +12,17 @@ struct LocalModelResourceBundleObserver {
         bundle: Bundle = .main,
         fileManager: FileManager = .default,
         profile: ModelRuntimeResourceProfile = ModelRuntimeResourceCatalog.gemmaE2B,
-        adapter: any GemmaLocalModelAdapting = GemmaLocalModelAdapter(),
+        adapter: (any GemmaLocalModelAdapting)? = nil,
         resourceStatusOverride: ModelRuntimeResourcePreflightResult? = nil
     ) {
         self.bundle = bundle
         self.fileManager = fileManager
         self.profile = profile
-        self.adapter = adapter
+        self.adapter = adapter ?? GemmaLocalModelAdapter(
+            bundle: bundle,
+            fileManager: fileManager,
+            profile: profile
+        )
         self.resourceStatusOverride = resourceStatusOverride
     }
 

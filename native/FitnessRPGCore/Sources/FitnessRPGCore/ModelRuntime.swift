@@ -140,6 +140,60 @@ public enum ModelRuntimeContextBuilder {
     }
 }
 
+public struct ModelRuntimePrompt: Codable, Equatable, Sendable {
+    public let systemInstruction: String
+    public let userMessage: String
+
+    public init(systemInstruction: String, userMessage: String) {
+        self.systemInstruction = systemInstruction
+        self.userMessage = userMessage
+    }
+
+    public var rawText: String {
+        """
+        \(systemInstruction)
+
+        \(userMessage)
+        """
+    }
+}
+
+public enum ModelRuntimePromptFormatter {
+    public static func prompt(for context: ModelRuntimeContext) -> ModelRuntimePrompt {
+        let systemInstruction = """
+        你是 Fitness RPG 的本地教练模型。只返回 JSON，不要输出 Markdown 或额外解释。
+        JSON schema: {"title":"短中文标题","body":"短中文教练文案","nextAction":"下一步动作"}
+        必须遵守安全规则，不生成原始 HealthKit、WatchConnectivity 或个人敏感数据。
+        如果 readiness 不是绿灯，必须降低强度、强调恢复或保守执行。
+        """
+
+        let watchStepLines = context.watchStepSummaries.isEmpty
+            ? ["- 暂无 Watch steps"]
+            : context.watchStepSummaries.map { "- \($0)" }
+        let memoryLines = context.recentMemories.isEmpty
+            ? ["Memory：暂无可用记忆"]
+            : context.recentMemories.map { memory in
+                "Memory：\(memory.date) · \(memory.completionLabel) · \(memory.storyNodeTitle) · \(memory.draft)"
+            }
+        let safetyLines = context.safetyRules.map { "- \($0)" }
+
+        let userMessage = ([
+            "Readiness：\(context.readinessTitle) \(context.readinessScore) · \(context.safetyGuidance)",
+            "Quest：\(context.questTitle) · \(context.questDifficulty) · \(context.questObjective)",
+            "Story：\(context.storyNode)",
+            "Watch Steps："
+        ] + watchStepLines + [
+            "Memory："
+        ] + memoryLines + [
+            "Safety Rules："
+        ] + safetyLines + [
+            "Output：返回一个 JSON object，字段只能包含 title、body、nextAction。"
+        ]).joined(separator: "\n")
+
+        return ModelRuntimePrompt(systemInstruction: systemInstruction, userMessage: userMessage)
+    }
+}
+
 public struct ModelRuntimeDraft: Codable, Equatable, Sendable {
     public let title: String
     public let body: String
