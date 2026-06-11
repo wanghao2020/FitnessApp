@@ -419,14 +419,14 @@ final class FitnessRPGCoreTests: XCTestCase {
                 id: "model",
                 displayName: "Model 文件",
                 kind: .model,
-                fileName: "gemma-e2b.task",
+                fileName: "ModelResources/gemma-e2b.task",
                 minimumByteSize: 1_024
             ),
             ModelRuntimeResourceRequirement(
                 id: "tokenizer",
                 displayName: "Tokenizer 文件",
                 kind: .tokenizer,
-                fileName: "tokenizer.model",
+                fileName: "ModelResources/tokenizer.model",
                 minimumByteSize: 1
             )
         ])

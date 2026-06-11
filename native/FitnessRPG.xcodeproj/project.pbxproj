@@ -31,6 +31,7 @@
 		01A000000000000000000016 /* MemoryReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000014 /* MemoryReviewView.swift */; };
 		01A000000000000000000017 /* WatchConnectivityDiagnosticsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000015 /* WatchConnectivityDiagnosticsPanel.swift */; };
 		01A000000000000000000018 /* LocalModelResourceBundleObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000016 /* LocalModelResourceBundleObserver.swift */; };
+		01A000000000000000000019 /* ModelResources in Resources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000017 /* ModelResources */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,6 +81,7 @@
 		01B000000000000000000014 /* MemoryReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryReviewView.swift; sourceTree = "<group>"; };
 		01B000000000000000000015 /* WatchConnectivityDiagnosticsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityDiagnosticsPanel.swift; sourceTree = "<group>"; };
 		01B000000000000000000016 /* LocalModelResourceBundleObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalModelResourceBundleObserver.swift; sourceTree = "<group>"; };
+		01B000000000000000000017 /* ModelResources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ModelResources; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,6 +220,7 @@
 			isa = PBXGroup;
 			children = (
 				01B000000000000000000016 /* LocalModelResourceBundleObserver.swift */,
+				01B000000000000000000017 /* ModelResources */,
 			);
 			path = ModelRuntime;
 			sourceTree = "<group>";
@@ -316,6 +319,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				01A000000000000000000015 /* LaunchScreen.storyboard in Resources */,
+				01A000000000000000000019 /* ModelResources in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
