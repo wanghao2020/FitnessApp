@@ -453,6 +453,40 @@ final class FitnessRPGCoreTests: XCTestCase {
         )))
     }
 
+    func testModelRuntimeDiagnosticsIncludesRunDraftSummaryRows() async {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let provider = ResourceBackedModelDraftProvider(
+            resourceStatus: readyGemmaResourceStatus,
+            draftGenerator: { _ in
+                ModelRuntimeDraft(
+                    title: "Gemma 草稿",
+                    body: "保持稳定节奏，按 Watch 步骤完成今日训练。",
+                    nextAction: "发送到 Watch"
+                )
+            }
+        )
+
+        let response = await ModelRuntimeRunner.response(context: context, provider: provider)
+        let summary = ModelRuntimeDiagnosticsBuilder.summary(
+            providerDiagnostics: response.providerDiagnostics!,
+            response: response
+        )
+
+        XCTAssertFalse(response.usedFallback)
+        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
+            title: "草稿",
+            value: "Gemma 草稿",
+            systemImageName: "sparkles"
+        )))
+        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
+            title: "下一步",
+            value: "发送到 Watch",
+            systemImageName: "arrow.right.circle.fill"
+        )))
+    }
+
     func testModelRuntimeDiagnosticsShowsParsingFailureReason() async {
         let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
         let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)

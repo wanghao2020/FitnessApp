@@ -61,6 +61,7 @@ The iOS target includes a read-only HealthKit MVP that maps available Apple Heal
 The native app now includes a first-pass WatchConnectivity sync layer. The iOS app can package the current `DailyQuest` into a versioned Core payload and send it to the watchOS app; the watchOS app records `ExecutionLog` feedback and returns it to iPhone for deterministic `ExecutionEngine` resolution. When WatchConnectivity is unavailable, both app surfaces keep safe fallback behavior.
 
 DEBUG builds can show WatchConnectivity and local model Runtime diagnostics from `--fitnessrpg-show-diagnostics`. These panels separate Watch session support, activation, pairing, reachability, model provider status, Bundle model resource preflight, per-file model/tokenizer resource rows, validator state, and fallback paths so device testing has a clear checklist.
+After a Runtime response executes, the panel also shows the generated draft title and next action for quick output inspection.
 
 DEBUG model Runtime fixture launch arguments can also simulate ready output, parsing failure, adapter failure, and validator fallback without real model files. Use them together with `--fitnessrpg-show-diagnostics` when validating the Runtime panel.
 

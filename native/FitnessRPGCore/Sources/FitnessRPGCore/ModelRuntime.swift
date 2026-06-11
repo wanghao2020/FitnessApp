@@ -464,6 +464,21 @@ public enum ModelRuntimeDiagnosticsBuilder {
             )
         ])
 
+        if let response {
+            rows.append(contentsOf: [
+                ModelRuntimeDiagnosticsRow(
+                    title: "草稿",
+                    value: response.draft.title,
+                    systemImageName: "sparkles"
+                ),
+                ModelRuntimeDiagnosticsRow(
+                    title: "下一步",
+                    value: response.draft.nextAction,
+                    systemImageName: "arrow.right.circle.fill"
+                )
+            ])
+        }
+
         return ModelRuntimeDiagnosticsSummary(
             headline: presentation.headline,
             detail: presentation.detail,

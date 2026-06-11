@@ -18,6 +18,7 @@ The shared core includes deterministic mock health profiles, readiness evaluatio
 The current native pass also includes first-pass WatchConnectivity source adapters. iOS sends versioned quest payloads derived from `ReadinessEngine` and `QuestEngine`; watchOS receives those payloads, records step feedback as `ExecutionLog` values, and sends logs back for `ExecutionEngine` resolution on iPhone. The iOS target embeds the watchOS app in `FitnessRPG.app/Watch`, and the watchOS target declares `com.hao.fitnessrpg` as its companion bundle identifier.
 
 DEBUG diagnostics can also show WatchConnectivity support, activation, pairing, Watch App installation, reachability, recent send/receive path, local model Runtime provider status, Bundle resource preflight, per-file model/tokenizer resource rows, validator state, and fallback paths from the Today surface.
+When a Runtime response has executed, the panel also shows the resulting draft title and next action so model, fixture, and fallback runs can be inspected without opening logs.
 
 DEBUG builds also support local model Runtime fixture launch arguments. These simulate ready resources and deterministic adapter output without linking LiteRT/Gemma or packaging model files, so the Runtime panel can exercise ready, parsing failure, adapter failure, and validator fallback paths.
 
