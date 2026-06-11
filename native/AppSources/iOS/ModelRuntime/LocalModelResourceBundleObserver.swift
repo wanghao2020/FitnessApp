@@ -16,18 +16,20 @@ struct LocalModelResourceBundleObserver {
         self.profile = profile
     }
 
+    var provider: ResourceBackedModelDraftProvider {
+        ResourceBackedModelDraftProvider(resourceStatus: resourceStatus)
+    }
+
     var diagnostics: ModelRuntimeProviderDiagnostics {
-        let preflight = ModelRuntimeResourcePreflight.evaluate(
+        provider.diagnostics
+    }
+
+    private var resourceStatus: ModelRuntimeResourcePreflightResult {
+        ModelRuntimeResourcePreflight.evaluate(
             providerID: profile.providerID,
             displayName: profile.displayName,
             requirements: profile.requirements,
             observations: observations
-        )
-
-        return ModelRuntimeProviderDiagnostics(
-            providerID: profile.providerID,
-            displayName: profile.displayName,
-            resourceStatus: preflight
         )
     }
 

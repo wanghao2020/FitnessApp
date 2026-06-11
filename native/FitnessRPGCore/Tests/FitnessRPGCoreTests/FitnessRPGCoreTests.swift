@@ -190,6 +190,73 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertTrue(response.draft.body.contains("降阶"))
     }
 
+    func testResourceBackedModelDraftProviderFallsBackWhenResourcesMissing() async {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.yellow)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.calibrationRune.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let resourceStatus = ModelRuntimeResourcePreflight.evaluate(
+            providerID: "gemma-e2b",
+            displayName: "Gemma E2B Local",
+            requirements: gemmaResourceRequirements,
+            observations: [
+                ModelRuntimeResourceObservation(
+                    requirementID: "model",
+                    fileName: "gemma-e2b.task",
+                    byteSize: 64_000_000
+                )
+            ]
+        )
+        let provider = ResourceBackedModelDraftProvider(resourceStatus: resourceStatus)
+
+        let response = await ModelRuntimeRunner.response(context: context, provider: provider)
+
+        XCTAssertTrue(response.usedFallback)
+        XCTAssertEqual(response.providerDiagnostics?.state, .unavailable)
+        XCTAssertEqual(response.providerDiagnostics?.message, "缺少 Tokenizer：tokenizer.model")
+        XCTAssertEqual(response.providerDiagnostics?.resourceStatus, resourceStatus)
+        XCTAssertTrue(response.validation.issues.contains(.providerUnavailable))
+    }
+
+    func testResourceBackedModelDraftProviderFallsBackWhenAdapterMissingAfterResourcesReady() async {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let resourceStatus = readyGemmaResourceStatus
+        let provider = ResourceBackedModelDraftProvider(resourceStatus: resourceStatus)
+
+        let response = await ModelRuntimeRunner.response(context: context, provider: provider)
+
+        XCTAssertTrue(response.usedFallback)
+        XCTAssertEqual(response.providerDiagnostics?.state, .unavailable)
+        XCTAssertEqual(response.providerDiagnostics?.message, "模型执行 adapter 未接入")
+        XCTAssertEqual(response.providerDiagnostics?.resourceStatus?.state, .ready)
+        XCTAssertTrue(response.validation.issues.contains(.providerUnavailable))
+    }
+
+    func testResourceBackedModelDraftProviderUsesAdapterDraftWhenResourcesReady() async {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let provider = ResourceBackedModelDraftProvider(
+            resourceStatus: readyGemmaResourceStatus,
+            draftGenerator: { _ in
+                ModelRuntimeDraft(
+                    title: "Gemma 草稿",
+                    body: "保持稳定节奏，按 Watch 步骤完成今日训练。",
+                    nextAction: "发送到 Watch"
+                )
+            }
+        )
+
+        let response = await ModelRuntimeRunner.response(context: context, provider: provider)
+
+        XCTAssertFalse(response.usedFallback)
+        XCTAssertEqual(response.source, .localModel)
+        XCTAssertEqual(response.providerDiagnostics?.state, .ready)
+        XCTAssertEqual(response.providerDiagnostics?.message, "模型资源与执行 adapter 已就绪")
+        XCTAssertEqual(response.draft.title, "Gemma 草稿")
+    }
+
     func testDeterministicModelDraftProviderProducesValidBoundedDraft() async {
         let readiness = ReadinessEngine.evaluate(MockHealthProfiles.red)
         let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.recoveryCharm.title)
@@ -1419,6 +1486,26 @@ final class FitnessRPGCoreTests: XCTestCase {
                 minimumByteSize: 1
             )
         ]
+    }
+
+    private var readyGemmaResourceStatus: ModelRuntimeResourcePreflightResult {
+        ModelRuntimeResourcePreflight.evaluate(
+            providerID: "gemma-e2b",
+            displayName: "Gemma E2B Local",
+            requirements: gemmaResourceRequirements,
+            observations: [
+                ModelRuntimeResourceObservation(
+                    requirementID: "model",
+                    fileName: "gemma-e2b.task",
+                    byteSize: 64_000_000
+                ),
+                ModelRuntimeResourceObservation(
+                    requirementID: "tokenizer",
+                    fileName: "tokenizer.model",
+                    byteSize: 16_384
+                )
+            ]
+        )
     }
 }
 

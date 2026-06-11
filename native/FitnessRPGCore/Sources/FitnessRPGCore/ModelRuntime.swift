@@ -531,6 +531,8 @@ public protocol ModelDraftProvider: Sendable {
     func draft(for context: ModelRuntimeContext) async throws -> ModelRuntimeDraft
 }
 
+public typealias ModelRuntimeDraftGenerator = @Sendable (ModelRuntimeContext) async throws -> ModelRuntimeDraft
+
 public enum ModelRuntimeRunner {
     public static func response(
         context: ModelRuntimeContext,
@@ -568,6 +570,62 @@ public enum ModelRuntimeRunner {
                 providerDiagnostics: failedDiagnostics,
                 additionalIssues: [.providerFailed]
             )
+        }
+    }
+}
+
+public struct ResourceBackedModelDraftProvider: ModelDraftProvider {
+    public let diagnostics: ModelRuntimeProviderDiagnostics
+    private let draftGenerator: ModelRuntimeDraftGenerator?
+
+    public init(
+        resourceStatus: ModelRuntimeResourcePreflightResult,
+        draftGenerator: ModelRuntimeDraftGenerator? = nil
+    ) {
+        self.draftGenerator = draftGenerator
+
+        guard resourceStatus.state == .ready else {
+            diagnostics = ModelRuntimeProviderDiagnostics(
+                providerID: resourceStatus.providerID,
+                displayName: resourceStatus.displayName,
+                resourceStatus: resourceStatus
+            )
+            return
+        }
+
+        guard draftGenerator != nil else {
+            diagnostics = ModelRuntimeProviderDiagnostics(
+                providerID: resourceStatus.providerID,
+                displayName: resourceStatus.displayName,
+                state: .unavailable,
+                message: "模型执行 adapter 未接入",
+                resourceStatus: resourceStatus
+            )
+            return
+        }
+
+        diagnostics = ModelRuntimeProviderDiagnostics(
+            providerID: resourceStatus.providerID,
+            displayName: resourceStatus.displayName,
+            state: .ready,
+            message: "模型资源与执行 adapter 已就绪",
+            resourceStatus: resourceStatus
+        )
+    }
+
+    public func draft(for context: ModelRuntimeContext) async throws -> ModelRuntimeDraft {
+        guard diagnostics.state == .ready, let draftGenerator else {
+            throw ResourceBackedModelProviderError(message: diagnostics.message)
+        }
+
+        return try await draftGenerator(context)
+    }
+
+    private struct ResourceBackedModelProviderError: Error, LocalizedError, Sendable {
+        let message: String
+
+        var errorDescription: String? {
+            message
         }
     }
 }
