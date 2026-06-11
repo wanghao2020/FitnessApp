@@ -221,7 +221,7 @@ public enum ModelRuntimeResourcePreflight {
                 kind: requirement.kind,
                 fileName: observation.fileName,
                 state: .invalid,
-                detail: "\(requirement.displayName) 文件过小：\(observation.byteSize) / \(requirement.minimumByteSize) bytes"
+                detail: "\(undersizedDetailName(for: requirement))过小：\(observation.byteSize) / \(requirement.minimumByteSize) bytes"
             )
         }
 
@@ -233,5 +233,13 @@ public enum ModelRuntimeResourcePreflight {
             state: .ready,
             detail: "\(requirement.displayName) 已就绪：\(observation.fileName)"
         )
+    }
+
+    private static func undersizedDetailName(for requirement: ModelRuntimeResourceRequirement) -> String {
+        if requirement.displayName.hasSuffix("文件") {
+            return requirement.displayName
+        }
+
+        return "\(requirement.displayName) 文件"
     }
 }

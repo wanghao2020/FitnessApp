@@ -414,6 +414,13 @@ public enum ModelRuntimeDiagnosticsBuilder {
                 value: resourceStatus.message,
                 systemImageName: "externaldrive.fill"
             ))
+            rows.append(contentsOf: resourceStatus.statuses.map { status in
+                ModelRuntimeDiagnosticsRow(
+                    title: "资源 · \(status.displayName)",
+                    value: status.detail,
+                    systemImageName: resourceSystemImageName(for: status.state)
+                )
+            })
         }
 
         rows.append(contentsOf: [
@@ -494,6 +501,17 @@ public enum ModelRuntimeDiagnosticsBuilder {
             return "不可用"
         case .failed:
             return "失败"
+        }
+    }
+
+    private static func resourceSystemImageName(for state: ModelRuntimeResourceState) -> String {
+        switch state {
+        case .ready:
+            return "checkmark.circle.fill"
+        case .missing:
+            return "xmark.circle.fill"
+        case .invalid:
+            return "exclamationmark.triangle.fill"
         }
     }
 

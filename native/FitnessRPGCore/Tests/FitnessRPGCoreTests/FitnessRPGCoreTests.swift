@@ -368,6 +368,42 @@ final class FitnessRPGCoreTests: XCTestCase {
         )))
     }
 
+    func testModelRuntimeDiagnosticsIncludesEachResourceStatusRow() {
+        let resourceStatus = ModelRuntimeResourcePreflight.evaluate(
+            providerID: "gemma-e2b",
+            displayName: "Gemma E2B Local",
+            requirements: ModelRuntimeResourceCatalog.gemmaE2B.requirements,
+            observations: [
+                ModelRuntimeResourceObservation(
+                    requirementID: "model",
+                    fileName: "ModelResources/gemma-e2b.task",
+                    byteSize: 512
+                )
+            ]
+        )
+        let diagnostics = ModelRuntimeProviderDiagnostics(
+            providerID: "gemma-e2b",
+            displayName: "Gemma E2B Local",
+            resourceStatus: resourceStatus
+        )
+
+        let summary = ModelRuntimeDiagnosticsBuilder.summary(
+            providerDiagnostics: diagnostics,
+            response: nil
+        )
+
+        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
+            title: "资源 · Model 文件",
+            value: "Model 文件过小：512 / 1024 bytes",
+            systemImageName: "exclamationmark.triangle.fill"
+        )))
+        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
+            title: "资源 · Tokenizer 文件",
+            value: "缺少 Tokenizer 文件：ModelResources/tokenizer.model",
+            systemImageName: "xmark.circle.fill"
+        )))
+    }
+
     func testModelRuntimeResourceObservationBuilderMatchesRequirementFileNames() {
         let observations = ModelRuntimeResourceObservationBuilder.observations(
             requirements: gemmaResourceRequirements,
