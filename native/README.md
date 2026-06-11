@@ -21,6 +21,8 @@ DEBUG diagnostics can also show WatchConnectivity support, activation, pairing, 
 
 The iOS target now owns local durable state through a JSON persistence store. It restores the same daily quest for the local day, persists Watch execution logs and resolved workout results, stores memory drafts, and advances deterministic RPG story progression. History and Memory Review expose those persisted records in the app. The watchOS target stays non-persistent in this pass.
 
+The shared core also includes a local model runtime scaffold. It turns current readiness, the active quest, and recent Memory Review entries into bounded prompt context, validates draft coach text for safety, and returns deterministic fallback copy when model output is missing or unsafe. No LiteRT-LM / Gemma SDK or model file is linked in this pass.
+
 ## HealthKit MVP
 
 The iOS target requests read-only HealthKit access for sleep, heart-rate, activity, and workout signals. The app maps available samples into `HealthSummary` and falls back to conservative yellow readiness when HealthKit is unavailable, denied, or incomplete. Fallback states now publish a structured source-status notice so Today can distinguish unsupported devices, unfinished authorization, and missing signal coverage.
@@ -45,7 +47,7 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 
 - Real-device WatchConnectivity validation can harden diagnostics copy after paired-device testing.
 - HealthKit permission and data-coverage copy can be validated on real devices before adding deeper onboarding.
-- LiteRT-LM / Gemma adapter can use persisted Memory Review entries before deterministic safety validation.
+- LiteRT-LM / Gemma adapter can plug into the Core runtime scaffold behind deterministic safety validation.
 
 ## Verification
 

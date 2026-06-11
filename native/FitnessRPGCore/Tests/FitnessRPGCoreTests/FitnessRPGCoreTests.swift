@@ -84,6 +84,77 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertTrue(harness.promptPreview.contains("禁用远程"))
     }
 
+    func testModelRuntimeContextUsesNewestBoundedMemoryReviewEntries() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)
+        let entries = [
+            makeMemoryReviewEntry(id: "oldest", date: "2026-06-07", createdAt: Date(timeIntervalSince1970: 1)),
+            makeMemoryReviewEntry(id: "newest", date: "2026-06-10", createdAt: Date(timeIntervalSince1970: 4)),
+            makeMemoryReviewEntry(id: "middle", date: "2026-06-09", createdAt: Date(timeIntervalSince1970: 3)),
+            makeMemoryReviewEntry(id: "older", date: "2026-06-08", createdAt: Date(timeIntervalSince1970: 2))
+        ]
+
+        let context = ModelRuntimeContextBuilder.context(
+            readiness: readiness,
+            quest: quest,
+            memories: entries,
+            maxMemoryCount: 3
+        )
+
+        XCTAssertEqual(context.recentMemories.map(\.date), ["2026-06-10", "2026-06-09", "2026-06-08"])
+        XCTAssertEqual(context.questTitle, quest.title)
+        XCTAssertTrue(context.safetyRules.contains("Watch Payload 必须保持短句、目标、时长和安全提示。"))
+        XCTAssertTrue(context.promptPreview.contains("Memory：2026-06-10"))
+        XCTAssertFalse(context.promptPreview.contains("2026-06-07"))
+    }
+
+    func testModelRuntimeRejectsUnsafeHighIntensityDraftForRedReadiness() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.red)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.recoveryCharm.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let unsafeDraft = ModelRuntimeDraft(
+            title: "冲刺 PR 挑战",
+            body: "今天直接冲刺最大重量，突破 PR。",
+            nextAction: "发送到 Watch"
+        )
+
+        let response = ModelRuntimeOrchestrator.response(context: context, modelDraft: unsafeDraft)
+
+        XCTAssertTrue(response.usedFallback)
+        XCTAssertEqual(response.source, .deterministicFallback)
+        XCTAssertTrue(response.validation.issues.contains(.unsafeIntensityForReadiness))
+        XCTAssertTrue(response.draft.body.contains("恢复"))
+        XCTAssertTrue(response.draft.nextAction.contains("发送到 Watch"))
+    }
+
+    func testModelRuntimeRequiresDowngradeGuidanceAfterOverloadMemory() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.yellow)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.calibrationRune.title)
+        let context = ModelRuntimeContextBuilder.context(
+            readiness: readiness,
+            quest: quest,
+            memories: [
+                makeMemoryReviewEntry(
+                    id: "downgrade",
+                    date: "2026-06-10",
+                    completionLabel: "已降阶",
+                    draft: "过重信号触发安全降阶。",
+                    createdAt: Date(timeIntervalSince1970: 10)
+                )
+            ]
+        )
+        let unsafeDraft = ModelRuntimeDraft(
+            title: "继续标准训练",
+            body: "今天保持标准训练节奏，完成全部力量循环。",
+            nextAction: "发送到 Watch"
+        )
+
+        let validation = ModelOutputValidator.validate(draft: unsafeDraft, context: context)
+
+        XCTAssertFalse(validation.isValid)
+        XCTAssertTrue(validation.issues.contains(.missingDowngradeAfterOverload))
+    }
+
     func testAppLaunchOptionsOpenHistoryFromArguments() {
         XCTAssertEqual(
             AppLaunchOptions.initialDestination(arguments: ["FitnessRPG"]),
@@ -993,6 +1064,28 @@ final class FitnessRPGCoreTests: XCTestCase {
             storyProgression: progression,
             createdAt: updatedAt,
             updatedAt: updatedAt
+        )
+    }
+
+    private func makeMemoryReviewEntry(
+        id: String,
+        date: String,
+        completionLabel: String = "已完成",
+        draft: String = "训练完成，状态稳定。",
+        createdAt: Date
+    ) -> MemoryReviewEntry {
+        MemoryReviewEntry(
+            id: id,
+            date: date,
+            questTitle: "回声训练厅：力量共振",
+            completionLabel: completionLabel,
+            completionSymbolName: "checkmark.circle.fill",
+            storyNodeTitle: StoryNode.mainTrial.title,
+            storyContextLabel: "\(StoryNode.mainTrial.title) · 标准",
+            sourceSummary: "\(completionLabel) · 3/3 步骤",
+            rewardSummary: "STR +10 / END +12 / CON +6",
+            draft: draft,
+            createdAt: createdAt
         )
     }
 }

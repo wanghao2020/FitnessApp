@@ -64,6 +64,8 @@ DEBUG builds can show a WatchConnectivity diagnostics panel from `--fitnessrpg-s
 
 The native iOS app now has a JSON-backed persistence MVP. iPhone restores the same local-day quest after relaunch, saves Watch-returned execution logs and deterministic workout results, stores memory drafts, and advances lightweight RPG chapter/node progression locally. History and Memory Review surfaces expose persisted training days and memory drafts for review. The watchOS target remains an execution surface and does not write durable history.
 
+The shared core now includes a local model runtime scaffold. It builds bounded context from Today readiness, the current quest, and recent Memory Review entries, then validates draft coach text before it can be accepted. Invalid or missing model output falls back to deterministic safety copy.
+
 See `native/README.md` for native build commands and target structure.
 
 ## Migrated Context
@@ -82,5 +84,5 @@ Recommended sequence:
 
 1. Run paired-device WatchConnectivity validation and tune diagnostics copy from real activation/reachability states.
 2. Validate HealthKit permission and data-coverage copy on real devices, then add onboarding if the fallback notice is not enough.
-3. Integrate local model runtime behind persisted Memory Review context and deterministic validator.
+3. Add a concrete LiteRT-LM / Gemma adapter behind the Core runtime scaffold and deterministic validator.
 4. Add deterministic weekly summaries and next-week plan scaffolding before model-generated weekly copy.
