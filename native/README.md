@@ -21,7 +21,7 @@ DEBUG diagnostics can also show WatchConnectivity support, activation, pairing, 
 
 The iOS target now owns local durable state through a JSON persistence store. It restores the same daily quest for the local day, persists Watch execution logs and resolved workout results, stores memory drafts, and advances deterministic RPG story progression. History and Memory Review expose those persisted records in the app. The watchOS target stays non-persistent in this pass.
 
-The shared core also includes a local model runtime scaffold, adapter boundary, SDK-independent resource preflight layer, resource-backed provider facade, raw text output parser, and a Gemma E2B resource catalog. It turns current readiness, the active quest, and recent Memory Review entries into bounded prompt context, checks provider resource requirements from platform observations, lets future SDK adapters return raw text or structured drafts, validates draft coach text for safety, and returns deterministic fallback copy when model output is missing, unavailable, or unsafe. The iOS DEBUG diagnostics path uses the Core catalog to scan `Bundle.main/ModelResources` for `gemma-e2b.task` and `tokenizer.model`, routes the result through the Core provider facade, then shows resource, adapter, parsing, validator, and fallback signals in the Runtime panel. No LiteRT-LM / Gemma SDK or model file is linked in this pass.
+The shared core also includes a local model runtime scaffold, adapter boundary, SDK-independent resource preflight layer, resource-backed provider facade, raw text output parser, and a Gemma E2B resource catalog. It turns current readiness, the active quest, and recent Memory Review entries into bounded prompt context, checks provider resource requirements from platform observations, lets future SDK adapters return raw text or structured drafts, validates draft coach text for safety, and returns deterministic fallback copy when model output is missing, unavailable, or unsafe. The iOS DEBUG diagnostics path uses the Core catalog to scan `Bundle.main/ModelResources` for `gemma-e2b.task` and `tokenizer.model`, combines that result with the iOS `GemmaLocalModelAdapting` placeholder, routes the result through the Core provider facade, then shows resource, adapter, parsing, validator, and fallback signals in the Runtime panel. No LiteRT-LM / Gemma SDK or model file is linked in this pass.
 
 ## HealthKit MVP
 
@@ -47,7 +47,7 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 
 - Real-device WatchConnectivity validation can harden diagnostics copy after paired-device testing.
 - HealthKit permission and data-coverage copy can be validated on real devices before adding deeper onboarding.
-- LiteRT-LM / Gemma SDK, model resource packaging, and model execution can plug into the Core adapter boundary behind deterministic safety validation.
+- LiteRT-LM / Gemma SDK, model resource packaging, and model execution can plug into `GemmaLocalModelAdapting` behind deterministic Core safety validation.
 
 ## Verification
 

@@ -5,19 +5,36 @@ struct LocalModelResourceBundleObserver {
     let bundle: Bundle
     let fileManager: FileManager
     let profile: ModelRuntimeResourceProfile
+    let adapter: any GemmaLocalModelAdapting
 
     init(
         bundle: Bundle = .main,
         fileManager: FileManager = .default,
-        profile: ModelRuntimeResourceProfile = ModelRuntimeResourceCatalog.gemmaE2B
+        profile: ModelRuntimeResourceProfile = ModelRuntimeResourceCatalog.gemmaE2B,
+        adapter: any GemmaLocalModelAdapting = GemmaLocalModelAdapter()
     ) {
         self.bundle = bundle
         self.fileManager = fileManager
         self.profile = profile
+        self.adapter = adapter
     }
 
     var provider: ResourceBackedModelDraftProvider {
-        ResourceBackedModelDraftProvider(resourceStatus: resourceStatus)
+        let adapter = adapter
+        let textGenerator: ModelRuntimeTextGenerator?
+
+        if adapter.isAvailable {
+            textGenerator = { context in
+                try await adapter.generateText(for: context)
+            }
+        } else {
+            textGenerator = nil
+        }
+
+        return ResourceBackedModelDraftProvider(
+            resourceStatus: resourceStatus,
+            optionalTextGenerator: textGenerator
+        )
     }
 
     var diagnostics: ModelRuntimeProviderDiagnostics {

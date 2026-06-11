@@ -658,6 +658,18 @@ public struct ResourceBackedModelDraftProvider: ModelDraftProvider {
         )
     }
 
+    public init(
+        resourceStatus: ModelRuntimeResourcePreflightResult,
+        optionalTextGenerator: ModelRuntimeTextGenerator?
+    ) {
+        guard let optionalTextGenerator else {
+            self.init(resourceStatus: resourceStatus)
+            return
+        }
+
+        self.init(resourceStatus: resourceStatus, textGenerator: optionalTextGenerator)
+    }
+
     public func draft(for context: ModelRuntimeContext) async throws -> ModelRuntimeDraft {
         guard diagnostics.state == .ready, let draftGenerator else {
             throw ResourceBackedModelProviderError(message: diagnostics.message)

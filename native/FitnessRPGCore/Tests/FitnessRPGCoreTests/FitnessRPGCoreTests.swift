@@ -337,6 +337,51 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(response.providerDiagnostics?.state, .ready)
     }
 
+    func testResourceBackedModelDraftProviderAcceptsOptionalTextGeneratorAdapter() async {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let unavailableProvider = ResourceBackedModelDraftProvider(
+            resourceStatus: readyGemmaResourceStatus,
+            optionalTextGenerator: nil
+        )
+        let availableProvider = ResourceBackedModelDraftProvider(
+            resourceStatus: readyGemmaResourceStatus,
+            optionalTextGenerator: { _ in "保持稳定节奏，按 Watch 步骤完成今日训练。" }
+        )
+
+        let unavailableResponse = await ModelRuntimeRunner.response(context: context, provider: unavailableProvider)
+        let availableResponse = await ModelRuntimeRunner.response(context: context, provider: availableProvider)
+
+        XCTAssertTrue(unavailableResponse.usedFallback)
+        XCTAssertEqual(unavailableResponse.providerDiagnostics?.state, .unavailable)
+        XCTAssertEqual(unavailableResponse.providerDiagnostics?.message, "模型执行 adapter 未接入")
+        XCTAssertFalse(availableResponse.usedFallback)
+        XCTAssertEqual(availableResponse.source, .localModel)
+        XCTAssertEqual(availableResponse.providerDiagnostics?.state, .ready)
+        XCTAssertEqual(availableResponse.draft.title, "本地模型建议")
+    }
+
+    func testResourceBackedModelDraftProviderClassifiesTextGeneratorFailuresAsAdapterFailures() async {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let provider = ResourceBackedModelDraftProvider(
+            resourceStatus: readyGemmaResourceStatus,
+            textGenerator: { _ in
+                throw TestModelRuntimeError(message: "LiteRT/Gemma SDK 尚未接入")
+            }
+        )
+
+        let response = await ModelRuntimeRunner.response(context: context, provider: provider)
+
+        XCTAssertTrue(response.usedFallback)
+        XCTAssertEqual(response.providerDiagnostics?.state, .failed)
+        XCTAssertEqual(response.providerDiagnostics?.message, "LiteRT/Gemma SDK 尚未接入")
+        XCTAssertEqual(response.providerDiagnostics?.failureStage, .adapter)
+        XCTAssertTrue(response.validation.issues.contains(.providerFailed))
+    }
+
     func testDeterministicModelDraftProviderProducesValidBoundedDraft() async {
         let readiness = ReadinessEngine.evaluate(MockHealthProfiles.red)
         let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.recoveryCharm.title)

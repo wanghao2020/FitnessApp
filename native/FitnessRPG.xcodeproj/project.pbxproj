@@ -32,6 +32,7 @@
 		01A000000000000000000017 /* WatchConnectivityDiagnosticsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000015 /* WatchConnectivityDiagnosticsPanel.swift */; };
 		01A000000000000000000018 /* LocalModelResourceBundleObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000016 /* LocalModelResourceBundleObserver.swift */; };
 		01A000000000000000000019 /* ModelResources in Resources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000017 /* ModelResources */; };
+		01A00000000000000000001A /* GemmaLocalModelAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000018 /* GemmaLocalModelAdapter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,6 +83,7 @@
 		01B000000000000000000015 /* WatchConnectivityDiagnosticsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityDiagnosticsPanel.swift; sourceTree = "<group>"; };
 		01B000000000000000000016 /* LocalModelResourceBundleObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalModelResourceBundleObserver.swift; sourceTree = "<group>"; };
 		01B000000000000000000017 /* ModelResources */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ModelResources; sourceTree = "<group>"; };
+		01B000000000000000000018 /* GemmaLocalModelAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GemmaLocalModelAdapter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -219,6 +221,7 @@
 		01E00000000000000000000C /* ModelRuntime */ = {
 			isa = PBXGroup;
 			children = (
+				01B000000000000000000018 /* GemmaLocalModelAdapter.swift */,
 				01B000000000000000000016 /* LocalModelResourceBundleObserver.swift */,
 				01B000000000000000000017 /* ModelResources */,
 			);
@@ -346,6 +349,7 @@
 				01A00000000000000000000B /* HealthKitHealthSummaryProvider.swift in Sources */,
 				01A000000000000000000013 /* HistoryView.swift in Sources */,
 				01A000000000000000000016 /* MemoryReviewView.swift in Sources */,
+				01A00000000000000000001A /* GemmaLocalModelAdapter.swift in Sources */,
 				01A000000000000000000018 /* LocalModelResourceBundleObserver.swift in Sources */,
 				01A000000000000000000017 /* WatchConnectivityDiagnosticsPanel.swift in Sources */,
 				01A000000000000000000012 /* TodayPersistenceModel.swift in Sources */,
