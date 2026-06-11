@@ -60,6 +60,8 @@ The iOS target includes a read-only HealthKit MVP that maps available Apple Heal
 
 The native app now includes a first-pass WatchConnectivity sync layer. The iOS app can package the current `DailyQuest` into a versioned Core payload and send it to the watchOS app; the watchOS app records `ExecutionLog` feedback and returns it to iPhone for deterministic `ExecutionEngine` resolution. When WatchConnectivity is unavailable, both app surfaces keep safe fallback behavior.
 
+DEBUG builds can show a WatchConnectivity diagnostics panel from `--fitnessrpg-show-diagnostics`. The panel separates session support, activation, pairing, Watch App installation, reachability, recent transfer path, and recent errors so paired-device testing has a clear checklist.
+
 The native iOS app now has a JSON-backed persistence MVP. iPhone restores the same local-day quest after relaunch, saves Watch-returned execution logs and deterministic workout results, stores memory drafts, and advances lightweight RPG chapter/node progression locally. History and Memory Review surfaces expose persisted training days and memory drafts for review. The watchOS target remains an execution surface and does not write durable history.
 
 See `native/README.md` for native build commands and target structure.
@@ -78,7 +80,7 @@ These records are context, not runtime app assets.
 
 Recommended sequence:
 
-1. Improve real-device WatchConnectivity diagnostics after paired-device testing.
+1. Run paired-device WatchConnectivity validation and tune diagnostics copy from real activation/reachability states.
 2. Harden HealthKit data coverage, permission UX, diagnostics, and onboarding copy after device testing.
 3. Integrate local model runtime behind persisted Memory Review context and deterministic validator.
 4. Add deterministic weekly summaries and next-week plan scaffolding before model-generated weekly copy.

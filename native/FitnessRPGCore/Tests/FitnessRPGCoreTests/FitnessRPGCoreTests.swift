@@ -831,6 +831,84 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(TrainingHistoryBuilder.days(from: []), [])
     }
 
+    func testWatchConnectivityDiagnosticsSummarizesUnsupportedState() {
+        let snapshot = WatchConnectivityDiagnosticsSnapshot(
+            isSupported: false,
+            activationState: .notActivated,
+            isPaired: false,
+            isWatchAppInstalled: false,
+            isReachable: false
+        )
+
+        let summary = snapshot.summary
+
+        XCTAssertEqual(summary.headline, "WatchConnectivity 不可用")
+        XCTAssertEqual(summary.detail, "当前设备无法建立 iPhone 与 Apple Watch 的同步会话。")
+        XCTAssertEqual(summary.systemImageName, "exclamationmark.triangle.fill")
+        XCTAssertEqual(summary.tintName, "orange")
+        XCTAssertTrue(summary.rows.contains(WatchConnectivityDiagnosticsRow(
+            title: "支持状态",
+            value: "不可用",
+            systemImageName: "iphone.slash"
+        )))
+    }
+
+    func testWatchConnectivityDiagnosticsSummarizesReachableReadyState() {
+        let sentAt = Date(timeIntervalSince1970: 1_717_172_000)
+        let snapshot = WatchConnectivityDiagnosticsSnapshot(
+            isSupported: true,
+            activationState: .activated,
+            isPaired: true,
+            isWatchAppInstalled: true,
+            isReachable: true,
+            lastOutbound: WatchConnectivityTransferRecord(
+                date: sentAt,
+                transport: .message,
+                detail: "回声训练厅：力量共振"
+            )
+        )
+
+        let summary = snapshot.summary
+
+        XCTAssertEqual(summary.headline, "Watch 可实时发送")
+        XCTAssertEqual(summary.systemImageName, "applewatch.radiowaves.left.and.right")
+        XCTAssertEqual(summary.tintName, "green")
+        XCTAssertTrue(summary.detail.contains("sendMessage"))
+        XCTAssertTrue(summary.rows.contains(WatchConnectivityDiagnosticsRow(
+            title: "可达性",
+            value: "实时可达",
+            systemImageName: "dot.radiowaves.left.and.right"
+        )))
+        XCTAssertTrue(summary.rows.contains(WatchConnectivityDiagnosticsRow(
+            title: "最近发送",
+            value: "sendMessage · 回声训练厅：力量共振",
+            systemImageName: "arrow.up.circle.fill"
+        )))
+    }
+
+    func testWatchConnectivityDiagnosticsSummarizesQueuedReadyState() {
+        let snapshot = WatchConnectivityDiagnosticsSnapshot(
+            isSupported: true,
+            activationState: .activated,
+            isPaired: true,
+            isWatchAppInstalled: true,
+            isReachable: false,
+            lastErrorText: "Watch 暂不可达"
+        )
+
+        let summary = snapshot.summary
+
+        XCTAssertEqual(summary.headline, "Watch 已就绪，等待实时可达")
+        XCTAssertEqual(summary.systemImageName, "tray.and.arrow.down.fill")
+        XCTAssertEqual(summary.tintName, "blue")
+        XCTAssertTrue(summary.detail.contains("transferUserInfo"))
+        XCTAssertTrue(summary.rows.contains(WatchConnectivityDiagnosticsRow(
+            title: "最近错误",
+            value: "Watch 暂不可达",
+            systemImageName: "exclamationmark.circle"
+        )))
+    }
+
     private func makeHistoryRecord(
         date: String,
         readinessColor: ReadinessColor,

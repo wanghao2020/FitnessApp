@@ -73,6 +73,10 @@ struct TodayCommandCenterView: View {
                         tint: questReadinessColor.todayTint
                     )
 
+                    if showsDiagnostics {
+                        WatchConnectivityDiagnosticsPanel(snapshot: watchSyncModel.diagnosticsSnapshot)
+                    }
+
                     TodayQuestActionCard(
                         quest: quest,
                         summary: todaySummary,
