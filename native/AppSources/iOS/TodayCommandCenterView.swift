@@ -79,6 +79,16 @@ struct TodayCommandCenterView: View {
         )
     }
 
+    private var realDeviceValidationChecklist: RealDeviceValidationChecklist {
+        RealDeviceValidationChecklistBuilder.summary(
+            watch: watchSyncModel.diagnosticsSnapshot,
+            health: healthDataSourceSnapshot,
+            runtime: modelRuntimeDiagnostics,
+            historyRecordCount: persistenceModel.historyDays.count,
+            hasWeeklyPolishCache: persistenceModel.weeklySummaryPolishEntry != nil
+        )
+    }
+
     private var modelRuntimeResourceObserver: LocalModelResourceBundleObserver {
         #if DEBUG
         if let modelRuntimeFixtureMode {
@@ -105,6 +115,7 @@ struct TodayCommandCenterView: View {
                     }
 
                     if showsDiagnostics {
+                        RealDeviceValidationChecklistPanel(checklist: realDeviceValidationChecklist)
                         ModelRuntimeDiagnosticsPanel(summary: modelRuntimeDiagnostics)
                         WatchConnectivityDiagnosticsPanel(snapshot: watchSyncModel.diagnosticsSnapshot)
                     }
@@ -336,6 +347,80 @@ private struct TodayQuestActionCard: View {
     }
 }
 
+private struct RealDeviceValidationChecklistPanel: View {
+    let checklist: RealDeviceValidationChecklist
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: checklist.systemImageName)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(checklist.tintColor)
+                    .frame(width: 34, height: 34)
+                    .background(checklist.tintColor.opacity(0.14))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("实机验证总览")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Text(checklist.headline)
+                        .font(.subheadline.weight(.semibold))
+                        .lineLimit(2)
+                    Text(checklist.detail)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(checklist.rows) { row in
+                    RealDeviceValidationChecklistRowView(row: row)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("实机验证总览")
+    }
+}
+
+private struct RealDeviceValidationChecklistRowView: View {
+    let row: RealDeviceValidationRow
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: row.systemImageName)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(row.tintColor)
+                .frame(width: 18, height: 18)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text(row.title)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Text(row.state.displayLabel)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(row.tintColor)
+                }
+                Text(row.value)
+                    .font(.footnote)
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(10)
+        .background(.quaternary.opacity(0.7))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
 private struct TodayHealthSourceNoticeCard: View {
     let snapshot: HealthDataSourceSnapshot
 
@@ -561,6 +646,49 @@ private extension HealthDataSourceSnapshot {
             return .red
         default:
             return .accentColor
+        }
+    }
+}
+
+private extension RealDeviceValidationChecklist {
+    var tintColor: Color {
+        switch tintName {
+        case "green":
+            return .green
+        case "blue":
+            return .blue
+        case "orange":
+            return .orange
+        case "red":
+            return .red
+        default:
+            return .accentColor
+        }
+    }
+}
+
+private extension RealDeviceValidationRow {
+    var tintColor: Color {
+        switch state {
+        case .passed:
+            return .green
+        case .pending:
+            return .blue
+        case .needsAction:
+            return .orange
+        }
+    }
+}
+
+private extension RealDeviceValidationState {
+    var displayLabel: String {
+        switch self {
+        case .passed:
+            return "通过"
+        case .pending:
+            return "待验证"
+        case .needsAction:
+            return "需处理"
         }
     }
 }

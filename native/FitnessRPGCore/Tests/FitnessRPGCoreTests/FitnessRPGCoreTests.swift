@@ -2016,6 +2016,100 @@ final class FitnessRPGCoreTests: XCTestCase {
         )))
     }
 
+    func testRealDeviceValidationChecklistSummarizesBlockingRows() {
+        let checklist = RealDeviceValidationChecklistBuilder.summary(
+            watch: .unsupported,
+            health: .authorizationDenied,
+            runtime: ModelRuntimeDiagnosticsSummary(
+                headline: "本地模型 Provider 不可用",
+                detail: "Gemma 4 E2B LiteRT-LM：缺少 LiteRT-LM 模型包。",
+                systemImageName: "exclamationmark.triangle.fill",
+                tintName: "orange",
+                rows: []
+            ),
+            historyRecordCount: 0,
+            hasWeeklyPolishCache: false
+        )
+
+        XCTAssertEqual(checklist.headline, "实机验证还有阻塞项")
+        XCTAssertEqual(checklist.tintName, "orange")
+        XCTAssertEqual(checklist.rows.map(\.state), [.needsAction, .needsAction, .needsAction, .needsAction])
+        XCTAssertTrue(checklist.rows[0].value.contains("真实 iPhone"))
+        XCTAssertTrue(checklist.rows[1].value.contains("下一步 · 权限"))
+        XCTAssertTrue(checklist.rows[2].value.contains("缺少 LiteRT-LM 模型包"))
+        XCTAssertTrue(checklist.rows[3].value.contains("完成 Watch 回传"))
+    }
+
+    func testRealDeviceValidationChecklistSummarizesInProgressRows() {
+        let checklist = RealDeviceValidationChecklistBuilder.summary(
+            watch: WatchConnectivityDiagnosticsSnapshot(
+                isSupported: true,
+                activationState: .activated,
+                isPaired: true,
+                isWatchAppInstalled: true,
+                isReachable: false,
+                lastOutbound: WatchConnectivityTransferRecord(
+                    date: Date(timeIntervalSince1970: 1),
+                    transport: .userInfo,
+                    detail: "灰烬坡道：降阶巡航"
+                )
+            ),
+            health: .loading,
+            runtime: ModelRuntimeDiagnosticsSummary(
+                headline: "本地模型 Provider 就绪",
+                detail: "Fixture provider 已就绪。",
+                systemImageName: "cpu.fill",
+                tintName: "green",
+                rows: []
+            ),
+            historyRecordCount: 2,
+            hasWeeklyPolishCache: false
+        )
+
+        XCTAssertEqual(checklist.headline, "实机验证正在推进")
+        XCTAssertEqual(checklist.tintName, "blue")
+        XCTAssertEqual(checklist.rows.map(\.state), [.pending, .pending, .passed, .pending])
+        XCTAssertTrue(checklist.rows[0].value.contains("在 Watch 完成步骤"))
+        XCTAssertTrue(checklist.rows[3].value.contains("生成周回顾润色"))
+    }
+
+    func testRealDeviceValidationChecklistSummarizesPassedRows() {
+        let checklist = RealDeviceValidationChecklistBuilder.summary(
+            watch: WatchConnectivityDiagnosticsSnapshot(
+                isSupported: true,
+                activationState: .activated,
+                isPaired: true,
+                isWatchAppInstalled: true,
+                isReachable: true,
+                lastOutbound: WatchConnectivityTransferRecord(
+                    date: Date(timeIntervalSince1970: 1),
+                    transport: .message,
+                    detail: "回声训练厅：力量共振"
+                ),
+                lastInbound: WatchConnectivityTransferRecord(
+                    date: Date(timeIntervalSince1970: 2),
+                    transport: .message,
+                    detail: "3/3 步骤"
+                )
+            ),
+            health: .healthKit,
+            runtime: ModelRuntimeDiagnosticsSummary(
+                headline: "本地模型 Provider 就绪",
+                detail: "Gemma 4 E2B LiteRT-LM 已接入 adapter 边界。",
+                systemImageName: "cpu.fill",
+                tintName: "green",
+                rows: []
+            ),
+            historyRecordCount: 3,
+            hasWeeklyPolishCache: true
+        )
+
+        XCTAssertEqual(checklist.headline, "实机验证清单已通过")
+        XCTAssertEqual(checklist.tintName, "green")
+        XCTAssertEqual(checklist.rows.map(\.state), [.passed, .passed, .passed, .passed])
+        XCTAssertTrue(checklist.detail.contains("4/4"))
+    }
+
     private func makeHistoryRecord(
         date: String,
         readinessColor: ReadinessColor,

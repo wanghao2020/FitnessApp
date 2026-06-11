@@ -60,7 +60,7 @@ The iOS target includes a read-only HealthKit MVP that maps available Apple Heal
 
 The native app now includes a first-pass WatchConnectivity sync layer. The iOS app can package the current `DailyQuest` into a versioned Core payload and send it to the watchOS app; the watchOS app records `ExecutionLog` feedback and returns it to iPhone for deterministic `ExecutionEngine` resolution. When WatchConnectivity is unavailable, both app surfaces keep safe fallback behavior.
 
-DEBUG builds can show WatchConnectivity and local model Runtime diagnostics from `--fitnessrpg-show-diagnostics`. These panels separate Watch session support, activation, pairing, reachability, model provider status, Bundle model resource preflight, per-file model/tokenizer resource rows, validator state, and fallback paths so device testing has a clear checklist.
+DEBUG builds can show a real-device validation overview plus WatchConnectivity and local model Runtime diagnostics from `--fitnessrpg-show-diagnostics`. The overview summarizes Watch sync, HealthKit, Runtime, and History weekly polish cache readiness, while the detailed panels separate Watch session support, activation, pairing, reachability, model provider status, Bundle model resource preflight, `.litertlm` resource rows, validator state, and fallback paths.
 After a Runtime response executes, the panel also shows the generated draft title and next action for quick output inspection.
 The WatchConnectivity diagnostics panel also includes device-validation checklist rows for installation, sending, and inbound return so paired-device testing can move from setup to Today send to Watch return without reading console logs first.
 
@@ -89,4 +89,4 @@ Recommended sequence:
 1. Run paired-device WatchConnectivity validation on real hardware: install both targets, launch iOS with `--fitnessrpg-show-diagnostics`, confirm the installation checklist row, send Today to Watch, complete Watch steps, then confirm the inbound checklist row and History write.
 2. Validate the HealthKit permission and data-coverage action rows on real devices, then add deeper onboarding only if those fallback notices are not enough.
 3. Add the LiteRT-LM Swift package and licensed `gemma-4-E2B-it.litertlm` resource, then enable `FITNESSRPG_ENABLE_LITERTLM` for real-device model execution.
-4. Run an end-to-end real-device pass across WatchConnectivity, HealthKit fallback/action rows, Runtime diagnostics, and History weekly polish cache controls.
+4. Run an end-to-end real-device pass using the DEBUG validation overview across WatchConnectivity, HealthKit fallback/action rows, Runtime diagnostics, and History weekly polish cache controls.
