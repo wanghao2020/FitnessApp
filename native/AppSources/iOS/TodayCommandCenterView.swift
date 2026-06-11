@@ -67,7 +67,7 @@ struct TodayCommandCenterView: View {
 
     private var modelRuntimeDiagnostics: ModelRuntimeDiagnosticsSummary {
         ModelRuntimeDiagnosticsBuilder.summary(
-            providerDiagnostics: DeterministicModelDraftProvider().diagnostics,
+            providerDiagnostics: LocalModelResourceBundleObserver().diagnostics,
             response: nil
         )
     }

@@ -368,6 +368,47 @@ final class FitnessRPGCoreTests: XCTestCase {
         )))
     }
 
+    func testModelRuntimeResourceObservationBuilderMatchesRequirementFileNames() {
+        let observations = ModelRuntimeResourceObservationBuilder.observations(
+            requirements: gemmaResourceRequirements,
+            files: [
+                ModelRuntimeResourceFileSnapshot(fileName: "gemma-e2b.task", byteSize: 64_000_000),
+                ModelRuntimeResourceFileSnapshot(fileName: "tokenizer.model", byteSize: 16_384)
+            ]
+        )
+
+        XCTAssertEqual(observations, [
+            ModelRuntimeResourceObservation(
+                requirementID: "model",
+                fileName: "gemma-e2b.task",
+                byteSize: 64_000_000
+            ),
+            ModelRuntimeResourceObservation(
+                requirementID: "tokenizer",
+                fileName: "tokenizer.model",
+                byteSize: 16_384
+            )
+        ])
+    }
+
+    func testModelRuntimeResourceObservationBuilderIgnoresUnmatchedFiles() {
+        let observations = ModelRuntimeResourceObservationBuilder.observations(
+            requirements: gemmaResourceRequirements,
+            files: [
+                ModelRuntimeResourceFileSnapshot(fileName: "unused.bin", byteSize: 4_096),
+                ModelRuntimeResourceFileSnapshot(fileName: "gemma-e2b.task", byteSize: 64_000_000)
+            ]
+        )
+
+        XCTAssertEqual(observations, [
+            ModelRuntimeResourceObservation(
+                requirementID: "model",
+                fileName: "gemma-e2b.task",
+                byteSize: 64_000_000
+            )
+        ])
+    }
+
     func testAppLaunchOptionsOpenHistoryFromArguments() {
         XCTAssertEqual(
             AppLaunchOptions.initialDestination(arguments: ["FitnessRPG"]),

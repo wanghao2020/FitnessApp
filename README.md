@@ -60,11 +60,11 @@ The iOS target includes a read-only HealthKit MVP that maps available Apple Heal
 
 The native app now includes a first-pass WatchConnectivity sync layer. The iOS app can package the current `DailyQuest` into a versioned Core payload and send it to the watchOS app; the watchOS app records `ExecutionLog` feedback and returns it to iPhone for deterministic `ExecutionEngine` resolution. When WatchConnectivity is unavailable, both app surfaces keep safe fallback behavior.
 
-DEBUG builds can show WatchConnectivity and local model Runtime diagnostics from `--fitnessrpg-show-diagnostics`. These panels separate Watch session support, activation, pairing, reachability, model provider status, model resource preflight, validator state, and fallback paths so device testing has a clear checklist.
+DEBUG builds can show WatchConnectivity and local model Runtime diagnostics from `--fitnessrpg-show-diagnostics`. These panels separate Watch session support, activation, pairing, reachability, model provider status, Bundle model resource preflight, validator state, and fallback paths so device testing has a clear checklist.
 
 The native iOS app now has a JSON-backed persistence MVP. iPhone restores the same local-day quest after relaunch, saves Watch-returned execution logs and deterministic workout results, stores memory drafts, and advances lightweight RPG chapter/node progression locally. History and Memory Review surfaces expose persisted training days and memory drafts for review. The watchOS target remains an execution surface and does not write durable history.
 
-The shared core now includes a local model runtime scaffold, adapter boundary, and SDK-independent resource preflight layer. It builds bounded context from Today readiness, the current quest, and recent Memory Review entries, checks provider resource requirements from platform observations, calls an interchangeable draft provider, then validates draft coach text before it can be accepted. Invalid, unavailable, or missing model output falls back to deterministic safety copy.
+The shared core now includes a local model runtime scaffold, adapter boundary, and SDK-independent resource preflight layer. It builds bounded context from Today readiness, the current quest, and recent Memory Review entries, checks provider resource requirements from platform observations, calls an interchangeable draft provider, then validates draft coach text before it can be accepted. The iOS DEBUG diagnostics path now scans `Bundle.main` for `gemma-e2b.task` and `tokenizer.model`; invalid, unavailable, or missing model output falls back to deterministic safety copy.
 
 See `native/README.md` for native build commands and target structure.
 
@@ -84,5 +84,5 @@ Recommended sequence:
 
 1. Run paired-device WatchConnectivity validation and tune diagnostics copy from real activation/reachability states.
 2. Validate HealthKit permission and data-coverage copy on real devices, then add onboarding if the fallback notice is not enough.
-3. Add concrete LiteRT-LM / Gemma SDK, Bundle/file observations, and model execution behind the Core adapter boundary.
+3. Add concrete LiteRT-LM / Gemma SDK, model resource packaging, and model execution behind the Core adapter boundary.
 4. Add deterministic weekly summaries and next-week plan scaffolding before model-generated weekly copy.

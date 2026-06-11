@@ -47,6 +47,40 @@ public struct ModelRuntimeResourceObservation: Codable, Equatable, Sendable {
     }
 }
 
+public struct ModelRuntimeResourceFileSnapshot: Codable, Equatable, Sendable {
+    public let fileName: String
+    public let byteSize: Int
+
+    public init(fileName: String, byteSize: Int) {
+        self.fileName = fileName
+        self.byteSize = max(0, byteSize)
+    }
+}
+
+public enum ModelRuntimeResourceObservationBuilder {
+    public static func observations(
+        requirements: [ModelRuntimeResourceRequirement],
+        files: [ModelRuntimeResourceFileSnapshot]
+    ) -> [ModelRuntimeResourceObservation] {
+        var filesByName: [String: ModelRuntimeResourceFileSnapshot] = [:]
+        for file in files {
+            filesByName[file.fileName] = file
+        }
+
+        return requirements.compactMap { requirement in
+            guard let file = filesByName[requirement.fileName] else {
+                return nil
+            }
+
+            return ModelRuntimeResourceObservation(
+                requirementID: requirement.id,
+                fileName: file.fileName,
+                byteSize: file.byteSize
+            )
+        }
+    }
+}
+
 public struct ModelRuntimeResourceStatus: Codable, Equatable, Identifiable, Sendable {
     public let requirementID: String
     public let displayName: String
