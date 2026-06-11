@@ -1585,6 +1585,70 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(TrainingHistoryBuilder.days(from: []), [])
     }
 
+    func testWeeklyTrainingSummaryBuildsSafetyPlanForMixedWeek() {
+        let records = [
+            makeHistoryRecord(
+                date: "2026-06-03",
+                readinessColor: .green,
+                completionState: .completed,
+                storyNode: .mainTrial,
+                updatedAt: Date(timeIntervalSince1970: 1)
+            ),
+            makeHistoryRecord(
+                date: "2026-06-04",
+                readinessColor: .yellow,
+                completionState: .downgraded,
+                storyNode: .safetyDowngrade,
+                updatedAt: Date(timeIntervalSince1970: 2)
+            ),
+            makeHistoryRecord(
+                date: "2026-06-05",
+                readinessColor: .red,
+                completionState: .skipped,
+                storyNode: .recoveryCharm,
+                updatedAt: Date(timeIntervalSince1970: 3)
+            ),
+            makeHistoryRecord(
+                date: "2026-06-06",
+                readinessColor: .green,
+                completionState: nil,
+                storyNode: .mainTrial,
+                updatedAt: Date(timeIntervalSince1970: 4)
+            )
+        ]
+
+        let summary = WeeklyTrainingSummaryBuilder.summary(from: records)
+
+        XCTAssertEqual(summary.dateRangeLabel, "2026-06-03 - 2026-06-06")
+        XCTAssertEqual(summary.headline, "本周以安全降阶为主")
+        XCTAssertEqual(summary.completionLabel, "完成 1 · 降阶 1 · 跳过 1 · 待执行 1")
+        XCTAssertEqual(summary.readinessLabel, "绿 2 · 黄 1 · 红 1")
+        XCTAssertTrue(summary.detail.contains("已完成 1 天"))
+        XCTAssertTrue(summary.safetyLabel.contains("降阶"))
+        XCTAssertEqual(summary.nextWeekPlanTitle, "下周计划：保守重启")
+        XCTAssertEqual(summary.nextWeekActions, [
+            "前 2 次训练降低一档强度",
+            "任一动作 RPE >= 9 时立即降阶",
+            "保留 1 天恢复或散步任务"
+        ])
+    }
+
+    func testWeeklyTrainingSummaryBuildsEmptyStatePlan() {
+        let summary = WeeklyTrainingSummaryBuilder.summary(from: [])
+
+        XCTAssertEqual(summary.dateRangeLabel, "暂无训练周")
+        XCTAssertEqual(summary.headline, "本周还没有训练记录")
+        XCTAssertEqual(summary.completionLabel, "完成 0 · 降阶 0 · 跳过 0 · 待执行 0")
+        XCTAssertEqual(summary.readinessLabel, "绿 0 · 黄 0 · 红 0")
+        XCTAssertEqual(summary.safetyLabel, "先完成 Watch 任务，再生成周回顾。")
+        XCTAssertEqual(summary.nextWeekPlanTitle, "下周计划：建立基线")
+        XCTAssertEqual(summary.nextWeekActions, [
+            "完成 2 次低风险 Watch 任务",
+            "记录 RPE 和过重信号",
+            "周末回顾 Memory 草稿"
+        ])
+    }
+
     func testWatchConnectivityDiagnosticsSummarizesUnsupportedState() {
         let snapshot = WatchConnectivityDiagnosticsSnapshot(
             isSupported: false,
