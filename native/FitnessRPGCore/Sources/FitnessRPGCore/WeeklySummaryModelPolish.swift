@@ -213,4 +213,14 @@ public enum WeeklySummaryPolishCache {
         )
         return updatedEntries
     }
+
+    public static func removing(
+        summary: WeeklyTrainingSummary,
+        from entries: [WeeklySummaryPolishEntry]
+    ) -> [WeeklySummaryPolishEntry] {
+        let fingerprint = fingerprint(for: summary)
+        return entries.filter { entry in
+            entry.summaryFingerprint != fingerprint
+        }
+    }
 }

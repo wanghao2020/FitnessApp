@@ -113,6 +113,37 @@ final class TodayPersistenceModel: ObservableObject {
         }
     }
 
+    func clearWeeklySummaryPolishEntry() {
+        guard !historyDays.isEmpty else {
+            weeklySummaryPolishEntry = nil
+            return
+        }
+
+        let loadedEntries = store.loadWeeklySummaryPolishEntries()
+        if let warning = loadedEntries.warning {
+            storageStatusText = "本地周回顾润色缓存读取失败：\(warning)"
+            return
+        }
+
+        let summary = weeklyTrainingSummary
+        let updatedEntries = WeeklySummaryPolishCache.removing(
+            summary: summary,
+            from: loadedEntries.value
+        )
+
+        do {
+            if updatedEntries != loadedEntries.value {
+                try store.saveWeeklySummaryPolishEntries(updatedEntries)
+                storageStatusText = statusText("已清除当前周回顾本地模型润色。")
+            } else {
+                storageStatusText = statusText("当前周回顾没有可清除的本地模型润色。")
+            }
+            weeklySummaryPolishEntry = WeeklySummaryPolishCache.entry(for: summary, in: updatedEntries)
+        } catch {
+            storageStatusText = "周回顾本地模型润色清除失败：\(error.localizedDescription)"
+        }
+    }
+
     func reloadMemoryReview() {
         let loadedMemoryEntries = store.loadMemoryEntries()
         if let warning = loadedMemoryEntries.warning {

@@ -1860,6 +1860,46 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(replaced[0].updatedAt, secondDate)
     }
 
+    func testWeeklySummaryPolishCacheRemovesOnlyMatchingSummaryEntry() {
+        let summary = WeeklyTrainingSummary(
+            dateRangeLabel: "2026-06-10 至 2026-06-16",
+            headline: "本周训练稳定完成",
+            detail: "已完成 2 天，降阶 0 天，跳过 0 天，待执行 0 天。",
+            completionLabel: "完成 2 · 降阶 0 · 跳过 0 · 待执行 0",
+            readinessLabel: "绿 2 · 黄 0 · 红 0",
+            safetyLabel: "未记录过重或跳过信号。",
+            nextWeekPlanTitle: "下周计划：稳定推进",
+            nextWeekActions: ["保持 3 次标准 Watch 任务"]
+        )
+        let otherSummary = WeeklyTrainingSummary(
+            dateRangeLabel: "2026-06-03 至 2026-06-09",
+            headline: "上周需要保守推进",
+            detail: "已完成 1 天，降阶 1 天，跳过 0 天，待执行 0 天。",
+            completionLabel: "完成 1 · 降阶 1 · 跳过 0 · 待执行 0",
+            readinessLabel: "绿 1 · 黄 1 · 红 0",
+            safetyLabel: "记录到降阶信号。",
+            nextWeekPlanTitle: "下周计划：降阶巩固",
+            nextWeekActions: ["保留 1 次恢复日"]
+        )
+        let matchingEntry = WeeklySummaryPolishEntry(
+            summary: summary,
+            draft: ModelRuntimeDraft(title: "本周缓存", body: "稳定完成。", nextAction: "查看下周计划"),
+            providerID: "fixture-provider"
+        )
+        let otherEntry = WeeklySummaryPolishEntry(
+            summary: otherSummary,
+            draft: ModelRuntimeDraft(title: "上周缓存", body: "保守推进。", nextAction: "查看降阶计划"),
+            providerID: "fixture-provider"
+        )
+
+        let updatedEntries = WeeklySummaryPolishCache.removing(
+            summary: summary,
+            from: [matchingEntry, otherEntry]
+        )
+
+        XCTAssertEqual(updatedEntries, [otherEntry])
+    }
+
     func testWatchConnectivityDiagnosticsSummarizesUnsupportedState() {
         let snapshot = WatchConnectivityDiagnosticsSnapshot(
             isSupported: false,

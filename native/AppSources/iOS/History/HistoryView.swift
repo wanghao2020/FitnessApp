@@ -11,6 +11,7 @@ struct HistoryView: View {
     let initialDisplay: HistoryInitialDisplay
     let modelRuntimeFixtureMode: ModelRuntimeDebugFixtureMode?
     @State private var weeklyPolishResponse: ModelRuntimeResponse?
+    @State private var isRegeneratingWeeklyPolish = false
 
     init(
         persistenceModel: TodayPersistenceModel,
@@ -53,7 +54,14 @@ struct HistoryView: View {
             Section {
                 WeeklyTrainingSummaryCard(
                     summary: persistenceModel.weeklyTrainingSummary,
-                    polishResponse: weeklyPolishResponse
+                    polishResponse: weeklyPolishResponse,
+                    isRegenerating: isRegeneratingWeeklyPolish,
+                    regenerateAction: {
+                        Task {
+                            await regenerateWeeklyPolish()
+                        }
+                    },
+                    clearAction: clearWeeklyPolishCache
                 )
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 10, trailing: 16))
                     .listRowBackground(Color.clear)
@@ -95,13 +103,14 @@ struct HistoryView: View {
     }
 
     @MainActor
-    private func refreshWeeklyPolishResponse() async {
+    private func refreshWeeklyPolishResponse(ignoringCache: Bool = false) async {
         guard !persistenceModel.historyDays.isEmpty else {
             weeklyPolishResponse = nil
             return
         }
 
-        if let cachedResponse = persistenceModel.weeklySummaryPolishEntry?.modelRuntimeResponse {
+        if !ignoringCache,
+           let cachedResponse = persistenceModel.weeklySummaryPolishEntry?.modelRuntimeResponse {
             weeklyPolishResponse = cachedResponse
             return
         }
@@ -117,11 +126,33 @@ struct HistoryView: View {
             weeklyPolishResponse = nil
         }
     }
+
+    @MainActor
+    private func regenerateWeeklyPolish() async {
+        guard !isRegeneratingWeeklyPolish else {
+            return
+        }
+
+        isRegeneratingWeeklyPolish = true
+        persistenceModel.clearWeeklySummaryPolishEntry()
+        weeklyPolishResponse = nil
+        await refreshWeeklyPolishResponse(ignoringCache: true)
+        isRegeneratingWeeklyPolish = false
+    }
+
+    @MainActor
+    private func clearWeeklyPolishCache() {
+        persistenceModel.clearWeeklySummaryPolishEntry()
+        weeklyPolishResponse = nil
+    }
 }
 
 private struct WeeklyTrainingSummaryCard: View {
     let summary: WeeklyTrainingSummary
     let polishResponse: ModelRuntimeResponse?
+    let isRegenerating: Bool
+    let regenerateAction: () -> Void
+    let clearAction: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -179,6 +210,22 @@ private struct WeeklyTrainingSummaryCard: View {
                     Label(polishResponse.draft.nextAction, systemImage: "arrow.right.circle.fill")
                         .font(.footnote.weight(.semibold))
                         .foregroundStyle(.secondary)
+
+                    HStack(spacing: 8) {
+                        Button(action: regenerateAction) {
+                            Label(
+                                isRegenerating ? "生成中" : "重新生成",
+                                systemImage: "arrow.clockwise"
+                            )
+                        }
+                        .disabled(isRegenerating)
+
+                        Button(role: .destructive, action: clearAction) {
+                            Label("清除缓存", systemImage: "trash")
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
             }
         }
@@ -186,7 +233,7 @@ private struct WeeklyTrainingSummaryCard: View {
         .padding()
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 8))
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
     }
 }
 
