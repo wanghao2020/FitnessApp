@@ -13,6 +13,7 @@ struct FitnessRPGApp: App {
                 readiness: healthViewModel.readiness,
                 modelMode: .localFirst,
                 sourceNote: healthViewModel.sourceNote,
+                healthDataSourceSnapshot: healthViewModel.healthDataSourceSnapshot,
                 watchSyncModel: watchSyncModel,
                 persistenceModel: persistenceModel,
                 initialDestination: Self.debugInitialDestination,

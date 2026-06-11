@@ -23,7 +23,7 @@ The iOS target now owns local durable state through a JSON persistence store. It
 
 ## HealthKit MVP
 
-The iOS target requests read-only HealthKit access for sleep, heart-rate, activity, and workout signals. The app maps available samples into `HealthSummary` and falls back to conservative yellow readiness when HealthKit is unavailable, denied, or incomplete.
+The iOS target requests read-only HealthKit access for sleep, heart-rate, activity, and workout signals. The app maps available samples into `HealthSummary` and falls back to conservative yellow readiness when HealthKit is unavailable, denied, or incomplete. Fallback states now publish a structured source-status notice so Today can distinguish unsupported devices, unfinished authorization, and missing signal coverage.
 
 The watchOS target does not read HealthKit in this pass.
 
@@ -44,7 +44,7 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 ## Future Integration Points
 
 - Real-device WatchConnectivity validation can harden diagnostics copy after paired-device testing.
-- HealthKit permission UX, diagnostics, and onboarding copy can be hardened after device testing.
+- HealthKit permission and data-coverage copy can be validated on real devices before adding deeper onboarding.
 - LiteRT-LM / Gemma adapter can use persisted Memory Review entries before deterministic safety validation.
 
 ## Verification

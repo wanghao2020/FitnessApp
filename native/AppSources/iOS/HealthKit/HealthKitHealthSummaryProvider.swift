@@ -7,6 +7,11 @@ enum HealthKitHealthSummaryProviderError: Error, Equatable {
     case authorizationFailed
 }
 
+struct HealthKitHealthSummaryLoadResult: Equatable {
+    let summary: HealthSummary
+    let sourceSnapshot: HealthDataSourceSnapshot
+}
+
 @MainActor
 final class HealthKitHealthSummaryProvider {
     private let healthStore: HKHealthStore
@@ -18,16 +23,41 @@ final class HealthKitHealthSummaryProvider {
     }
 
     func requestAuthorizationAndLoadSummary(referenceDate: Date = Date()) async -> HealthSummary {
+        await requestAuthorizationAndLoadResult(referenceDate: referenceDate).summary
+    }
+
+    func requestAuthorizationAndLoadResult(referenceDate: Date = Date()) async -> HealthKitHealthSummaryLoadResult {
         guard HKHealthStore.isHealthDataAvailable() else {
-            return MockHealthProfiles.missing
+            return HealthKitHealthSummaryLoadResult(
+                summary: MockHealthProfiles.missing,
+                sourceSnapshot: .unavailable
+            )
         }
 
         do {
             try await requestAuthorization()
             let signals = await loadSignals(referenceDate: referenceDate)
-            return HealthSummaryMapper.summary(from: signals)
+            let summary = HealthSummaryMapper.summary(from: signals)
+            let sourceSnapshot: HealthDataSourceSnapshot
+
+            if summary.drivers.contains("HealthKit 数据缺失") {
+                sourceSnapshot = HealthDataSourceSnapshot(
+                    status: .insufficientData,
+                    missingSignalLabels: missingSignalLabels(from: signals)
+                )
+            } else {
+                sourceSnapshot = .healthKit
+            }
+
+            return HealthKitHealthSummaryLoadResult(
+                summary: summary,
+                sourceSnapshot: sourceSnapshot
+            )
         } catch {
-            return MockHealthProfiles.missing
+            return HealthKitHealthSummaryLoadResult(
+                summary: MockHealthProfiles.missing,
+                sourceSnapshot: .authorizationDenied
+            )
         }
     }
 
@@ -188,5 +218,29 @@ final class HealthKitHealthSummaryProvider {
 
             healthStore.execute(query)
         }
+    }
+
+    private func missingSignalLabels(from signals: HealthSignals) -> [String] {
+        var labels: [String] = []
+
+        if signals.sleepHours == nil {
+            labels.append("睡眠")
+        }
+
+        if signals.hrvSDNN == nil && signals.restingHeartRate == nil {
+            labels.append("恢复")
+        }
+
+        let hasActivity = [
+            signals.activeEnergyKcal,
+            signals.exerciseMinutes,
+            signals.stepCount
+        ].contains { $0 != nil } || signals.workoutCount != nil
+
+        if !hasActivity {
+            labels.append("活动")
+        }
+
+        return labels
     }
 }

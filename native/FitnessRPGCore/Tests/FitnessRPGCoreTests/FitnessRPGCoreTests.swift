@@ -217,6 +217,42 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertTrue(readiness.explanation.contains("HealthKit 数据缺失"))
     }
 
+    func testHealthDataSourceSnapshotDisplaysSuccessfulHealthKitLoad() {
+        let snapshot = HealthDataSourceSnapshot(status: .healthKit)
+
+        XCTAssertEqual(snapshot.sourceNote, "已读取 HealthKit 今日健康摘要。")
+        XCTAssertEqual(snapshot.headline, "Apple Health 已接入")
+        XCTAssertEqual(snapshot.detail, "今日 Readiness 已根据 HealthKit 睡眠、恢复和活动信号生成。")
+        XCTAssertEqual(snapshot.systemImageName, "heart.text.square.fill")
+        XCTAssertEqual(snapshot.tintName, "green")
+        XCTAssertFalse(snapshot.shouldShowNotice)
+    }
+
+    func testHealthDataSourceSnapshotExplainsAuthorizationFallback() {
+        let snapshot = HealthDataSourceSnapshot(status: .authorizationDenied)
+
+        XCTAssertEqual(snapshot.sourceNote, "未完成 HealthKit 读取授权，已使用保守黄灯策略。")
+        XCTAssertEqual(snapshot.headline, "HealthKit 权限未完成")
+        XCTAssertTrue(snapshot.detail.contains("iOS 设置"))
+        XCTAssertEqual(snapshot.systemImageName, "lock.shield.fill")
+        XCTAssertEqual(snapshot.tintName, "orange")
+        XCTAssertTrue(snapshot.shouldShowNotice)
+    }
+
+    func testHealthDataSourceSnapshotExplainsInsufficientDataFallback() {
+        let snapshot = HealthDataSourceSnapshot(
+            status: .insufficientData,
+            missingSignalLabels: ["睡眠", "恢复"]
+        )
+
+        XCTAssertEqual(snapshot.sourceNote, "HealthKit 睡眠、恢复数据不足，已使用保守黄灯策略。")
+        XCTAssertEqual(snapshot.headline, "HealthKit 数据不足")
+        XCTAssertTrue(snapshot.detail.contains("睡眠、恢复"))
+        XCTAssertEqual(snapshot.systemImageName, "waveform.path.ecg.rectangle")
+        XCTAssertEqual(snapshot.tintName, "orange")
+        XCTAssertTrue(snapshot.shouldShowNotice)
+    }
+
     func testIncompleteSignalsUseConservativeHealthKitFallback() {
         let summary = HealthSummaryMapper.summary(
             from: HealthSignals(

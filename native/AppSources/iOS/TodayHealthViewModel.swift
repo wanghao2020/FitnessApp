@@ -6,16 +6,19 @@ import FitnessRPGCore
 final class TodayHealthViewModel: ObservableObject {
     @Published private(set) var healthSummary: HealthSummary
     @Published private(set) var sourceNote: String
+    @Published private(set) var healthDataSourceSnapshot: HealthDataSourceSnapshot
 
     private let provider: HealthKitHealthSummaryProvider
 
     init(
         provider: HealthKitHealthSummaryProvider = HealthKitHealthSummaryProvider(),
-        initialSummary: HealthSummary = MockHealthProfiles.missing
+        initialSummary: HealthSummary = MockHealthProfiles.missing,
+        initialSourceSnapshot: HealthDataSourceSnapshot = .loading
     ) {
         self.provider = provider
         self.healthSummary = initialSummary
-        self.sourceNote = "正在读取 HealthKit 数据..."
+        self.healthDataSourceSnapshot = initialSourceSnapshot
+        self.sourceNote = initialSourceSnapshot.sourceNote
     }
 
     var readiness: ReadinessResult {
@@ -23,15 +26,12 @@ final class TodayHealthViewModel: ObservableObject {
     }
 
     func loadHealthSummary() async {
-        sourceNote = "正在读取 HealthKit 数据..."
+        healthDataSourceSnapshot = .loading
+        sourceNote = healthDataSourceSnapshot.sourceNote
 
-        let summary = await provider.requestAuthorizationAndLoadSummary()
-        healthSummary = summary
-
-        if summary.drivers.contains("HealthKit 数据缺失") {
-            sourceNote = "HealthKit 数据缺失，已使用保守黄灯策略。"
-        } else {
-            sourceNote = "已读取 HealthKit 今日健康摘要。"
-        }
+        let result = await provider.requestAuthorizationAndLoadResult()
+        healthSummary = result.summary
+        healthDataSourceSnapshot = result.sourceSnapshot
+        sourceNote = result.sourceSnapshot.sourceNote
     }
 }

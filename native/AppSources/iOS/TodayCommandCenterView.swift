@@ -5,6 +5,7 @@ struct TodayCommandCenterView: View {
     let readiness: ReadinessResult
     let modelMode: ModelMode
     let sourceNote: String?
+    let healthDataSourceSnapshot: HealthDataSourceSnapshot
     @ObservedObject var watchSyncModel: WatchQuestSyncModel
     @ObservedObject var persistenceModel: TodayPersistenceModel
     let showsDiagnostics: Bool
@@ -14,6 +15,7 @@ struct TodayCommandCenterView: View {
         readiness: ReadinessResult,
         modelMode: ModelMode,
         sourceNote: String?,
+        healthDataSourceSnapshot: HealthDataSourceSnapshot = .loading,
         watchSyncModel: WatchQuestSyncModel,
         persistenceModel: TodayPersistenceModel,
         initialDestination: AppLaunchDestination = .today,
@@ -22,6 +24,7 @@ struct TodayCommandCenterView: View {
         self.readiness = readiness
         self.modelMode = modelMode
         self.sourceNote = sourceNote
+        self.healthDataSourceSnapshot = healthDataSourceSnapshot
         self.watchSyncModel = watchSyncModel
         self.persistenceModel = persistenceModel
         self.showsDiagnostics = showsDiagnostics
@@ -72,6 +75,10 @@ struct TodayCommandCenterView: View {
                         watchStatusText: watchSyncModel.statusText,
                         tint: questReadinessColor.todayTint
                     )
+
+                    if healthDataSourceSnapshot.shouldShowNotice {
+                        TodayHealthSourceNoticeCard(snapshot: healthDataSourceSnapshot)
+                    }
 
                     if showsDiagnostics {
                         WatchConnectivityDiagnosticsPanel(snapshot: watchSyncModel.diagnosticsSnapshot)
@@ -276,6 +283,35 @@ private struct TodayQuestActionCard: View {
     }
 }
 
+private struct TodayHealthSourceNoticeCard: View {
+    let snapshot: HealthDataSourceSnapshot
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: snapshot.systemImageName)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(snapshot.tintColor)
+                .frame(width: 34, height: 34)
+                .background(snapshot.tintColor.opacity(0.14))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(snapshot.headline)
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(2)
+                Text(snapshot.detail)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
 private struct TodayStickyWatchCTA: View {
     let summary: TodayCommandCenterSummary
     let sendAction: () -> Void
@@ -420,6 +456,23 @@ private extension ReadinessColor {
             return .orange
         case .red:
             return .red
+        }
+    }
+}
+
+private extension HealthDataSourceSnapshot {
+    var tintColor: Color {
+        switch tintName {
+        case "green":
+            return .green
+        case "blue":
+            return .blue
+        case "orange":
+            return .orange
+        case "red":
+            return .red
+        default:
+            return .accentColor
         }
     }
 }
