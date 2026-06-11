@@ -101,11 +101,21 @@ struct HistoryView: View {
             return
         }
 
+        if let cachedResponse = persistenceModel.weeklySummaryPolishEntry?.modelRuntimeResponse {
+            weeklyPolishResponse = cachedResponse
+            return
+        }
+
         let response = await WeeklySummaryPolishRunner.response(
             summary: persistenceModel.weeklyTrainingSummary,
             provider: modelRuntimeResourceObserver.provider
         )
-        weeklyPolishResponse = response.source == .localModel ? response : nil
+        if response.source == .localModel {
+            weeklyPolishResponse = response
+            persistenceModel.saveWeeklySummaryPolishResponse(response)
+        } else {
+            weeklyPolishResponse = nil
+        }
     }
 }
 

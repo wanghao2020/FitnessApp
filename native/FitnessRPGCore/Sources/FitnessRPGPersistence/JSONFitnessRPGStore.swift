@@ -60,6 +60,14 @@ public final class JSONFitnessRPGStore: @unchecked Sendable {
         try write(entries, filename: "memory-entries.json")
     }
 
+    public func loadWeeklySummaryPolishEntries() -> PersistenceLoadResult<[WeeklySummaryPolishEntry]> {
+        readCollection(filename: "weekly-summary-polish-entries.json", defaultValue: [])
+    }
+
+    public func saveWeeklySummaryPolishEntries(_ entries: [WeeklySummaryPolishEntry]) throws {
+        try write(entries, filename: "weekly-summary-polish-entries.json")
+    }
+
     public func appendMemoryEntry(_ entry: MemoryEntry) throws {
         var entries = loadMemoryEntries().value
         entries.append(entry)

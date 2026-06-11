@@ -84,6 +84,37 @@ final class JSONFitnessRPGStoreTests: XCTestCase {
         XCTAssertEqual(store.loadMemoryEntries().value, [first, second])
     }
 
+    func testSavingWeeklySummaryPolishEntriesCanBeLoadedAgain() throws {
+        let store = try temporaryStore()
+        let summary = WeeklyTrainingSummary(
+            dateRangeLabel: "2026-06-10",
+            headline: "本周训练稳定完成",
+            detail: "已完成 1 天，降阶 0 天，跳过 0 天，待执行 0 天。",
+            completionLabel: "完成 1 · 降阶 0 · 跳过 0 · 待执行 0",
+            readinessLabel: "绿 1 · 黄 0 · 红 0",
+            safetyLabel: "未记录过重或跳过信号。",
+            nextWeekPlanTitle: "下周计划：稳定推进",
+            nextWeekActions: ["保持 3 次标准 Watch 任务"]
+        )
+        let entry = WeeklySummaryPolishEntry(
+            summary: summary,
+            draft: ModelRuntimeDraft(
+                title: "本地周报",
+                body: "稳定完成。",
+                nextAction: "查看下周计划"
+            ),
+            providerID: "fixture-provider",
+            createdAt: Date(timeIntervalSince1970: 1),
+            updatedAt: Date(timeIntervalSince1970: 2)
+        )
+
+        try store.saveWeeklySummaryPolishEntries([entry])
+        let loaded = store.loadWeeklySummaryPolishEntries()
+
+        XCTAssertEqual(loaded.value, [entry])
+        XCTAssertNil(loaded.warning)
+    }
+
     func testCorruptJSONFallsBackWithWarning() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)

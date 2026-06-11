@@ -10,6 +10,7 @@ final class TodayPersistenceModel: ObservableObject {
     @Published private(set) var storageStatusText = "本地记录尚未加载。"
     @Published private(set) var historyDays: [TrainingHistoryDay] = []
     @Published private(set) var historyLoadErrorText: String?
+    @Published private(set) var weeklySummaryPolishEntry: WeeklySummaryPolishEntry?
     @Published private(set) var memoryReviewEntries: [MemoryReviewEntry] = []
     @Published private(set) var memoryReviewLoadErrorText: String?
 
@@ -78,6 +79,38 @@ final class TodayPersistenceModel: ObservableObject {
 
         historyLoadErrorText = nil
         publishHistory(from: loadedRecords.value)
+    }
+
+    func saveWeeklySummaryPolishResponse(_ response: ModelRuntimeResponse, date: Date = Date()) {
+        guard !historyDays.isEmpty else {
+            weeklySummaryPolishEntry = nil
+            return
+        }
+
+        let loadedEntries = store.loadWeeklySummaryPolishEntries()
+        if let warning = loadedEntries.warning {
+            storageStatusText = "本地周回顾润色缓存读取失败：\(warning)"
+            return
+        }
+
+        let summary = weeklyTrainingSummary
+        let updatedEntries = WeeklySummaryPolishCache.upserting(
+            response: response,
+            summary: summary,
+            in: loadedEntries.value,
+            date: date
+        )
+        guard updatedEntries != loadedEntries.value else {
+            return
+        }
+
+        do {
+            try store.saveWeeklySummaryPolishEntries(updatedEntries)
+            weeklySummaryPolishEntry = WeeklySummaryPolishCache.entry(for: summary, in: updatedEntries)
+            storageStatusText = statusText("已保存周回顾本地模型润色。")
+        } catch {
+            storageStatusText = "周回顾本地模型润色保存失败：\(error.localizedDescription)"
+        }
     }
 
     func reloadMemoryReview() {
@@ -306,11 +339,31 @@ final class TodayPersistenceModel: ObservableObject {
     private func publishHistory(from records: [TrainingDayRecord]) {
         historyLoadErrorText = nil
         historyDays = TrainingHistoryBuilder.days(from: records)
+        publishWeeklySummaryPolish()
     }
 
     private func publishMemoryReview(from memories: [MemoryEntry], records: [TrainingDayRecord]) {
         memoryReviewLoadErrorText = nil
         memoryReviewEntries = MemoryReviewBuilder.entries(from: memories, records: records)
+    }
+
+    private func publishWeeklySummaryPolish() {
+        guard !historyDays.isEmpty else {
+            weeklySummaryPolishEntry = nil
+            return
+        }
+
+        let loadedEntries = store.loadWeeklySummaryPolishEntries()
+        if let warning = loadedEntries.warning {
+            weeklySummaryPolishEntry = nil
+            storageStatusText = "本地周回顾润色缓存读取失败：\(warning)"
+            return
+        }
+
+        weeklySummaryPolishEntry = WeeklySummaryPolishCache.entry(
+            for: weeklyTrainingSummary,
+            in: loadedEntries.value
+        )
     }
 
     private func loadSafeTrainingDays() -> [TrainingDayRecord]? {

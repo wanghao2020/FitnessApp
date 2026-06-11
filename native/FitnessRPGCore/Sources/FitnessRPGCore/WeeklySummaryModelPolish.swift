@@ -87,3 +87,130 @@ public enum WeeklySummaryPolishRunner {
         )
     }
 }
+
+public struct WeeklySummaryPolishEntry: Codable, Equatable, Identifiable, Sendable {
+    public let id: String
+    public let summaryFingerprint: String
+    public let dateRangeLabel: String
+    public let draft: ModelRuntimeDraft
+    public let providerID: String
+    public let createdAt: Date
+    public let updatedAt: Date
+
+    public init(
+        summary: WeeklyTrainingSummary,
+        draft: ModelRuntimeDraft,
+        providerID: String,
+        createdAt: Date = Date(),
+        updatedAt: Date = Date()
+    ) {
+        let fingerprint = WeeklySummaryPolishCache.fingerprint(for: summary)
+        self.id = fingerprint
+        self.summaryFingerprint = fingerprint
+        self.dateRangeLabel = summary.dateRangeLabel
+        self.draft = draft
+        self.providerID = providerID
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+
+    private init(
+        id: String,
+        summaryFingerprint: String,
+        dateRangeLabel: String,
+        draft: ModelRuntimeDraft,
+        providerID: String,
+        createdAt: Date,
+        updatedAt: Date
+    ) {
+        self.id = id
+        self.summaryFingerprint = summaryFingerprint
+        self.dateRangeLabel = dateRangeLabel
+        self.draft = draft
+        self.providerID = providerID
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+    }
+
+    func replacing(
+        draft: ModelRuntimeDraft,
+        providerID: String,
+        updatedAt: Date
+    ) -> WeeklySummaryPolishEntry {
+        WeeklySummaryPolishEntry(
+            id: id,
+            summaryFingerprint: summaryFingerprint,
+            dateRangeLabel: dateRangeLabel,
+            draft: draft,
+            providerID: providerID,
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        )
+    }
+
+    public var modelRuntimeResponse: ModelRuntimeResponse {
+        ModelRuntimeResponse(
+            draft: draft,
+            source: .localModel,
+            validation: ModelRuntimeValidationResult(issues: [])
+        )
+    }
+}
+
+public enum WeeklySummaryPolishCache {
+    public static func fingerprint(for summary: WeeklyTrainingSummary) -> String {
+        [
+            summary.dateRangeLabel,
+            summary.headline,
+            summary.detail,
+            summary.completionLabel,
+            summary.readinessLabel,
+            summary.safetyLabel,
+            summary.nextWeekPlanTitle,
+            summary.nextWeekActions.joined(separator: " / ")
+        ].joined(separator: " | ")
+    }
+
+    public static func entry(
+        for summary: WeeklyTrainingSummary,
+        in entries: [WeeklySummaryPolishEntry]
+    ) -> WeeklySummaryPolishEntry? {
+        let fingerprint = fingerprint(for: summary)
+        return entries.first { entry in
+            entry.summaryFingerprint == fingerprint
+        }
+    }
+
+    public static func upserting(
+        response: ModelRuntimeResponse,
+        summary: WeeklyTrainingSummary,
+        in entries: [WeeklySummaryPolishEntry],
+        date: Date = Date()
+    ) -> [WeeklySummaryPolishEntry] {
+        guard response.source == .localModel, response.validation.isValid else {
+            return entries
+        }
+
+        let fingerprint = fingerprint(for: summary)
+        let providerID = response.providerDiagnostics?.providerID ?? "local-model"
+        let newEntry = WeeklySummaryPolishEntry(
+            summary: summary,
+            draft: response.draft,
+            providerID: providerID,
+            createdAt: date,
+            updatedAt: date
+        )
+        var updatedEntries = entries
+        guard let index = entries.firstIndex(where: { $0.summaryFingerprint == fingerprint }) else {
+            updatedEntries.append(newEntry)
+            return updatedEntries
+        }
+
+        updatedEntries[index] = entries[index].replacing(
+            draft: response.draft,
+            providerID: providerID,
+            updatedAt: date
+        )
+        return updatedEntries
+    }
+}

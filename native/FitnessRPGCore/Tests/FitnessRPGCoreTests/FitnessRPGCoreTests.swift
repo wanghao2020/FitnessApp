@@ -1728,6 +1728,93 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertTrue(response.validation.issues.contains(.providerUnavailable))
     }
 
+    func testWeeklySummaryPolishCacheUpsertsAcceptedLocalModelDraft() {
+        let summary = WeeklyTrainingSummary(
+            dateRangeLabel: "2026-06-10",
+            headline: "本周训练稳定完成",
+            detail: "已完成 1 天，降阶 0 天，跳过 0 天，待执行 0 天。",
+            completionLabel: "完成 1 · 降阶 0 · 跳过 0 · 待执行 0",
+            readinessLabel: "绿 1 · 黄 0 · 红 0",
+            safetyLabel: "未记录过重或跳过信号。",
+            nextWeekPlanTitle: "下周计划：稳定推进",
+            nextWeekActions: [
+                "保持 3 次标准 Watch 任务",
+                "保留 1 次技术质量日",
+                "周末生成 Memory 回顾"
+            ]
+        )
+        let firstDate = Date(timeIntervalSince1970: 1)
+        let secondDate = Date(timeIntervalSince1970: 2)
+        let firstResponse = ModelRuntimeResponse(
+            draft: ModelRuntimeDraft(
+                title: "本地周报：稳定完成",
+                body: "本周训练完成稳定。",
+                nextAction: "查看下周计划"
+            ),
+            source: .localModel,
+            validation: ModelRuntimeValidationResult(issues: []),
+            providerDiagnostics: ModelRuntimeProviderDiagnostics(
+                providerID: "fixture-provider",
+                displayName: "Fixture Provider",
+                state: .ready,
+                message: "测试 provider"
+            )
+        )
+
+        let inserted = WeeklySummaryPolishCache.upserting(
+            response: firstResponse,
+            summary: summary,
+            in: [],
+            date: firstDate
+        )
+
+        XCTAssertEqual(inserted.count, 1)
+        XCTAssertEqual(inserted[0].id, WeeklySummaryPolishCache.fingerprint(for: summary))
+        XCTAssertEqual(inserted[0].draft, firstResponse.draft)
+        XCTAssertEqual(inserted[0].providerID, "fixture-provider")
+        XCTAssertEqual(inserted[0].createdAt, firstDate)
+        XCTAssertEqual(inserted[0].updatedAt, firstDate)
+        XCTAssertEqual(WeeklySummaryPolishCache.entry(for: summary, in: inserted), inserted[0])
+
+        let fallbackResponse = ModelRuntimeResponse(
+            draft: WeeklySummaryPolishRunner.fallbackDraft(for: summary),
+            source: .deterministicFallback,
+            validation: ModelRuntimeValidationResult(issues: [.providerUnavailable])
+        )
+
+        XCTAssertEqual(
+            WeeklySummaryPolishCache.upserting(
+                response: fallbackResponse,
+                summary: summary,
+                in: inserted,
+                date: secondDate
+            ),
+            inserted
+        )
+
+        let replacementResponse = ModelRuntimeResponse(
+            draft: ModelRuntimeDraft(
+                title: "本地周报：继续稳定",
+                body: "缓存应该替换为最新 accepted 文案。",
+                nextAction: "保留安全边界"
+            ),
+            source: .localModel,
+            validation: ModelRuntimeValidationResult(issues: [])
+        )
+        let replaced = WeeklySummaryPolishCache.upserting(
+            response: replacementResponse,
+            summary: summary,
+            in: inserted,
+            date: secondDate
+        )
+
+        XCTAssertEqual(replaced.count, 1)
+        XCTAssertEqual(replaced[0].draft, replacementResponse.draft)
+        XCTAssertEqual(replaced[0].providerID, "local-model")
+        XCTAssertEqual(replaced[0].createdAt, firstDate)
+        XCTAssertEqual(replaced[0].updatedAt, secondDate)
+    }
+
     func testWatchConnectivityDiagnosticsSummarizesUnsupportedState() {
         let snapshot = WatchConnectivityDiagnosticsSnapshot(
             isSupported: false,
