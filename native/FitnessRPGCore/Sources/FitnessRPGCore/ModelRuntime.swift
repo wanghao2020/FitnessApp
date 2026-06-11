@@ -313,17 +313,34 @@ public struct ModelRuntimeProviderDiagnostics: Codable, Equatable, Sendable {
     public let displayName: String
     public let state: ModelRuntimeProviderState
     public let message: String
+    public let resourceStatus: ModelRuntimeResourcePreflightResult?
 
     public init(
         providerID: String,
         displayName: String,
         state: ModelRuntimeProviderState,
-        message: String
+        message: String,
+        resourceStatus: ModelRuntimeResourcePreflightResult? = nil
     ) {
         self.providerID = providerID
         self.displayName = displayName
         self.state = state
         self.message = message
+        self.resourceStatus = resourceStatus
+    }
+
+    public init(
+        providerID: String,
+        displayName: String,
+        resourceStatus: ModelRuntimeResourcePreflightResult
+    ) {
+        self.init(
+            providerID: providerID,
+            displayName: displayName,
+            state: resourceStatus.state,
+            message: resourceStatus.message,
+            resourceStatus: resourceStatus
+        )
     }
 }
 
@@ -373,44 +390,56 @@ public enum ModelRuntimeDiagnosticsBuilder {
         let presentation = presentation(for: providerDiagnostics, response: response)
         let outputSource = response.map { sourceLabel(for: $0.source) } ?? "尚未运行"
         let validationIssues = response?.validation.issues.map(\.rawValue).joined(separator: " / ") ?? "尚未运行"
+        var rows = [
+            ModelRuntimeDiagnosticsRow(
+                title: "Provider",
+                value: providerDiagnostics.displayName,
+                systemImageName: "shippingbox.fill"
+            ),
+            ModelRuntimeDiagnosticsRow(
+                title: "状态",
+                value: stateLabel(for: providerDiagnostics.state),
+                systemImageName: "cpu.fill"
+            ),
+            ModelRuntimeDiagnosticsRow(
+                title: "消息",
+                value: providerDiagnostics.message,
+                systemImageName: "text.bubble.fill"
+            )
+        ]
+
+        if let resourceStatus = providerDiagnostics.resourceStatus {
+            rows.append(ModelRuntimeDiagnosticsRow(
+                title: "资源",
+                value: resourceStatus.message,
+                systemImageName: "externaldrive.fill"
+            ))
+        }
+
+        rows.append(contentsOf: [
+            ModelRuntimeDiagnosticsRow(
+                title: "输出来源",
+                value: outputSource,
+                systemImageName: "doc.text.fill"
+            ),
+            ModelRuntimeDiagnosticsRow(
+                title: "校验",
+                value: validationIssues.isEmpty ? "通过" : validationIssues,
+                systemImageName: "checkmark.shield.fill"
+            ),
+            ModelRuntimeDiagnosticsRow(
+                title: "Fallback",
+                value: "确定性安全文案可用",
+                systemImageName: "arrow.uturn.backward.circle.fill"
+            )
+        ])
 
         return ModelRuntimeDiagnosticsSummary(
             headline: presentation.headline,
             detail: presentation.detail,
             systemImageName: presentation.systemImageName,
             tintName: presentation.tintName,
-            rows: [
-                ModelRuntimeDiagnosticsRow(
-                    title: "Provider",
-                    value: providerDiagnostics.displayName,
-                    systemImageName: "shippingbox.fill"
-                ),
-                ModelRuntimeDiagnosticsRow(
-                    title: "状态",
-                    value: stateLabel(for: providerDiagnostics.state),
-                    systemImageName: "cpu.fill"
-                ),
-                ModelRuntimeDiagnosticsRow(
-                    title: "消息",
-                    value: providerDiagnostics.message,
-                    systemImageName: "text.bubble.fill"
-                ),
-                ModelRuntimeDiagnosticsRow(
-                    title: "输出来源",
-                    value: outputSource,
-                    systemImageName: "doc.text.fill"
-                ),
-                ModelRuntimeDiagnosticsRow(
-                    title: "校验",
-                    value: validationIssues.isEmpty ? "通过" : validationIssues,
-                    systemImageName: "checkmark.shield.fill"
-                ),
-                ModelRuntimeDiagnosticsRow(
-                    title: "Fallback",
-                    value: "确定性安全文案可用",
-                    systemImageName: "arrow.uturn.backward.circle.fill"
-                )
-            ]
+            rows: rows
         )
     }
 
@@ -512,7 +541,8 @@ public enum ModelRuntimeRunner {
                 providerID: diagnostics.providerID,
                 displayName: diagnostics.displayName,
                 state: .failed,
-                message: error.localizedDescription
+                message: error.localizedDescription,
+                resourceStatus: diagnostics.resourceStatus
             )
             return ModelRuntimeOrchestrator.response(
                 context: context,

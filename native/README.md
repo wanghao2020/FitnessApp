@@ -17,11 +17,11 @@ The shared core includes deterministic mock health profiles, readiness evaluatio
 
 The current native pass also includes first-pass WatchConnectivity source adapters. iOS sends versioned quest payloads derived from `ReadinessEngine` and `QuestEngine`; watchOS receives those payloads, records step feedback as `ExecutionLog` values, and sends logs back for `ExecutionEngine` resolution on iPhone. The iOS target embeds the watchOS app in `FitnessRPG.app/Watch`, and the watchOS target declares `com.hao.fitnessrpg` as its companion bundle identifier.
 
-DEBUG diagnostics can also show WatchConnectivity support, activation, pairing, Watch App installation, reachability, recent send/receive path, local model Runtime provider status, validator state, and fallback paths from the Today surface.
+DEBUG diagnostics can also show WatchConnectivity support, activation, pairing, Watch App installation, reachability, recent send/receive path, local model Runtime provider status, resource preflight, validator state, and fallback paths from the Today surface.
 
 The iOS target now owns local durable state through a JSON persistence store. It restores the same daily quest for the local day, persists Watch execution logs and resolved workout results, stores memory drafts, and advances deterministic RPG story progression. History and Memory Review expose those persisted records in the app. The watchOS target stays non-persistent in this pass.
 
-The shared core also includes a local model runtime scaffold and adapter boundary. It turns current readiness, the active quest, and recent Memory Review entries into bounded prompt context, calls an interchangeable draft provider, validates draft coach text for safety, and returns deterministic fallback copy when model output is missing, unavailable, or unsafe. No LiteRT-LM / Gemma SDK or model file is linked in this pass.
+The shared core also includes a local model runtime scaffold, adapter boundary, and SDK-independent resource preflight layer. It turns current readiness, the active quest, and recent Memory Review entries into bounded prompt context, checks provider resource requirements from platform observations, calls an interchangeable draft provider, validates draft coach text for safety, and returns deterministic fallback copy when model output is missing, unavailable, or unsafe. No LiteRT-LM / Gemma SDK or model file is linked in this pass.
 
 ## HealthKit MVP
 
@@ -47,7 +47,7 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 
 - Real-device WatchConnectivity validation can harden diagnostics copy after paired-device testing.
 - HealthKit permission and data-coverage copy can be validated on real devices before adding deeper onboarding.
-- LiteRT-LM / Gemma SDK and model-resource wiring can plug into the Core adapter boundary behind deterministic safety validation.
+- LiteRT-LM / Gemma SDK, Bundle/file observations, and model execution can plug into the Core adapter boundary behind deterministic safety validation.
 
 ## Verification
 
