@@ -408,6 +408,92 @@ final class FitnessRPGCoreTests: XCTestCase {
         )))
     }
 
+    func testModelRuntimeDiagnosticsShowsParsingFailureReason() async {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let provider = ResourceBackedModelDraftProvider(
+            resourceStatus: readyGemmaResourceStatus,
+            textGenerator: { _ in #"{"title":"空输出","body":" ","nextAction":"发送到 Watch"}"# }
+        )
+
+        let response = await ModelRuntimeRunner.response(context: context, provider: provider)
+        let summary = ModelRuntimeDiagnosticsBuilder.summary(
+            providerDiagnostics: response.providerDiagnostics!,
+            response: response
+        )
+
+        XCTAssertTrue(response.usedFallback)
+        XCTAssertEqual(response.providerDiagnostics?.failureStage, .parsing)
+        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
+            title: "解析",
+            value: "模型输出缺少正文",
+            systemImageName: "curlybraces.square.fill"
+        )))
+        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
+            title: "校验",
+            value: "providerFailed",
+            systemImageName: "checkmark.shield.fill"
+        )))
+    }
+
+    func testModelRuntimeDiagnosticsShowsAdapterFailureReason() async {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let provider = ResourceBackedModelDraftProvider(
+            resourceStatus: readyGemmaResourceStatus,
+            draftGenerator: { _ in throw TestModelRuntimeError(message: "SDK 执行失败") }
+        )
+
+        let response = await ModelRuntimeRunner.response(context: context, provider: provider)
+        let summary = ModelRuntimeDiagnosticsBuilder.summary(
+            providerDiagnostics: response.providerDiagnostics!,
+            response: response
+        )
+
+        XCTAssertTrue(response.usedFallback)
+        XCTAssertEqual(response.providerDiagnostics?.failureStage, .adapter)
+        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
+            title: "Adapter",
+            value: "SDK 执行失败",
+            systemImageName: "wrench.and.screwdriver.fill"
+        )))
+    }
+
+    func testModelRuntimeDiagnosticsShowsValidatorFallbackReason() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.red)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.recoveryCharm.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let diagnostics = ModelRuntimeProviderDiagnostics(
+            providerID: "gemma-e2b",
+            displayName: "Gemma E2B Local",
+            state: .ready,
+            message: "模型资源与执行 adapter 已就绪"
+        )
+        let response = ModelRuntimeOrchestrator.response(
+            context: context,
+            modelDraft: ModelRuntimeDraft(
+                title: "冲刺 PR",
+                body: "今天直接冲刺最大重量，突破 PR。",
+                nextAction: "发送到 Watch"
+            ),
+            providerDiagnostics: diagnostics
+        )
+
+        let summary = ModelRuntimeDiagnosticsBuilder.summary(
+            providerDiagnostics: diagnostics,
+            response: response
+        )
+
+        XCTAssertTrue(response.usedFallback)
+        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
+            title: "校验",
+            value: "unsafeIntensityForReadiness",
+            systemImageName: "checkmark.shield.fill"
+        )))
+    }
+
     func testModelRuntimeResourcePreflightReportsReadyResources() {
         let result = ModelRuntimeResourcePreflight.evaluate(
             providerID: "gemma-e2b",
@@ -1603,5 +1689,13 @@ private struct FixedModelDraftProvider: ModelDraftProvider {
 
     func draft(for context: ModelRuntimeContext) async throws -> ModelRuntimeDraft {
         draft
+    }
+}
+
+private struct TestModelRuntimeError: Error, LocalizedError {
+    let message: String
+
+    var errorDescription: String? {
+        message
     }
 }

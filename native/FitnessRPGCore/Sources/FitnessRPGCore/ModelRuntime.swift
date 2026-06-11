@@ -308,25 +308,33 @@ public enum ModelRuntimeProviderState: String, Codable, Equatable, Sendable {
     case failed
 }
 
+public enum ModelRuntimeProviderFailureStage: String, Codable, Equatable, Sendable {
+    case adapter
+    case parsing
+}
+
 public struct ModelRuntimeProviderDiagnostics: Codable, Equatable, Sendable {
     public let providerID: String
     public let displayName: String
     public let state: ModelRuntimeProviderState
     public let message: String
     public let resourceStatus: ModelRuntimeResourcePreflightResult?
+    public let failureStage: ModelRuntimeProviderFailureStage?
 
     public init(
         providerID: String,
         displayName: String,
         state: ModelRuntimeProviderState,
         message: String,
-        resourceStatus: ModelRuntimeResourcePreflightResult? = nil
+        resourceStatus: ModelRuntimeResourcePreflightResult? = nil,
+        failureStage: ModelRuntimeProviderFailureStage? = nil
     ) {
         self.providerID = providerID
         self.displayName = displayName
         self.state = state
         self.message = message
         self.resourceStatus = resourceStatus
+        self.failureStage = failureStage
     }
 
     public init(
@@ -421,6 +429,21 @@ public enum ModelRuntimeDiagnosticsBuilder {
                     systemImageName: resourceSystemImageName(for: status.state)
                 )
             })
+        }
+
+        if providerDiagnostics.failureStage == .parsing {
+            rows.append(ModelRuntimeDiagnosticsRow(
+                title: "解析",
+                value: providerDiagnostics.message,
+                systemImageName: "curlybraces.square.fill"
+            ))
+        }
+        if providerDiagnostics.failureStage == .adapter {
+            rows.append(ModelRuntimeDiagnosticsRow(
+                title: "Adapter",
+                value: providerDiagnostics.message,
+                systemImageName: "wrench.and.screwdriver.fill"
+            ))
         }
 
         rows.append(contentsOf: [
@@ -563,7 +586,8 @@ public enum ModelRuntimeRunner {
                 displayName: diagnostics.displayName,
                 state: .failed,
                 message: error.localizedDescription,
-                resourceStatus: diagnostics.resourceStatus
+                resourceStatus: diagnostics.resourceStatus,
+                failureStage: failureStage(for: error)
             )
             return ModelRuntimeOrchestrator.response(
                 context: context,
@@ -572,6 +596,14 @@ public enum ModelRuntimeRunner {
                 additionalIssues: [.providerFailed]
             )
         }
+    }
+
+    private static func failureStage(for error: Error) -> ModelRuntimeProviderFailureStage {
+        if error is ModelRuntimeDraftParsingError {
+            return .parsing
+        }
+
+        return .adapter
     }
 }
 
