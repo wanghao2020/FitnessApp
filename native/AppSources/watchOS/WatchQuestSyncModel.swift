@@ -10,16 +10,19 @@ final class WatchQuestSyncModel: NSObject, ObservableObject {
     @Published private(set) var statusText = "等待 iPhone 任务。"
 
     private let session: WCSession?
+    private let autoCompleteQuestOnReceipt: Bool
 
     init(
         initialQuest: DailyQuest = QuestEngine.quest(
             for: ReadinessEngine.evaluate(MockHealthProfiles.green),
             storyNode: "回声训练厅"
         ),
-        session: WCSession? = WCSession.isSupported() ? WCSession.default : nil
+        session: WCSession? = WCSession.isSupported() ? WCSession.default : nil,
+        autoCompleteQuestOnReceipt: Bool = WatchQuestSyncModel.debugAutoCompleteQuestOnReceipt
     ) {
         self.quest = initialQuest
         self.session = session
+        self.autoCompleteQuestOnReceipt = autoCompleteQuestOnReceipt
         super.init()
 
         guard let session else {
@@ -33,40 +36,18 @@ final class WatchQuestSyncModel: NSObject, ObservableObject {
     }
 
     func record(action: WatchAction, step: WatchStep, order: Int) {
-        let log = ExecutionLog(
-            action: action,
-            order: order,
-            rpe: rpe(for: action),
-            note: note(for: action, step: step)
-        )
+        let log = WatchExecutionLogFactory.log(action: action, step: step, order: order)
         logs.append(log)
         sendLogs()
     }
 
-    private func rpe(for action: WatchAction) -> Int {
-        switch action {
-        case .complete:
-            return 6
-        case .tooHeavy:
-            return 9
-        case .skip:
-            return 2
-        case .rpeWithinTarget:
-            return 5
+    private func debugAutoCompleteQuestIfNeeded() {
+        guard autoCompleteQuestOnReceipt else {
+            return
         }
-    }
 
-    private func note(for action: WatchAction, step: WatchStep) -> String {
-        switch action {
-        case .complete:
-            return "\(step.instruction) 完成"
-        case .tooHeavy:
-            return "\(step.instruction) 过重"
-        case .skip:
-            return "\(step.instruction) 跳过"
-        case .rpeWithinTarget:
-            return "\(step.instruction) RPE 在目标内"
-        }
+        logs = WatchExecutionLogFactory.completedLogs(for: quest)
+        sendLogs()
     }
 
     private func sendLogs() {
@@ -116,9 +97,20 @@ final class WatchQuestSyncModel: NSObject, ObservableObject {
             quest = payload.quest
             logs = []
             statusText = "已收到 iPhone 今日任务。"
+            debugAutoCompleteQuestIfNeeded()
         } catch {
             statusText = "iPhone 任务解码失败，继续使用本地安全任务。"
         }
+    }
+}
+
+private extension WatchQuestSyncModel {
+    static var debugAutoCompleteQuestOnReceipt: Bool {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("--fitnessrpg-auto-complete-watch-quest")
+        #else
+        false
+        #endif
     }
 }
 

@@ -260,6 +260,21 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(decodedPayload.sentAt, payload.sentAt)
     }
 
+    func testWatchExecutionLogFactoryBuildsManualAndDebugCompletionLogs() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.yellow)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.calibrationRune.title)
+        let firstStep = quest.watchSteps[0]
+
+        let manualLog = WatchExecutionLogFactory.log(action: .tooHeavy, step: firstStep, order: 1)
+        let debugLogs = WatchExecutionLogFactory.completedLogs(for: quest)
+
+        XCTAssertEqual(manualLog, ExecutionLog(action: .tooHeavy, order: 1, rpe: 9, note: "\(firstStep.instruction) 过重"))
+        XCTAssertEqual(debugLogs.count, quest.watchSteps.count)
+        XCTAssertEqual(debugLogs.map(\.order), [1, 2, 3])
+        XCTAssertTrue(debugLogs.allSatisfy { $0.action == .complete && $0.rpe == 6 })
+        XCTAssertEqual(debugLogs[0].note, "\(quest.watchSteps[0].instruction) 完成")
+    }
+
     func testSyncEnvelopeRejectsUnexpectedMessageKind() throws {
         let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
         let payload = QuestSyncPayload(
