@@ -15,7 +15,7 @@ The repo now includes `native/FitnessRPG.xcodeproj` with buildable iOS and watch
 
 The shared core includes deterministic mock health profiles, readiness evaluation, quest selection, Watch execution result handling, and local model harness explanation.
 
-The current native pass also includes first-pass WatchConnectivity source adapters. iOS sends versioned quest payloads derived from `ReadinessEngine` and `QuestEngine`; watchOS receives those payloads, records step feedback as `ExecutionLog` values, and sends logs back for `ExecutionEngine` resolution on iPhone.
+The current native pass also includes first-pass WatchConnectivity source adapters. iOS sends versioned quest payloads derived from `ReadinessEngine` and `QuestEngine`; watchOS receives those payloads, records step feedback as `ExecutionLog` values, and sends logs back for `ExecutionEngine` resolution on iPhone. The iOS target embeds the watchOS app in `FitnessRPG.app/Watch`, and the watchOS target declares `com.hao.fitnessrpg` as its companion bundle identifier.
 
 The iOS target now owns local durable state through a JSON persistence store. It restores the same daily quest for the local day, persists Watch execution logs and resolved workout results, stores memory drafts, and advances deterministic RPG story progression. The watchOS target stays non-persistent in this pass.
 
@@ -36,7 +36,7 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 
 - Native history and memory review UI can expose persisted workout results and memory entries.
 - LiteRT-LM / Gemma adapter can use persisted memory entries before deterministic safety validation.
-- Real-device WatchConnectivity diagnostics and companion target configuration can be hardened after device testing.
+- Real-device WatchConnectivity diagnostics can be hardened after device testing.
 
 ## Verification
 

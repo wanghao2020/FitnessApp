@@ -26,7 +26,32 @@
 		01A000000000000000000011 /* FitnessRPGPersistence in Frameworks */ = {isa = PBXBuildFile; productRef = 01C000000000000000000003 /* FitnessRPGPersistence */; };
 		01A000000000000000000012 /* TodayPersistenceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000011 /* TodayPersistenceModel.swift */; };
 		01A000000000000000000013 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000012 /* HistoryView.swift */; };
+		01A000000000000000000014 /* FitnessRPGWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 01B000000000000000000009 /* FitnessRPGWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		01AB00000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 01F000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 01F000000000000000000002;
+			remoteInfo = FitnessRPGWatch;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		01D000000000000000000007 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				01A000000000000000000014 /* FitnessRPGWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		01B000000000000000000001 /* FitnessRPGApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FitnessRPGApp.swift; sourceTree = "<group>"; };
@@ -179,10 +204,12 @@
 				01D000000000000000000003 /* Sources */,
 				01D000000000000000000001 /* Frameworks */,
 				01D000000000000000000005 /* Resources */,
+				01D000000000000000000007 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				01AC00000000000000000001 /* PBXTargetDependency */,
 			);
 			name = FitnessRPG;
 			packageProductDependencies = (
@@ -301,6 +328,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		01AC00000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 01F000000000000000000002 /* FitnessRPGWatch */;
+			targetProxy = 01AB00000000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		01AA00000000000000000004 /* Debug */ = {
@@ -463,8 +498,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG Watch";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.hao.fitnessrpg;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.hao.fitnessrpg.watch;
 				PRODUCT_NAME = FitnessRPGWatch;
@@ -484,8 +519,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG Watch";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.hao.fitnessrpg;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKWatchOnly = YES;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.hao.fitnessrpg.watch;
 				PRODUCT_NAME = FitnessRPGWatch;
