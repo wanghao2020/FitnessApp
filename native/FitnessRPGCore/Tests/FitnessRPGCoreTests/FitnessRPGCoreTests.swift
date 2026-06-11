@@ -2110,6 +2110,119 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertTrue(checklist.detail.contains("4/4"))
     }
 
+    func testRealDeviceValidationReportIncludesCopyableSections() {
+        let watch = WatchConnectivityDiagnosticsSnapshot(
+            isSupported: true,
+            activationState: .activated,
+            isPaired: true,
+            isWatchAppInstalled: true,
+            isReachable: false,
+            lastOutbound: WatchConnectivityTransferRecord(
+                date: Date(timeIntervalSince1970: 1),
+                transport: .userInfo,
+                detail: "灰烬坡道：降阶巡航"
+            )
+        )
+        let runtime = ModelRuntimeDiagnosticsSummary(
+            headline: "本地模型不可用，使用确定性 fallback",
+            detail: "Gemma 4 E2B LiteRT-LM：模型执行 adapter 未接入。",
+            systemImageName: "exclamationmark.triangle.fill",
+            tintName: "orange",
+            rows: [
+                ModelRuntimeDiagnosticsRow(
+                    title: "Provider",
+                    value: "Gemma 4 E2B LiteRT-LM",
+                    systemImageName: "shippingbox.fill"
+                ),
+                ModelRuntimeDiagnosticsRow(
+                    title: "Adapter",
+                    value: "模型执行 adapter 未接入",
+                    systemImageName: "wrench.and.screwdriver.fill"
+                )
+            ]
+        )
+        let checklist = RealDeviceValidationChecklistBuilder.summary(
+            watch: watch,
+            health: .authorizationDenied,
+            runtime: runtime,
+            historyRecordCount: 2,
+            hasWeeklyPolishCache: false
+        )
+
+        let report = RealDeviceValidationReportBuilder.report(
+            checklist: checklist,
+            watch: watch,
+            health: .authorizationDenied,
+            runtime: runtime,
+            historyRecordCount: 2,
+            hasWeeklyPolishCache: false,
+            generatedAt: Date(timeIntervalSince1970: 0)
+        )
+
+        XCTAssertTrue(report.body.contains("Fitness RPG 实机验证报告"))
+        XCTAssertTrue(report.body.contains("生成时间：1970-01-01T00:00:00Z"))
+        XCTAssertTrue(report.body.contains("总览：实机验证还有阻塞项"))
+        XCTAssertTrue(report.body.contains("- [待验证] Watch 同步"))
+        XCTAssertTrue(report.body.contains("HealthKit：HealthKit 权限未完成"))
+        XCTAssertTrue(report.body.contains("行动 · 下一步 · 权限"))
+        XCTAssertTrue(report.body.contains("Runtime：本地模型不可用，使用确定性 fallback"))
+        XCTAssertTrue(report.body.contains("Provider：Gemma 4 E2B LiteRT-LM"))
+        XCTAssertTrue(report.body.contains("WatchConnectivity：Watch 已就绪，等待实时可达"))
+        XCTAssertTrue(report.body.contains("最近发送：transferUserInfo · 灰烬坡道：降阶巡航"))
+        XCTAssertTrue(report.body.contains("History：2 条记录；周回顾缓存：未生成"))
+    }
+
+    func testRealDeviceValidationReportMarksPassedRowsAndCacheReady() {
+        let watch = WatchConnectivityDiagnosticsSnapshot(
+            isSupported: true,
+            activationState: .activated,
+            isPaired: true,
+            isWatchAppInstalled: true,
+            isReachable: true,
+            lastInbound: WatchConnectivityTransferRecord(
+                date: Date(timeIntervalSince1970: 2),
+                transport: .message,
+                detail: "3/3 步骤"
+            )
+        )
+        let runtime = ModelRuntimeDiagnosticsSummary(
+            headline: "本地模型 Provider 就绪",
+            detail: "Fixture provider 已就绪。",
+            systemImageName: "cpu.fill",
+            tintName: "green",
+            rows: [
+                ModelRuntimeDiagnosticsRow(
+                    title: "状态",
+                    value: "ready",
+                    systemImageName: "cpu.fill"
+                )
+            ]
+        )
+        let checklist = RealDeviceValidationChecklistBuilder.summary(
+            watch: watch,
+            health: .healthKit,
+            runtime: runtime,
+            historyRecordCount: 3,
+            hasWeeklyPolishCache: true
+        )
+
+        let report = RealDeviceValidationReportBuilder.report(
+            checklist: checklist,
+            watch: watch,
+            health: .healthKit,
+            runtime: runtime,
+            historyRecordCount: 3,
+            hasWeeklyPolishCache: true,
+            generatedAt: Date(timeIntervalSince1970: 0)
+        )
+
+        XCTAssertTrue(report.body.contains("总览：实机验证清单已通过"))
+        XCTAssertTrue(report.body.contains("- [通过] Watch 同步"))
+        XCTAssertTrue(report.body.contains("HealthKit：HealthKit 已接入"))
+        XCTAssertTrue(report.body.contains("WatchConnectivity：Watch 实时可达"))
+        XCTAssertTrue(report.body.contains("History：3 条记录；周回顾缓存：已生成"))
+    }
+
     private func makeHistoryRecord(
         date: String,
         readinessColor: ReadinessColor,

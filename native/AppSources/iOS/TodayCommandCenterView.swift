@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import FitnessRPGCore
 
 struct TodayCommandCenterView: View {
@@ -89,6 +90,17 @@ struct TodayCommandCenterView: View {
         )
     }
 
+    private var realDeviceValidationReport: RealDeviceValidationReport {
+        RealDeviceValidationReportBuilder.report(
+            checklist: realDeviceValidationChecklist,
+            watch: watchSyncModel.diagnosticsSnapshot,
+            health: healthDataSourceSnapshot,
+            runtime: modelRuntimeDiagnostics,
+            historyRecordCount: persistenceModel.historyDays.count,
+            hasWeeklyPolishCache: persistenceModel.weeklySummaryPolishEntry != nil
+        )
+    }
+
     private var modelRuntimeResourceObserver: LocalModelResourceBundleObserver {
         #if DEBUG
         if let modelRuntimeFixtureMode {
@@ -115,7 +127,10 @@ struct TodayCommandCenterView: View {
                     }
 
                     if showsDiagnostics {
-                        RealDeviceValidationChecklistPanel(checklist: realDeviceValidationChecklist)
+                        RealDeviceValidationChecklistPanel(
+                            checklist: realDeviceValidationChecklist,
+                            report: realDeviceValidationReport
+                        )
                         ModelRuntimeDiagnosticsPanel(summary: modelRuntimeDiagnostics)
                         WatchConnectivityDiagnosticsPanel(snapshot: watchSyncModel.diagnosticsSnapshot)
                     }
@@ -349,6 +364,8 @@ private struct TodayQuestActionCard: View {
 
 private struct RealDeviceValidationChecklistPanel: View {
     let checklist: RealDeviceValidationChecklist
+    let report: RealDeviceValidationReport
+    @State private var didCopyReport = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -361,9 +378,31 @@ private struct RealDeviceValidationChecklistPanel: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("实机验证总览")
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text("实机验证总览")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+
+                        Spacer(minLength: 8)
+
+                        Button {
+                            UIPasteboard.general.string = report.body
+                            didCopyReport = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+                                didCopyReport = false
+                            }
+                        } label: {
+                            Label(
+                                didCopyReport ? "已复制" : "复制报告",
+                                systemImage: didCopyReport ? "checkmark.circle.fill" : "doc.on.doc.fill"
+                            )
+                        }
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .accessibilityLabel(didCopyReport ? "实机验证报告已复制" : "复制实机验证报告")
+                    }
+
                     Text(checklist.headline)
                         .font(.subheadline.weight(.semibold))
                         .lineLimit(2)

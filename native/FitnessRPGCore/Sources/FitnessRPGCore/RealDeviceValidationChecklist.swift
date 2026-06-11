@@ -1,3 +1,5 @@
+import Foundation
+
 public enum RealDeviceValidationState: String, Codable, Equatable, Sendable {
     case passed
     case pending
@@ -24,6 +26,106 @@ public struct RealDeviceValidationRow: Codable, Equatable, Identifiable, Sendabl
 
     public var id: String {
         title
+    }
+}
+
+public struct RealDeviceValidationReport: Equatable, Sendable {
+    public let body: String
+
+    public init(body: String) {
+        self.body = body
+    }
+}
+
+public enum RealDeviceValidationReportBuilder {
+    public static func report(
+        checklist: RealDeviceValidationChecklist,
+        watch: WatchConnectivityDiagnosticsSnapshot,
+        health: HealthDataSourceSnapshot,
+        runtime: ModelRuntimeDiagnosticsSummary,
+        historyRecordCount: Int,
+        hasWeeklyPolishCache: Bool,
+        generatedAt: Date = Date()
+    ) -> RealDeviceValidationReport {
+        let watchSummary = watch.summary
+        var lines: [String] = [
+            "Fitness RPG 实机验证报告",
+            "生成时间：\(iso8601String(from: generatedAt))",
+            "",
+            "总览：\(checklist.headline)",
+            "进度：\(checklist.detail)"
+        ]
+
+        lines.append(contentsOf: checklist.rows.map { row in
+            "- [\(stateLabel(for: row.state))] \(row.title)：\(row.value)"
+        })
+
+        lines.append("")
+        lines.append("HealthKit：\(healthHeadline(for: health))")
+        lines.append("说明：\(health.detail)")
+        lines.append(contentsOf: health.actionRows.map { row in
+            "行动 · \(row.title)：\(row.value)"
+        })
+
+        lines.append("")
+        lines.append("Runtime：\(runtime.headline)")
+        lines.append("说明：\(runtime.detail)")
+        lines.append(contentsOf: runtime.rows.map { row in
+            "\(row.title)：\(row.value)"
+        })
+
+        lines.append("")
+        lines.append("WatchConnectivity：\(watchHeadline(for: watch, summary: watchSummary))")
+        lines.append("说明：\(watchSummary.detail)")
+        lines.append(contentsOf: watchSummary.rows.map { row in
+            "\(row.title)：\(row.value)"
+        })
+
+        lines.append("")
+        lines.append("History：\(historyRecordCount) 条记录；周回顾缓存：\(hasWeeklyPolishCache ? "已生成" : "未生成")")
+
+        return RealDeviceValidationReport(body: lines.joined(separator: "\n"))
+    }
+
+    private static func iso8601String(from date: Date) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.string(from: date)
+    }
+
+    private static func stateLabel(for state: RealDeviceValidationState) -> String {
+        switch state {
+        case .passed:
+            return "通过"
+        case .pending:
+            return "待验证"
+        case .needsAction:
+            return "需处理"
+        }
+    }
+
+    private static func healthHeadline(for snapshot: HealthDataSourceSnapshot) -> String {
+        switch snapshot.status {
+        case .healthKit:
+            return "HealthKit 已接入"
+        case .loading, .unavailable, .authorizationDenied, .insufficientData:
+            return snapshot.headline
+        }
+    }
+
+    private static func watchHeadline(
+        for snapshot: WatchConnectivityDiagnosticsSnapshot,
+        summary: WatchConnectivityDiagnosticsSummary
+    ) -> String {
+        if snapshot.isSupported,
+           snapshot.activationState == .activated,
+           snapshot.isPaired,
+           snapshot.isWatchAppInstalled,
+           snapshot.isReachable {
+            return "Watch 实时可达"
+        }
+
+        return summary.headline
     }
 }
 
