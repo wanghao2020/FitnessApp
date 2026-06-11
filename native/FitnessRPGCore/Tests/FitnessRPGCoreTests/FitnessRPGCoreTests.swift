@@ -257,6 +257,86 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(response.draft.title, "Gemma 草稿")
     }
 
+    func testModelRuntimeDraftParserParsesJSONObject() throws {
+        let draft = try ModelRuntimeDraftParser.draft(from: """
+        {
+          "title": "本地模型建议",
+          "body": "保持稳定节奏，按 Watch 步骤完成今日训练。",
+          "nextAction": "发送到 Watch"
+        }
+        """)
+
+        XCTAssertEqual(draft, ModelRuntimeDraft(
+            title: "本地模型建议",
+            body: "保持稳定节奏，按 Watch 步骤完成今日训练。",
+            nextAction: "发送到 Watch"
+        ))
+    }
+
+    func testModelRuntimeDraftParserParsesFencedJSONWithSnakeCaseNextAction() throws {
+        let draft = try ModelRuntimeDraftParser.draft(from: """
+        下面是今日建议：
+        ```json
+        {
+          "title": "降阶校准",
+          "body": "降低强度，优先动作质量和恢复观察。",
+          "next_action": "发送到 Watch"
+        }
+        ```
+        """)
+
+        XCTAssertEqual(draft.nextAction, "发送到 Watch")
+        XCTAssertEqual(draft.title, "降阶校准")
+        XCTAssertEqual(draft.body, "降低强度，优先动作质量和恢复观察。")
+    }
+
+    func testModelRuntimeDraftParserUsesPlainTextFallback() throws {
+        let draft = try ModelRuntimeDraftParser.draft(from: "今天保持稳定节奏，按 Watch 步骤完成训练。")
+
+        XCTAssertEqual(draft.title, "本地模型建议")
+        XCTAssertEqual(draft.body, "今天保持稳定节奏，按 Watch 步骤完成训练。")
+        XCTAssertEqual(draft.nextAction, "发送到 Watch")
+    }
+
+    func testModelRuntimeDraftParserRejectsEmptyOutput() {
+        XCTAssertThrowsError(try ModelRuntimeDraftParser.draft(from: "  \n\t ")) { error in
+            XCTAssertEqual(error as? ModelRuntimeDraftParsingError, .emptyOutput)
+        }
+    }
+
+    func testModelRuntimeDraftParserRejectsMissingBody() {
+        XCTAssertThrowsError(
+            try ModelRuntimeDraftParser.draft(from: #"{"title":"空输出","body":" ","nextAction":"发送到 Watch"}"#)
+        ) { error in
+            XCTAssertEqual(error as? ModelRuntimeDraftParsingError, .missingBody)
+        }
+    }
+
+    func testResourceBackedModelDraftProviderParsesTextGeneratorOutput() async {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let provider = ResourceBackedModelDraftProvider(
+            resourceStatus: readyGemmaResourceStatus,
+            textGenerator: { _ in
+                """
+                {
+                  "title": "Gemma JSON 草稿",
+                  "body": "保持稳定节奏，按 Watch 步骤完成今日训练。",
+                  "nextAction": "发送到 Watch"
+                }
+                """
+            }
+        )
+
+        let response = await ModelRuntimeRunner.response(context: context, provider: provider)
+
+        XCTAssertFalse(response.usedFallback)
+        XCTAssertEqual(response.source, .localModel)
+        XCTAssertEqual(response.draft.title, "Gemma JSON 草稿")
+        XCTAssertEqual(response.providerDiagnostics?.state, .ready)
+    }
+
     func testDeterministicModelDraftProviderProducesValidBoundedDraft() async {
         let readiness = ReadinessEngine.evaluate(MockHealthProfiles.red)
         let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.recoveryCharm.title)

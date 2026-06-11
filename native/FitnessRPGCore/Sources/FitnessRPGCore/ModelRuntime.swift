@@ -532,6 +532,7 @@ public protocol ModelDraftProvider: Sendable {
 }
 
 public typealias ModelRuntimeDraftGenerator = @Sendable (ModelRuntimeContext) async throws -> ModelRuntimeDraft
+public typealias ModelRuntimeTextGenerator = @Sendable (ModelRuntimeContext) async throws -> String
 
 public enum ModelRuntimeRunner {
     public static func response(
@@ -610,6 +611,18 @@ public struct ResourceBackedModelDraftProvider: ModelDraftProvider {
             state: .ready,
             message: "模型资源与执行 adapter 已就绪",
             resourceStatus: resourceStatus
+        )
+    }
+
+    public init(
+        resourceStatus: ModelRuntimeResourcePreflightResult,
+        textGenerator: @escaping ModelRuntimeTextGenerator
+    ) {
+        self.init(
+            resourceStatus: resourceStatus,
+            draftGenerator: { context in
+                try ModelRuntimeDraftParser.draft(from: try await textGenerator(context))
+            }
         )
     }
 
