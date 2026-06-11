@@ -41,6 +41,16 @@ struct DebugGemmaLocalModelAdapter: GemmaLocalModelAdapting {
     func generateText(for context: ModelRuntimeContext) async throws -> String {
         switch mode {
         case .ready:
+            if context.questTitle == "周训练总结" {
+                return """
+                {
+                  "title": "Fixture 周回顾润色",
+                  "body": "本周训练节奏已经记录清楚，下周继续按确定性计划推进，并保留安全边界。",
+                  "nextAction": "查看下周计划"
+                }
+                """
+            }
+
             return """
             {
               "title": "Fixture 本地建议",

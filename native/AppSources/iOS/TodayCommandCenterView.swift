@@ -147,9 +147,16 @@ struct TodayCommandCenterView: View {
                 case .today:
                     EmptyView()
                 case .history:
-                    HistoryView(persistenceModel: persistenceModel)
+                    HistoryView(
+                        persistenceModel: persistenceModel,
+                        modelRuntimeFixtureMode: modelRuntimeFixtureMode
+                    )
                 case .latestHistoryDetail:
-                    HistoryView(persistenceModel: persistenceModel, initialDisplay: .latestDetail)
+                    HistoryView(
+                        persistenceModel: persistenceModel,
+                        initialDisplay: .latestDetail,
+                        modelRuntimeFixtureMode: modelRuntimeFixtureMode
+                    )
                 case .memoryReview:
                     MemoryReviewView(persistenceModel: persistenceModel)
                 }

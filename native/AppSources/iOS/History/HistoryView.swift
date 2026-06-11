@@ -9,13 +9,17 @@ enum HistoryInitialDisplay {
 struct HistoryView: View {
     @ObservedObject var persistenceModel: TodayPersistenceModel
     let initialDisplay: HistoryInitialDisplay
+    let modelRuntimeFixtureMode: ModelRuntimeDebugFixtureMode?
+    @State private var weeklyPolishResponse: ModelRuntimeResponse?
 
     init(
         persistenceModel: TodayPersistenceModel,
-        initialDisplay: HistoryInitialDisplay = .list
+        initialDisplay: HistoryInitialDisplay = .list,
+        modelRuntimeFixtureMode: ModelRuntimeDebugFixtureMode? = nil
     ) {
         self.persistenceModel = persistenceModel
         self.initialDisplay = initialDisplay
+        self.modelRuntimeFixtureMode = modelRuntimeFixtureMode
     }
 
     var body: some View {
@@ -39,12 +43,18 @@ struct HistoryView: View {
         .onAppear {
             persistenceModel.reloadHistory()
         }
+        .task(id: weeklySummaryRefreshID) {
+            await refreshWeeklyPolishResponse()
+        }
     }
 
     private var historyList: some View {
         List {
             Section {
-                WeeklyTrainingSummaryCard(summary: persistenceModel.weeklyTrainingSummary)
+                WeeklyTrainingSummaryCard(
+                    summary: persistenceModel.weeklyTrainingSummary,
+                    polishResponse: weeklyPolishResponse
+                )
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 10, trailing: 16))
                     .listRowBackground(Color.clear)
             }
@@ -63,10 +73,45 @@ struct HistoryView: View {
         }
         .listStyle(.insetGrouped)
     }
+
+    private var weeklySummaryRefreshID: String {
+        let summary = persistenceModel.weeklyTrainingSummary
+        return [
+            summary.dateRangeLabel,
+            summary.completionLabel,
+            summary.readinessLabel,
+            modelRuntimeFixtureMode?.rawValue ?? "default"
+        ].joined(separator: "|")
+    }
+
+    private var modelRuntimeResourceObserver: LocalModelResourceBundleObserver {
+        #if DEBUG
+        if let modelRuntimeFixtureMode {
+            return .debugFixture(mode: modelRuntimeFixtureMode)
+        }
+        #endif
+
+        return LocalModelResourceBundleObserver()
+    }
+
+    @MainActor
+    private func refreshWeeklyPolishResponse() async {
+        guard !persistenceModel.historyDays.isEmpty else {
+            weeklyPolishResponse = nil
+            return
+        }
+
+        let response = await WeeklySummaryPolishRunner.response(
+            summary: persistenceModel.weeklyTrainingSummary,
+            provider: modelRuntimeResourceObserver.provider
+        )
+        weeklyPolishResponse = response.source == .localModel ? response : nil
+    }
 }
 
 private struct WeeklyTrainingSummaryCard: View {
     let summary: WeeklyTrainingSummary
+    let polishResponse: ModelRuntimeResponse?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -105,6 +150,25 @@ private struct WeeklyTrainingSummaryCard: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            if let polishResponse, polishResponse.source == .localModel {
+                Divider()
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Label("本地模型润色", systemImage: "sparkles")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.blue)
+                    Text(polishResponse.draft.title)
+                        .font(.subheadline.weight(.semibold))
+                    Text(polishResponse.draft.body)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Label(polishResponse.draft.nextAction, systemImage: "arrow.right.circle.fill")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.secondary)
                 }
             }
         }

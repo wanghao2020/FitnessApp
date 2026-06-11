@@ -1649,6 +1649,85 @@ final class FitnessRPGCoreTests: XCTestCase {
         ])
     }
 
+    func testWeeklySummaryModelContextPreservesDeterministicBoundaries() {
+        let summary = WeeklyTrainingSummary(
+            dateRangeLabel: "2026-06-03 - 2026-06-06",
+            headline: "本周以安全降阶为主",
+            detail: "已完成 1 天，降阶 1 天，跳过 1 天，待执行 1 天。",
+            completionLabel: "完成 1 · 降阶 1 · 跳过 1 · 待执行 1",
+            readinessLabel: "绿 2 · 黄 1 · 红 1",
+            safetyLabel: "记录到降阶信号，下周优先保守推进。",
+            nextWeekPlanTitle: "下周计划：保守重启",
+            nextWeekActions: [
+                "前 2 次训练降低一档强度",
+                "任一动作 RPE >= 9 时立即降阶",
+                "保留 1 天恢复或散步任务"
+            ]
+        )
+
+        let context = WeeklySummaryModelContextBuilder.context(summary: summary)
+
+        XCTAssertEqual(context.questTitle, "周训练总结")
+        XCTAssertEqual(context.readinessColor, .yellow)
+        XCTAssertTrue(context.questObjective.contains(summary.completionLabel))
+        XCTAssertTrue(context.questObjective.contains(summary.readinessLabel))
+        XCTAssertTrue(context.safetyRules.contains("不得改写周训练统计数字。"))
+        XCTAssertTrue(context.safetyRules.contains("必须保留确定性安全提示：记录到降阶信号，下周优先保守推进。"))
+        XCTAssertTrue(context.promptPreview.contains("完成 1 · 降阶 1 · 跳过 1 · 待执行 1"))
+        XCTAssertTrue(context.promptPreview.contains("前 2 次训练降低一档强度"))
+    }
+
+    func testWeeklySummaryPolishRunnerAcceptsSafeProviderDraft() async {
+        let summary = WeeklyTrainingSummaryBuilder.summary(from: [
+            makeHistoryRecord(
+                date: "2026-06-10",
+                readinessColor: .green,
+                completionState: .completed,
+                storyNode: .mainTrial,
+                updatedAt: Date(timeIntervalSince1970: 1)
+            )
+        ])
+        let provider = FixedModelDraftProvider(draft: ModelRuntimeDraft(
+            title: "本地周报：节奏稳定",
+            body: "本周训练完成稳定，下周继续保持 Watch 任务节奏并记录 RPE。",
+            nextAction: "查看下周计划"
+        ))
+
+        let response = await WeeklySummaryPolishRunner.response(summary: summary, provider: provider)
+
+        XCTAssertEqual(response.source, .localModel)
+        XCTAssertEqual(response.draft.title, "本地周报：节奏稳定")
+        XCTAssertEqual(response.draft.nextAction, "查看下周计划")
+        XCTAssertFalse(response.usedFallback)
+    }
+
+    func testWeeklySummaryPolishRunnerFallsBackToDeterministicSummary() async {
+        let summary = WeeklyTrainingSummary(
+            dateRangeLabel: "2026-06-10",
+            headline: "本周训练稳定完成",
+            detail: "已完成 1 天，降阶 0 天，跳过 0 天，待执行 0 天。",
+            completionLabel: "完成 1 · 降阶 0 · 跳过 0 · 待执行 0",
+            readinessLabel: "绿 1 · 黄 0 · 红 0",
+            safetyLabel: "未记录过重或跳过信号。",
+            nextWeekPlanTitle: "下周计划：稳定推进",
+            nextWeekActions: [
+                "保持 3 次标准 Watch 任务",
+                "保留 1 次技术质量日",
+                "周末生成 Memory 回顾"
+            ]
+        )
+        let provider = UnavailableModelDraftProvider(message: "模型文件未安装")
+
+        let response = await WeeklySummaryPolishRunner.response(summary: summary, provider: provider)
+
+        XCTAssertEqual(response.source, .deterministicFallback)
+        XCTAssertEqual(response.draft.title, summary.headline)
+        XCTAssertTrue(response.draft.body.contains(summary.detail))
+        XCTAssertTrue(response.draft.body.contains(summary.safetyLabel))
+        XCTAssertEqual(response.draft.nextAction, summary.nextWeekPlanTitle)
+        XCTAssertTrue(response.validation.issues.contains(.providerUnavailable))
+    }
+
     func testWatchConnectivityDiagnosticsSummarizesUnsupportedState() {
         let snapshot = WatchConnectivityDiagnosticsSnapshot(
             isSupported: false,
