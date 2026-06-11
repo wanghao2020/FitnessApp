@@ -62,6 +62,7 @@ The native app now includes a first-pass WatchConnectivity sync layer. The iOS a
 
 DEBUG builds can show WatchConnectivity and local model Runtime diagnostics from `--fitnessrpg-show-diagnostics`. These panels separate Watch session support, activation, pairing, reachability, model provider status, Bundle model resource preflight, per-file model/tokenizer resource rows, validator state, and fallback paths so device testing has a clear checklist.
 After a Runtime response executes, the panel also shows the generated draft title and next action for quick output inspection.
+The WatchConnectivity diagnostics panel also includes device-validation checklist rows for installation, sending, and inbound return so paired-device testing can move from setup to Today send to Watch return without reading console logs first.
 
 DEBUG model Runtime fixture launch arguments can also simulate ready output, parsing failure, adapter failure, and validator fallback without real model files. Use them together with `--fitnessrpg-show-diagnostics` when validating the Runtime panel, or with `--fitnessrpg-open-history` when validating the History weekly polish path.
 
@@ -85,7 +86,7 @@ These records are context, not runtime app assets.
 
 Recommended sequence:
 
-1. Run paired-device WatchConnectivity validation and tune diagnostics copy from real activation/reachability states.
+1. Run paired-device WatchConnectivity validation on real hardware: install both targets, launch iOS with `--fitnessrpg-show-diagnostics`, confirm the installation checklist row, send Today to Watch, complete Watch steps, then confirm the inbound checklist row and History write.
 2. Validate HealthKit permission and data-coverage copy on real devices, then add onboarding if the fallback notice is not enough.
 3. Replace the iOS `GemmaLocalModelAdapting` placeholder with concrete LiteRT-LM / Gemma SDK execution and packaged model resources.
 4. Add a small History affordance for clearing or regenerating cached weekly polish drafts after real-device testing.

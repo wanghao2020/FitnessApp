@@ -1868,6 +1868,16 @@ final class FitnessRPGCoreTests: XCTestCase {
             value: "sendMessage · 回声训练厅：力量共振",
             systemImageName: "arrow.up.circle.fill"
         )))
+        XCTAssertTrue(summary.rows.contains(WatchConnectivityDiagnosticsRow(
+            title: "真机检查 · 安装",
+            value: "iPhone 与 Watch App 已准备好。",
+            systemImageName: "checkmark.seal.fill"
+        )))
+        XCTAssertTrue(summary.rows.contains(WatchConnectivityDiagnosticsRow(
+            title: "真机检查 · 发送",
+            value: "最近发送：sendMessage · 回声训练厅：力量共振",
+            systemImageName: "paperplane.fill"
+        )))
     }
 
     func testWatchConnectivityDiagnosticsSummarizesQueuedReadyState() {
@@ -1890,6 +1900,34 @@ final class FitnessRPGCoreTests: XCTestCase {
             title: "最近错误",
             value: "Watch 暂不可达",
             systemImageName: "exclamationmark.circle"
+        )))
+        XCTAssertTrue(summary.rows.contains(WatchConnectivityDiagnosticsRow(
+            title: "真机检查 · 发送",
+            value: "Watch 暂不可实时连接，可先验证 transferUserInfo 排队发送。",
+            systemImageName: "paperplane.fill"
+        )))
+    }
+
+    func testWatchConnectivityDiagnosticsShowsInboundDeviceValidationStep() {
+        let snapshot = WatchConnectivityDiagnosticsSnapshot(
+            isSupported: true,
+            activationState: .activated,
+            isPaired: true,
+            isWatchAppInstalled: true,
+            isReachable: true,
+            lastInbound: WatchConnectivityTransferRecord(
+                date: Date(timeIntervalSince1970: 1_717_172_100),
+                transport: .message,
+                detail: "3 条记录"
+            )
+        )
+
+        let summary = snapshot.summary
+
+        XCTAssertTrue(summary.rows.contains(WatchConnectivityDiagnosticsRow(
+            title: "真机检查 · 回传",
+            value: "最近回传：sendMessage · 3 条记录",
+            systemImageName: "arrow.down.doc.fill"
         )))
     }
 

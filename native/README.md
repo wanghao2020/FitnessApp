@@ -19,6 +19,7 @@ The current native pass also includes first-pass WatchConnectivity source adapte
 
 DEBUG diagnostics can also show WatchConnectivity support, activation, pairing, Watch App installation, reachability, recent send/receive path, local model Runtime provider status, Bundle resource preflight, per-file model/tokenizer resource rows, validator state, and fallback paths from the Today surface.
 When a Runtime response has executed, the panel also shows the resulting draft title and next action so model, fixture, and fallback runs can be inspected without opening logs.
+The WatchConnectivity panel includes three real-device checklist rows: installation readiness, send path, and inbound return. Use them with `--fitnessrpg-show-diagnostics` when validating paired hardware.
 
 DEBUG builds also support local model Runtime fixture launch arguments. These simulate ready resources and deterministic adapter output without linking LiteRT/Gemma or packaging model files, so the Runtime panel and History weekly polish path can exercise ready, parsing failure, adapter failure, and validator fallback paths.
 
@@ -52,7 +53,7 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 
 ## Future Integration Points
 
-- Real-device WatchConnectivity validation can harden diagnostics copy after paired-device testing.
+- Real-device WatchConnectivity validation can now start from the DEBUG checklist rows: confirm iPhone support/pairing/Watch App installation, send Today to Watch, complete Watch steps, then verify inbound return and History persistence.
 - HealthKit permission and data-coverage copy can be validated on real devices before adding deeper onboarding.
 - LiteRT-LM / Gemma SDK, model resource packaging, and model execution can plug into `GemmaLocalModelAdapting` behind deterministic Core safety validation.
 

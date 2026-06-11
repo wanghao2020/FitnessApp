@@ -172,6 +172,7 @@ public struct WatchConnectivityDiagnosticsSnapshot: Codable, Equatable, Sendable
                 systemImageName: "exclamationmark.circle"
             ))
         }
+        rows.append(contentsOf: deviceValidationRows)
 
         return WatchConnectivityDiagnosticsSummary(
             headline: status.headline,
@@ -180,6 +181,70 @@ public struct WatchConnectivityDiagnosticsSnapshot: Codable, Equatable, Sendable
             tintName: status.tintName,
             rows: rows
         )
+    }
+
+    private var deviceValidationRows: [WatchConnectivityDiagnosticsRow] {
+        [
+            WatchConnectivityDiagnosticsRow(
+                title: "真机检查 · 安装",
+                value: deviceInstallValidationText,
+                systemImageName: "checkmark.seal.fill"
+            ),
+            WatchConnectivityDiagnosticsRow(
+                title: "真机检查 · 发送",
+                value: deviceSendValidationText,
+                systemImageName: "paperplane.fill"
+            ),
+            WatchConnectivityDiagnosticsRow(
+                title: "真机检查 · 回传",
+                value: deviceInboundValidationText,
+                systemImageName: "arrow.down.doc.fill"
+            )
+        ]
+    }
+
+    private var deviceInstallValidationText: String {
+        guard isSupported else {
+            return "当前设备不支持，请改用真实 iPhone。"
+        }
+
+        guard isPaired else {
+            return "先在 iPhone 上确认 Apple Watch 已配对。"
+        }
+
+        guard isWatchAppInstalled else {
+            return "确认 companion Watch App 已安装并完成首次打开。"
+        }
+
+        return "iPhone 与 Watch App 已准备好。"
+    }
+
+    private var deviceSendValidationText: String {
+        if let lastOutbound {
+            return "最近发送：\(lastOutbound.summaryLabel)"
+        }
+
+        guard activationState == .activated else {
+            return "等待 WCSession 激活后再发送 Today 任务。"
+        }
+
+        guard isReachable else {
+            return "Watch 暂不可实时连接，可先验证 transferUserInfo 排队发送。"
+        }
+
+        return "点击 Today 底部发送按钮，验证 sendMessage 实时发送。"
+    }
+
+    private var deviceInboundValidationText: String {
+        if let lastInbound {
+            return "最近回传：\(lastInbound.summaryLabel)"
+        }
+
+        guard lastOutbound != nil else {
+            return "先发送 Today 任务，再在 Watch 完成步骤。"
+        }
+
+        return "在 Watch 完成步骤后，回到 iPhone 查看 History 是否写入。"
     }
 
     private var statusPresentation: (
