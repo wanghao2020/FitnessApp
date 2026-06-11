@@ -409,6 +409,29 @@ final class FitnessRPGCoreTests: XCTestCase {
         ])
     }
 
+    func testModelRuntimeResourceCatalogDefinesGemmaE2BBundleRequirements() {
+        let profile = ModelRuntimeResourceCatalog.gemmaE2B
+
+        XCTAssertEqual(profile.providerID, "gemma-e2b")
+        XCTAssertEqual(profile.displayName, "Gemma E2B Local")
+        XCTAssertEqual(profile.requirements, [
+            ModelRuntimeResourceRequirement(
+                id: "model",
+                displayName: "Model 文件",
+                kind: .model,
+                fileName: "gemma-e2b.task",
+                minimumByteSize: 1_024
+            ),
+            ModelRuntimeResourceRequirement(
+                id: "tokenizer",
+                displayName: "Tokenizer 文件",
+                kind: .tokenizer,
+                fileName: "tokenizer.model",
+                minimumByteSize: 1
+            )
+        ])
+    }
+
     func testAppLaunchOptionsOpenHistoryFromArguments() {
         XCTAssertEqual(
             AppLaunchOptions.initialDestination(arguments: ["FitnessRPG"]),

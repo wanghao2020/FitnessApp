@@ -35,6 +35,45 @@ public struct ModelRuntimeResourceRequirement: Codable, Equatable, Identifiable,
     }
 }
 
+public struct ModelRuntimeResourceProfile: Codable, Equatable, Sendable {
+    public let providerID: String
+    public let displayName: String
+    public let requirements: [ModelRuntimeResourceRequirement]
+
+    public init(
+        providerID: String,
+        displayName: String,
+        requirements: [ModelRuntimeResourceRequirement]
+    ) {
+        self.providerID = providerID
+        self.displayName = displayName
+        self.requirements = requirements
+    }
+}
+
+public enum ModelRuntimeResourceCatalog {
+    public static let gemmaE2B = ModelRuntimeResourceProfile(
+        providerID: "gemma-e2b",
+        displayName: "Gemma E2B Local",
+        requirements: [
+            ModelRuntimeResourceRequirement(
+                id: "model",
+                displayName: "Model 文件",
+                kind: .model,
+                fileName: "gemma-e2b.task",
+                minimumByteSize: 1_024
+            ),
+            ModelRuntimeResourceRequirement(
+                id: "tokenizer",
+                displayName: "Tokenizer 文件",
+                kind: .tokenizer,
+                fileName: "tokenizer.model",
+                minimumByteSize: 1
+            )
+        ]
+    )
+}
+
 public struct ModelRuntimeResourceObservation: Codable, Equatable, Sendable {
     public let requirementID: String
     public let fileName: String

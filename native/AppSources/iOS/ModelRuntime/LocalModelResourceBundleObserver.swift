@@ -2,42 +2,39 @@ import Foundation
 import FitnessRPGCore
 
 struct LocalModelResourceBundleObserver {
-    static let providerID = "gemma-e2b"
-    static let displayName = "Gemma E2B Local"
-
     let bundle: Bundle
     let fileManager: FileManager
-    let requirements: [ModelRuntimeResourceRequirement]
+    let profile: ModelRuntimeResourceProfile
 
     init(
         bundle: Bundle = .main,
         fileManager: FileManager = .default,
-        requirements: [ModelRuntimeResourceRequirement] = Self.defaultRequirements
+        profile: ModelRuntimeResourceProfile = ModelRuntimeResourceCatalog.gemmaE2B
     ) {
         self.bundle = bundle
         self.fileManager = fileManager
-        self.requirements = requirements
+        self.profile = profile
     }
 
     var diagnostics: ModelRuntimeProviderDiagnostics {
         let preflight = ModelRuntimeResourcePreflight.evaluate(
-            providerID: Self.providerID,
-            displayName: Self.displayName,
-            requirements: requirements,
+            providerID: profile.providerID,
+            displayName: profile.displayName,
+            requirements: profile.requirements,
             observations: observations
         )
 
         return ModelRuntimeProviderDiagnostics(
-            providerID: Self.providerID,
-            displayName: Self.displayName,
+            providerID: profile.providerID,
+            displayName: profile.displayName,
             resourceStatus: preflight
         )
     }
 
     private var observations: [ModelRuntimeResourceObservation] {
         ModelRuntimeResourceObservationBuilder.observations(
-            requirements: requirements,
-            files: requirements.compactMap(fileSnapshot)
+            requirements: profile.requirements,
+            files: profile.requirements.compactMap(fileSnapshot)
         )
     }
 
@@ -74,26 +71,5 @@ struct LocalModelResourceBundleObserver {
         }
 
         return size.intValue
-    }
-}
-
-private extension LocalModelResourceBundleObserver {
-    static var defaultRequirements: [ModelRuntimeResourceRequirement] {
-        [
-            ModelRuntimeResourceRequirement(
-                id: "model",
-                displayName: "Model 文件",
-                kind: .model,
-                fileName: "gemma-e2b.task",
-                minimumByteSize: 1_024
-            ),
-            ModelRuntimeResourceRequirement(
-                id: "tokenizer",
-                displayName: "Tokenizer 文件",
-                kind: .tokenizer,
-                fileName: "tokenizer.model",
-                minimumByteSize: 1
-            )
-        ]
     }
 }
