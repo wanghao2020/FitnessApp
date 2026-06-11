@@ -155,6 +155,56 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertTrue(validation.issues.contains(.missingDowngradeAfterOverload))
     }
 
+    func testModelRuntimeRunnerAcceptsValidProviderDraft() async {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.mainTrial.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let provider = FixedModelDraftProvider(draft: ModelRuntimeDraft(
+            title: "本地模型建议",
+            body: "保持稳定节奏，按 Watch 步骤完成今日训练。",
+            nextAction: "发送到 Watch"
+        ))
+
+        let response = await ModelRuntimeRunner.response(context: context, provider: provider)
+
+        XCTAssertFalse(response.usedFallback)
+        XCTAssertEqual(response.source, .localModel)
+        XCTAssertEqual(response.providerDiagnostics?.state, .ready)
+        XCTAssertEqual(response.draft.title, "本地模型建议")
+        XCTAssertTrue(response.validation.isValid)
+    }
+
+    func testModelRuntimeRunnerFallsBackWhenProviderUnavailable() async {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.yellow)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.calibrationRune.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let provider = UnavailableModelDraftProvider(message: "模型文件未安装")
+
+        let response = await ModelRuntimeRunner.response(context: context, provider: provider)
+
+        XCTAssertTrue(response.usedFallback)
+        XCTAssertEqual(response.source, .deterministicFallback)
+        XCTAssertEqual(response.providerDiagnostics?.state, .unavailable)
+        XCTAssertEqual(response.providerDiagnostics?.message, "模型文件未安装")
+        XCTAssertTrue(response.validation.issues.contains(.providerUnavailable))
+        XCTAssertTrue(response.draft.body.contains("降阶"))
+    }
+
+    func testDeterministicModelDraftProviderProducesValidBoundedDraft() async {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.red)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.recoveryCharm.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let provider = DeterministicModelDraftProvider()
+
+        let response = await ModelRuntimeRunner.response(context: context, provider: provider)
+
+        XCTAssertFalse(response.usedFallback)
+        XCTAssertEqual(response.providerDiagnostics?.providerID, "deterministic-local-stub")
+        XCTAssertEqual(response.source, .localModel)
+        XCTAssertTrue(response.draft.body.contains("恢复"))
+        XCTAssertTrue(response.validation.isValid)
+    }
+
     func testAppLaunchOptionsOpenHistoryFromArguments() {
         XCTAssertEqual(
             AppLaunchOptions.initialDestination(arguments: ["FitnessRPG"]),
@@ -1087,5 +1137,22 @@ final class FitnessRPGCoreTests: XCTestCase {
             draft: draft,
             createdAt: createdAt
         )
+    }
+}
+
+private struct FixedModelDraftProvider: ModelDraftProvider {
+    let draft: ModelRuntimeDraft
+
+    var diagnostics: ModelRuntimeProviderDiagnostics {
+        ModelRuntimeProviderDiagnostics(
+            providerID: "fixed-test-provider",
+            displayName: "Fixed Test Provider",
+            state: .ready,
+            message: "测试 provider 已就绪"
+        )
+    }
+
+    func draft(for context: ModelRuntimeContext) async throws -> ModelRuntimeDraft {
+        draft
     }
 }
