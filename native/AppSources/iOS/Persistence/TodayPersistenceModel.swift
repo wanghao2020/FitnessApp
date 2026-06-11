@@ -61,6 +61,10 @@ final class TodayPersistenceModel: ObservableObject {
         "还没有历史记录。完成一次 Today 任务或同步一次 Watch 结果后，这里会显示训练回顾。"
     }
 
+    var weeklyTrainingSummary: WeeklyTrainingSummary {
+        WeeklyTrainingSummaryBuilder.summary(from: historyDays.map(\.record))
+    }
+
     var memoryReviewEmptyStateText: String {
         "还没有记忆草稿。完成一次 Watch 回传并生成训练结果后，这里会显示可回顾的故事记忆。"
     }

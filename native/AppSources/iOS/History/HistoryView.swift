@@ -44,6 +44,12 @@ struct HistoryView: View {
     private var historyList: some View {
         List {
             Section {
+                WeeklyTrainingSummaryCard(summary: persistenceModel.weeklyTrainingSummary)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 10, trailing: 16))
+                    .listRowBackground(Color.clear)
+            }
+
+            Section {
                 ForEach(persistenceModel.historyDays) { day in
                     NavigationLink {
                         HistoryDetailView(day: day)
@@ -56,6 +62,57 @@ struct HistoryView: View {
             }
         }
         .listStyle(.insetGrouped)
+    }
+}
+
+private struct WeeklyTrainingSummaryCard: View {
+    let summary: WeeklyTrainingSummary
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("本周回顾", systemImage: "calendar.badge.clock")
+                .font(.headline)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(summary.dateRangeLabel)
+                    .font(.caption.monospacedDigit().weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Text(summary.headline)
+                    .font(.system(.title3, design: .rounded, weight: .bold))
+                    .lineLimit(2)
+                Text(summary.detail)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            VStack(alignment: .leading, spacing: 6) {
+                Label(summary.completionLabel, systemImage: "checklist")
+                Label(summary.readinessLabel, systemImage: "heart.text.square")
+                Label(summary.safetyLabel, systemImage: "shield.lefthalf.filled")
+            }
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(.secondary)
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(summary.nextWeekPlanTitle)
+                    .font(.subheadline.weight(.semibold))
+
+                ForEach(Array(summary.nextWeekActions.enumerated()), id: \.offset) { _, action in
+                    Label(action, systemImage: "arrow.forward.circle.fill")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .accessibilityElement(children: .combine)
     }
 }
 
