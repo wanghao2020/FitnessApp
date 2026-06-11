@@ -6,6 +6,22 @@ public enum HealthDataSourceStatus: String, Codable, Equatable, Sendable {
     case insufficientData
 }
 
+public struct HealthDataSourceActionRow: Codable, Equatable, Identifiable, Sendable {
+    public let title: String
+    public let value: String
+    public let systemImageName: String
+
+    public init(title: String, value: String, systemImageName: String) {
+        self.title = title
+        self.value = value
+        self.systemImageName = systemImageName
+    }
+
+    public var id: String {
+        "\(title)-\(value)"
+    }
+}
+
 public struct HealthDataSourceSnapshot: Codable, Equatable, Sendable {
     public let status: HealthDataSourceStatus
     public let missingSignalLabels: [String]
@@ -97,6 +113,57 @@ public struct HealthDataSourceSnapshot: Codable, Equatable, Sendable {
             return false
         case .unavailable, .authorizationDenied, .insufficientData:
             return true
+        }
+    }
+
+    public var actionRows: [HealthDataSourceActionRow] {
+        switch status {
+        case .loading, .healthKit:
+            return []
+        case .unavailable:
+            return [
+                HealthDataSourceActionRow(
+                    title: "下一步 · 设备",
+                    value: "请在真实 iPhone 上运行；Simulator 或部分设备不提供 HealthKit 数据。",
+                    systemImageName: "iphone"
+                ),
+                HealthDataSourceActionRow(
+                    title: "当前策略",
+                    value: "当前环境继续使用保守黄灯，方便安全调试和演示。",
+                    systemImageName: "exclamationmark.triangle.fill"
+                )
+            ]
+        case .authorizationDenied:
+            return [
+                HealthDataSourceActionRow(
+                    title: "下一步 · 权限",
+                    value: "打开 iOS 设置 > 健康 > 数据访问与设备 > Fitness RPG，允许读取睡眠、心率和活动。",
+                    systemImageName: "checkmark.shield.fill"
+                ),
+                HealthDataSourceActionRow(
+                    title: "当前策略",
+                    value: "授权完成前继续使用保守黄灯，不会推进高强度任务。",
+                    systemImageName: "exclamationmark.triangle.fill"
+                )
+            ]
+        case .insufficientData:
+            return [
+                HealthDataSourceActionRow(
+                    title: "缺少信号",
+                    value: missingSignalText,
+                    systemImageName: "waveform.path.ecg"
+                ),
+                HealthDataSourceActionRow(
+                    title: "下一步 · 数据",
+                    value: "佩戴 Apple Watch，并确认健康 App 已产生对应睡眠、恢复和活动记录。",
+                    systemImageName: "applewatch.watchface"
+                ),
+                HealthDataSourceActionRow(
+                    title: "当前策略",
+                    value: "数据补齐前继续使用保守黄灯，避免在信息不足时安排高强度任务。",
+                    systemImageName: "exclamationmark.triangle.fill"
+                )
+            ]
         }
     }
 

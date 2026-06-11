@@ -29,7 +29,7 @@ The shared core also includes a local model runtime scaffold, adapter boundary, 
 
 ## HealthKit MVP
 
-The iOS target requests read-only HealthKit access for sleep, heart-rate, activity, and workout signals. The app maps available samples into `HealthSummary` and falls back to conservative yellow readiness when HealthKit is unavailable, denied, or incomplete. Fallback states now publish a structured source-status notice so Today can distinguish unsupported devices, unfinished authorization, and missing signal coverage.
+The iOS target requests read-only HealthKit access for sleep, heart-rate, activity, and workout signals. The app maps available samples into `HealthSummary` and falls back to conservative yellow readiness when HealthKit is unavailable, denied, or incomplete. Fallback states now publish a structured source-status notice with next-action rows so Today can distinguish unsupported devices, unfinished authorization, and missing signal coverage.
 
 The watchOS target does not read HealthKit in this pass.
 
@@ -54,7 +54,7 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 ## Future Integration Points
 
 - Real-device WatchConnectivity validation can now start from the DEBUG checklist rows: confirm iPhone support/pairing/Watch App installation, send Today to Watch, complete Watch steps, then verify inbound return and History persistence.
-- HealthKit permission and data-coverage copy can be validated on real devices before adding deeper onboarding.
+- HealthKit permission and data-coverage action rows can be validated on real devices before adding deeper onboarding.
 - LiteRT-LM / Gemma SDK, model resource packaging, and model execution can plug into `GemmaLocalModelAdapting` behind deterministic Core safety validation.
 
 ## Verification

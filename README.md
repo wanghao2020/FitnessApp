@@ -56,7 +56,7 @@ node prototype/tests/prototypeContract.test.mjs
 
 The native code now includes `native/FitnessRPG.xcodeproj` with buildable iOS and watchOS app schemes, plus the shared `native/FitnessRPGCore` Swift Package.
 
-The iOS target includes a read-only HealthKit MVP that maps available Apple Health sleep, heart-rate, activity, and workout data into `HealthSummary`. Missing, denied, unavailable, or incomplete HealthKit data falls back to the conservative yellow readiness path, with a structured source-status notice explaining the reason.
+The iOS target includes a read-only HealthKit MVP that maps available Apple Health sleep, heart-rate, activity, and workout data into `HealthSummary`. Missing, denied, unavailable, or incomplete HealthKit data falls back to the conservative yellow readiness path, with a structured source-status notice explaining the reason and showing concrete next-action rows for permissions, device support, or missing signal coverage.
 
 The native app now includes a first-pass WatchConnectivity sync layer. The iOS app can package the current `DailyQuest` into a versioned Core payload and send it to the watchOS app; the watchOS app records `ExecutionLog` feedback and returns it to iPhone for deterministic `ExecutionEngine` resolution. When WatchConnectivity is unavailable, both app surfaces keep safe fallback behavior.
 
@@ -87,6 +87,6 @@ These records are context, not runtime app assets.
 Recommended sequence:
 
 1. Run paired-device WatchConnectivity validation on real hardware: install both targets, launch iOS with `--fitnessrpg-show-diagnostics`, confirm the installation checklist row, send Today to Watch, complete Watch steps, then confirm the inbound checklist row and History write.
-2. Validate HealthKit permission and data-coverage copy on real devices, then add onboarding if the fallback notice is not enough.
+2. Validate the HealthKit permission and data-coverage action rows on real devices, then add deeper onboarding only if those fallback notices are not enough.
 3. Replace the iOS `GemmaLocalModelAdapting` placeholder with concrete LiteRT-LM / Gemma SDK execution and packaged model resources.
 4. Add a small History affordance for clearing or regenerating cached weekly polish drafts after real-device testing.

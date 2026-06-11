@@ -955,6 +955,21 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(snapshot.systemImageName, "lock.shield.fill")
         XCTAssertEqual(snapshot.tintName, "orange")
         XCTAssertTrue(snapshot.shouldShowNotice)
+        XCTAssertEqual(
+            snapshot.actionRows,
+            [
+                HealthDataSourceActionRow(
+                    title: "下一步 · 权限",
+                    value: "打开 iOS 设置 > 健康 > 数据访问与设备 > Fitness RPG，允许读取睡眠、心率和活动。",
+                    systemImageName: "checkmark.shield.fill"
+                ),
+                HealthDataSourceActionRow(
+                    title: "当前策略",
+                    value: "授权完成前继续使用保守黄灯，不会推进高强度任务。",
+                    systemImageName: "exclamationmark.triangle.fill"
+                )
+            ]
+        )
     }
 
     func testHealthDataSourceSnapshotExplainsInsufficientDataFallback() {
@@ -969,6 +984,49 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(snapshot.systemImageName, "waveform.path.ecg.rectangle")
         XCTAssertEqual(snapshot.tintName, "orange")
         XCTAssertTrue(snapshot.shouldShowNotice)
+        XCTAssertEqual(
+            snapshot.actionRows,
+            [
+                HealthDataSourceActionRow(
+                    title: "缺少信号",
+                    value: "睡眠、恢复",
+                    systemImageName: "waveform.path.ecg"
+                ),
+                HealthDataSourceActionRow(
+                    title: "下一步 · 数据",
+                    value: "佩戴 Apple Watch，并确认健康 App 已产生对应睡眠、恢复和活动记录。",
+                    systemImageName: "applewatch.watchface"
+                ),
+                HealthDataSourceActionRow(
+                    title: "当前策略",
+                    value: "数据补齐前继续使用保守黄灯，避免在信息不足时安排高强度任务。",
+                    systemImageName: "exclamationmark.triangle.fill"
+                )
+            ]
+        )
+    }
+
+    func testHealthDataSourceSnapshotExplainsUnavailableFallbackActions() {
+        let snapshot = HealthDataSourceSnapshot(status: .unavailable)
+
+        XCTAssertEqual(snapshot.sourceNote, "此设备不支持 HealthKit，已使用保守黄灯策略。")
+        XCTAssertEqual(snapshot.headline, "HealthKit 不可用")
+        XCTAssertTrue(snapshot.detail.contains("不提供 HealthKit"))
+        XCTAssertEqual(
+            snapshot.actionRows,
+            [
+                HealthDataSourceActionRow(
+                    title: "下一步 · 设备",
+                    value: "请在真实 iPhone 上运行；Simulator 或部分设备不提供 HealthKit 数据。",
+                    systemImageName: "iphone"
+                ),
+                HealthDataSourceActionRow(
+                    title: "当前策略",
+                    value: "当前环境继续使用保守黄灯，方便安全调试和演示。",
+                    systemImageName: "exclamationmark.triangle.fill"
+                )
+            ]
+        )
     }
 
     func testIncompleteSignalsUseConservativeHealthKitFallback() {

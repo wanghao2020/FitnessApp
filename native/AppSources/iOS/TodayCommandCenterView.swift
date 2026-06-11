@@ -356,12 +356,47 @@ private struct TodayHealthSourceNoticeCard: View {
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+
+                if !snapshot.actionRows.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(snapshot.actionRows) { row in
+                            TodayHealthSourceActionRow(row: row, tint: snapshot.tintColor)
+                        }
+                    }
+                    .padding(.top, 6)
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .background(.thinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+private struct TodayHealthSourceActionRow: View {
+    let row: HealthDataSourceActionRow
+    let tint: Color
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: row.systemImageName)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(tint)
+                .frame(width: 18, height: 18)
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(row.title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(2)
+                Text(row.value)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 }
 
