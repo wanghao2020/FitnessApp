@@ -65,6 +65,13 @@ struct TodayCommandCenterView: View {
         )
     }
 
+    private var modelRuntimeDiagnostics: ModelRuntimeDiagnosticsSummary {
+        ModelRuntimeDiagnosticsBuilder.summary(
+            providerDiagnostics: DeterministicModelDraftProvider().diagnostics,
+            response: nil
+        )
+    }
+
     var body: some View {
         NavigationStack(path: $navigationPath) {
             ScrollView {
@@ -81,6 +88,7 @@ struct TodayCommandCenterView: View {
                     }
 
                     if showsDiagnostics {
+                        ModelRuntimeDiagnosticsPanel(summary: modelRuntimeDiagnostics)
                         WatchConnectivityDiagnosticsPanel(snapshot: watchSyncModel.diagnosticsSnapshot)
                     }
 

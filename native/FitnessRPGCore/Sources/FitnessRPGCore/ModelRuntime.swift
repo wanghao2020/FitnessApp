@@ -327,6 +327,157 @@ public struct ModelRuntimeProviderDiagnostics: Codable, Equatable, Sendable {
     }
 }
 
+public struct ModelRuntimeDiagnosticsRow: Equatable, Identifiable, Sendable {
+    public let title: String
+    public let value: String
+    public let systemImageName: String
+
+    public var id: String {
+        title
+    }
+
+    public init(title: String, value: String, systemImageName: String) {
+        self.title = title
+        self.value = value
+        self.systemImageName = systemImageName
+    }
+}
+
+public struct ModelRuntimeDiagnosticsSummary: Equatable, Sendable {
+    public let headline: String
+    public let detail: String
+    public let systemImageName: String
+    public let tintName: String
+    public let rows: [ModelRuntimeDiagnosticsRow]
+
+    public init(
+        headline: String,
+        detail: String,
+        systemImageName: String,
+        tintName: String,
+        rows: [ModelRuntimeDiagnosticsRow]
+    ) {
+        self.headline = headline
+        self.detail = detail
+        self.systemImageName = systemImageName
+        self.tintName = tintName
+        self.rows = rows
+    }
+}
+
+public enum ModelRuntimeDiagnosticsBuilder {
+    public static func summary(
+        providerDiagnostics: ModelRuntimeProviderDiagnostics,
+        response: ModelRuntimeResponse?
+    ) -> ModelRuntimeDiagnosticsSummary {
+        let presentation = presentation(for: providerDiagnostics, response: response)
+        let outputSource = response.map { sourceLabel(for: $0.source) } ?? "尚未运行"
+        let validationIssues = response?.validation.issues.map(\.rawValue).joined(separator: " / ") ?? "尚未运行"
+
+        return ModelRuntimeDiagnosticsSummary(
+            headline: presentation.headline,
+            detail: presentation.detail,
+            systemImageName: presentation.systemImageName,
+            tintName: presentation.tintName,
+            rows: [
+                ModelRuntimeDiagnosticsRow(
+                    title: "Provider",
+                    value: providerDiagnostics.displayName,
+                    systemImageName: "shippingbox.fill"
+                ),
+                ModelRuntimeDiagnosticsRow(
+                    title: "状态",
+                    value: stateLabel(for: providerDiagnostics.state),
+                    systemImageName: "cpu.fill"
+                ),
+                ModelRuntimeDiagnosticsRow(
+                    title: "消息",
+                    value: providerDiagnostics.message,
+                    systemImageName: "text.bubble.fill"
+                ),
+                ModelRuntimeDiagnosticsRow(
+                    title: "输出来源",
+                    value: outputSource,
+                    systemImageName: "doc.text.fill"
+                ),
+                ModelRuntimeDiagnosticsRow(
+                    title: "校验",
+                    value: validationIssues.isEmpty ? "通过" : validationIssues,
+                    systemImageName: "checkmark.shield.fill"
+                ),
+                ModelRuntimeDiagnosticsRow(
+                    title: "Fallback",
+                    value: "确定性安全文案可用",
+                    systemImageName: "arrow.uturn.backward.circle.fill"
+                )
+            ]
+        )
+    }
+
+    private static func presentation(
+        for providerDiagnostics: ModelRuntimeProviderDiagnostics,
+        response: ModelRuntimeResponse?
+    ) -> (
+        headline: String,
+        detail: String,
+        systemImageName: String,
+        tintName: String
+    ) {
+        if response?.source == .deterministicFallback {
+            return (
+                "本地模型不可用，使用确定性 fallback",
+                "\(providerDiagnostics.displayName)：\(providerDiagnostics.message)。安全校验仍然生效。",
+                "exclamationmark.triangle.fill",
+                "orange"
+            )
+        }
+
+        switch providerDiagnostics.state {
+        case .ready:
+            return (
+                "本地模型 Provider 就绪",
+                "\(providerDiagnostics.displayName) 已接入 adapter 边界；输出会先经过安全校验。",
+                "cpu.fill",
+                "green"
+            )
+        case .unavailable:
+            return (
+                "本地模型 Provider 不可用",
+                "\(providerDiagnostics.displayName)：\(providerDiagnostics.message)。将使用确定性 fallback。",
+                "exclamationmark.triangle.fill",
+                "orange"
+            )
+        case .failed:
+            return (
+                "本地模型 Provider 失败",
+                "\(providerDiagnostics.displayName)：\(providerDiagnostics.message)。将使用确定性 fallback。",
+                "xmark.octagon.fill",
+                "red"
+            )
+        }
+    }
+
+    private static func stateLabel(for state: ModelRuntimeProviderState) -> String {
+        switch state {
+        case .ready:
+            return "就绪"
+        case .unavailable:
+            return "不可用"
+        case .failed:
+            return "失败"
+        }
+    }
+
+    private static func sourceLabel(for source: ModelRuntimeDraftSource) -> String {
+        switch source {
+        case .localModel:
+            return "本地模型 provider"
+        case .deterministicFallback:
+            return "确定性 fallback"
+        }
+    }
+}
+
 public protocol ModelDraftProvider: Sendable {
     var diagnostics: ModelRuntimeProviderDiagnostics { get }
 

@@ -205,6 +205,62 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertTrue(response.validation.isValid)
     }
 
+    func testModelRuntimeDiagnosticsSummarizesReadyProviderWithoutRun() {
+        let diagnostics = DeterministicModelDraftProvider().diagnostics
+
+        let summary = ModelRuntimeDiagnosticsBuilder.summary(
+            providerDiagnostics: diagnostics,
+            response: nil
+        )
+
+        XCTAssertEqual(summary.headline, "本地模型 Provider 就绪")
+        XCTAssertEqual(summary.tintName, "green")
+        XCTAssertEqual(summary.systemImageName, "cpu.fill")
+        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
+            title: "Provider",
+            value: "Deterministic Local Stub",
+            systemImageName: "shippingbox.fill"
+        )))
+        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
+            title: "Fallback",
+            value: "确定性安全文案可用",
+            systemImageName: "arrow.uturn.backward.circle.fill"
+        )))
+    }
+
+    func testModelRuntimeDiagnosticsSummarizesUnavailableFallbackResponse() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.yellow)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.calibrationRune.title)
+        let context = ModelRuntimeContextBuilder.context(readiness: readiness, quest: quest, memories: [])
+        let diagnostics = UnavailableModelDraftProvider(message: "模型文件未安装").diagnostics
+        let response = ModelRuntimeOrchestrator.response(
+            context: context,
+            modelDraft: nil,
+            providerDiagnostics: diagnostics,
+            additionalIssues: [.providerUnavailable]
+        )
+
+        let summary = ModelRuntimeDiagnosticsBuilder.summary(
+            providerDiagnostics: diagnostics,
+            response: response
+        )
+
+        XCTAssertEqual(summary.headline, "本地模型不可用，使用确定性 fallback")
+        XCTAssertEqual(summary.tintName, "orange")
+        XCTAssertEqual(summary.systemImageName, "exclamationmark.triangle.fill")
+        XCTAssertTrue(summary.detail.contains("模型文件未安装"))
+        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
+            title: "输出来源",
+            value: "确定性 fallback",
+            systemImageName: "doc.text.fill"
+        )))
+        XCTAssertTrue(summary.rows.contains(ModelRuntimeDiagnosticsRow(
+            title: "校验",
+            value: "providerUnavailable",
+            systemImageName: "checkmark.shield.fill"
+        )))
+    }
+
     func testAppLaunchOptionsOpenHistoryFromArguments() {
         XCTAssertEqual(
             AppLaunchOptions.initialDestination(arguments: ["FitnessRPG"]),
