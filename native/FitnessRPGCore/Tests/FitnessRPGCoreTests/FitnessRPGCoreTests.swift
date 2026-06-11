@@ -341,6 +341,81 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(decoded.id, "2026-06-10")
     }
 
+    func testTrainingDayExecutionApplierCreatesIntermediateSnapshotBeforeFinalStep() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.yellow)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.calibrationRune.title)
+        let record = TrainingDayRecord(
+            date: "2026-06-11",
+            readiness: readiness,
+            quest: quest,
+            storyProgression: .initial(updatedAt: Date(timeIntervalSince1970: 1)),
+            createdAt: Date(timeIntervalSince1970: 2),
+            updatedAt: Date(timeIntervalSince1970: 2)
+        )
+        let payload = ExecutionLogSyncPayload(
+            questTitle: quest.title,
+            logs: [ExecutionLog(action: .complete, order: 1, rpe: 5, note: "低强度热身完成")],
+            sentAt: Date(timeIntervalSince1970: 3)
+        )
+
+        let application = TrainingDayExecutionApplier.apply(
+            payload: payload,
+            to: record,
+            baselineProgression: .initial(updatedAt: Date(timeIntervalSince1970: 0)),
+            receivedAt: Date(timeIntervalSince1970: 4)
+        )
+
+        XCTAssertEqual(application.status, .intermediateSnapshot)
+        XCTAssertEqual(application.record.executionLogs, payload.logs)
+        XCTAssertNil(application.record.workoutResult)
+        XCTAssertNil(application.progression)
+        XCTAssertNil(application.memory)
+    }
+
+    func testTrainingDayExecutionApplierFinalizesRecordAndMemoryWhenAllWatchStepsReturn() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.yellow)
+        let quest = QuestEngine.quest(for: readiness, storyNode: StoryNode.calibrationRune.title)
+        let record = TrainingDayRecord(
+            date: "2026-06-11",
+            readiness: readiness,
+            quest: quest,
+            storyProgression: .initial(updatedAt: Date(timeIntervalSince1970: 1)),
+            createdAt: Date(timeIntervalSince1970: 2),
+            updatedAt: Date(timeIntervalSince1970: 2)
+        )
+        let logs = quest.watchSteps.enumerated().map { index, step in
+            ExecutionLog(
+                action: .complete,
+                order: index + 1,
+                rpe: 5,
+                note: "\(step.instruction) 完成"
+            )
+        }
+        let receivedAt = Date(timeIntervalSince1970: 4)
+        let payload = ExecutionLogSyncPayload(
+            questTitle: quest.title,
+            logs: logs,
+            sentAt: Date(timeIntervalSince1970: 3)
+        )
+
+        let application = TrainingDayExecutionApplier.apply(
+            payload: payload,
+            to: record,
+            baselineProgression: .initial(updatedAt: Date(timeIntervalSince1970: 0)),
+            receivedAt: receivedAt
+        )
+
+        XCTAssertEqual(application.status, .finalResult)
+        XCTAssertEqual(application.record.executionLogs, logs)
+        XCTAssertEqual(application.record.workoutResult?.completionState, .completed)
+        XCTAssertEqual(application.record.updatedAt, receivedAt)
+        XCTAssertEqual(application.progression?.currentNodeID, StoryNode.calibrationRune.id)
+        XCTAssertEqual(application.progression?.updatedAt, receivedAt)
+        XCTAssertEqual(application.memory?.date, record.date)
+        XCTAssertEqual(application.memory?.questTitle, quest.title)
+        XCTAssertEqual(application.memory?.draft, application.record.workoutResult?.memoryDraft)
+    }
+
     func testStoryModelsAndMemoryEntryRoundTripThroughJSON() throws {
         let memory = MemoryEntry(
             date: "2026-06-10",

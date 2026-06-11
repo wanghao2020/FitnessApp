@@ -116,71 +116,58 @@ final class TodayPersistenceModel: ObservableObject {
         let diskRecord = records.first { $0.date == payloadDayKey }
         let candidate = diskRecord ?? (isDisplayedRecord ? todayRecord : nil)
 
-        guard var record = candidate else {
+        guard let record = candidate else {
             storageStatusText = "已收到 Watch 记录，但本地没有今日任务。"
-            return
-        }
-
-        guard payload.questTitle == record.quest.title else {
-            storageStatusText = "已收到 Watch 记录，但与今日任务不匹配。"
-            return
-        }
-
-        guard shouldApply(payload: payload, to: record) else {
             return
         }
 
         let shouldPublishIntermediateRecord = payloadDayKey == currentDayKey || isDisplayedRecord
         let shouldPublishFinalRecord = payloadDayKey == currentDayKey
         let shouldUpdateGlobalStory = payloadDayKey == currentDayKey
-        let finalPayload = isFinalPayload(payload, for: record)
+        let application = TrainingDayExecutionApplier.apply(
+            payload: payload,
+            to: record,
+            baselineProgression: storyProgression,
+            receivedAt: receivedAt
+        )
 
-        if !finalPayload {
-            record.executionLogs = payload.logs
-            record.updatedAt = receivedAt
+        switch application.status {
+        case .intermediateSnapshot:
             saveIntermediateSnapshot(
-                record: record,
+                record: application.record,
                 shouldPublishRecord: shouldPublishIntermediateRecord,
                 successStatusText: shouldPublishIntermediateRecord
                     ? "已保存 Watch 训练快照。"
                     : "已保存历史 Watch 训练快照，当前任务未切换。"
             )
-            return
+        case .finalResult:
+            guard let progression = application.progression,
+                  let memory = application.memory else {
+                storageStatusText = "Watch 训练结果生成失败。"
+                return
+            }
+
+            persist(
+                record: application.record,
+                progression: progression,
+                memory: memory,
+                shouldUpdateGlobalStory: shouldUpdateGlobalStory,
+                shouldPublishRecord: shouldPublishFinalRecord,
+                successStatusText: shouldUpdateGlobalStory
+                    ? "已保存 Watch 训练结果和故事进度。"
+                    : "已保存历史 Watch 训练结果和记忆，当前故事未回退。"
+            )
+        case .questMismatch:
+            storageStatusText = "已收到 Watch 记录，但与今日任务不匹配。"
+        case .duplicate:
+            storageStatusText = "已忽略重复的 Watch 训练记录。"
+        case .stale:
+            storageStatusText = "已忽略过期的 Watch 训练记录。"
+        case .alreadySettled:
+            storageStatusText = "已忽略已结算后的 Watch 训练记录。"
+        case .conflictingSameCount:
+            storageStatusText = "已忽略可能覆盖现有结果的 Watch 训练记录。"
         }
-
-        let baselineProgression = record.storyProgression ?? storyProgression
-        let result = ExecutionEngine.resolve(quest: record.quest, logs: payload.logs)
-        let nextProgression = StoryProgressionEngine.progression(
-            after: baselineProgression,
-            readinessColor: record.readiness.color,
-            quest: record.quest,
-            result: result,
-            updatedAt: receivedAt
-        )
-        let memory = MemoryEntry(
-            date: record.date,
-            questTitle: record.quest.title,
-            completionState: result.completionState,
-            storyNodeID: nextProgression.currentNodeID,
-            draft: result.memoryDraft,
-            createdAt: receivedAt
-        )
-
-        record.executionLogs = payload.logs
-        record.workoutResult = result
-        record.storyProgression = nextProgression
-        record.updatedAt = receivedAt
-
-        persist(
-            record: record,
-            progression: nextProgression,
-            memory: memory,
-            shouldUpdateGlobalStory: shouldUpdateGlobalStory,
-            shouldPublishRecord: shouldPublishFinalRecord,
-            successStatusText: shouldUpdateGlobalStory
-                ? "已保存 Watch 训练结果和故事进度。"
-                : "已保存历史 Watch 训练结果和记忆，当前故事未回退。"
-        )
     }
 
     private func saveIntermediateSnapshot(
@@ -332,38 +319,6 @@ final class TodayPersistenceModel: ObservableObject {
     private func isFallbackInitialStoryProgression(_ progression: StoryProgression) -> Bool {
         let initial = StoryProgression.initial(updatedAt: Date(timeIntervalSince1970: 0))
         return progression == initial
-    }
-
-    private func shouldApply(payload: ExecutionLogSyncPayload, to record: TrainingDayRecord) -> Bool {
-        if record.executionLogs == payload.logs {
-            storageStatusText = "已忽略重复的 Watch 训练记录。"
-            return false
-        }
-
-        if payload.logs.count < record.executionLogs.count {
-            storageStatusText = "已忽略过期的 Watch 训练记录。"
-            return false
-        }
-
-        if record.workoutResult != nil {
-            storageStatusText = "已忽略已结算后的 Watch 训练记录。"
-            return false
-        }
-
-        if payload.logs.count == record.executionLogs.count && !record.executionLogs.isEmpty {
-            storageStatusText = "已忽略可能覆盖现有结果的 Watch 训练记录。"
-            return false
-        }
-
-        return true
-    }
-
-    private func isFinalPayload(_ payload: ExecutionLogSyncPayload, for record: TrainingDayRecord) -> Bool {
-        payload.logs.count >= record.quest.watchSteps.count || containsOverloadSignal(payload.logs)
-    }
-
-    private func containsOverloadSignal(_ logs: [ExecutionLog]) -> Bool {
-        logs.contains { $0.action == .tooHeavy || $0.rpe >= 9 }
     }
 
     private func rollbackRecords(_ records: [TrainingDayRecord]) -> Bool {
