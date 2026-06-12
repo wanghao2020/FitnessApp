@@ -8,6 +8,8 @@
 
 **Tech Stack:** Swift 6, Swift Package, SwiftUI diagnostics, conditional compilation, guarded LiteRT-LM Swift package entry.
 
+**Execution status:** Implemented in `53bcfa3 feat(native): prepare litertlm swift bridge`. Re-verified on 2026-06-12 with `swift test --package-path native/FitnessRPGCore`.
+
 ---
 
 ### Task 1: Core Prompt Contract
@@ -16,11 +18,11 @@
 - Modify: `native/FitnessRPGCore/Sources/FitnessRPGCore/ModelRuntime.swift`
 - Modify: `native/FitnessRPGCore/Tests/FitnessRPGCoreTests/FitnessRPGCoreTests.swift`
 
-- [ ] **Step 1: Write failing prompt formatter test**
+- [x] **Step 1: Write failing prompt formatter test**
 
 Add a test that creates a `ModelRuntimeContext` and expects `ModelRuntimePromptFormatter.prompt(for:)` to include safety rules, watch steps, memory lines, Chinese output, and JSON keys `title`, `body`, `nextAction`.
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 Run:
 
@@ -30,11 +32,11 @@ swift test --package-path native/FitnessRPGCore --filter ModelRuntimePromptForma
 
 Expected: build failure because `ModelRuntimePromptFormatter` does not exist.
 
-- [ ] **Step 3: Implement prompt formatter**
+- [x] **Step 3: Implement prompt formatter**
 
 Add `ModelRuntimePrompt` and `ModelRuntimePromptFormatter` to Core. Keep it pure Swift and SDK independent.
 
-- [ ] **Step 4: Verify GREEN**
+- [x] **Step 4: Verify GREEN**
 
 Run the same focused test and expect pass.
 
@@ -45,11 +47,11 @@ Run the same focused test and expect pass.
 - Modify: `native/FitnessRPGCore/Tests/FitnessRPGCoreTests/FitnessRPGCoreTests.swift`
 - Modify: `native/AppSources/iOS/ModelRuntime/ModelResources/README.md`
 
-- [ ] **Step 1: Update tests for `.litertlm` container**
+- [x] **Step 1: Update tests for `.litertlm` container**
 
 Update catalog and resource-preflight tests to expect `ModelResources/gemma-4-E2B-it.litertlm` as the single required resource.
 
-- [ ] **Step 2: Verify RED**
+- [x] **Step 2: Verify RED**
 
 Run:
 
@@ -59,15 +61,15 @@ swift test --package-path native/FitnessRPGCore --filter ModelRuntimeResource
 
 Expected: failures because catalog still points to `.task` and tokenizer files.
 
-- [ ] **Step 3: Update catalog and helper fixtures**
+- [x] **Step 3: Update catalog and helper fixtures**
 
 Change `ModelRuntimeResourceCatalog.gemmaE2B` and test helper resources to the `.litertlm` container.
 
-- [ ] **Step 4: Update model resource README**
+- [x] **Step 4: Update model resource README**
 
 Document the expected `.litertlm` package and keep the no-large-model-files rule.
 
-- [ ] **Step 5: Verify GREEN**
+- [x] **Step 5: Verify GREEN**
 
 Run focused resource tests and expect pass.
 
@@ -79,44 +81,44 @@ Run focused resource tests and expect pass.
 - Modify: `README.md`
 - Modify: `native/README.md`
 
-- [ ] **Step 1: Make adapter resource-aware**
+- [x] **Step 1: Make adapter resource-aware**
 
 Give `GemmaLocalModelAdapter` bundle/profile/fileManager configuration and resolve the catalog model resource URL.
 
-- [ ] **Step 2: Add conditional LiteRT-LM bridge**
+- [x] **Step 2: Add conditional LiteRT-LM bridge**
 
 Add `#if canImport(LiteRTLM) && FITNESSRPG_ENABLE_LITERTLM` code that imports `LiteRTLM`, creates an engine from the `.litertlm` model path, sends `ModelRuntimePromptFormatter.prompt(for:).rawText`, and returns raw text.
 
-- [ ] **Step 3: Keep default fallback**
+- [x] **Step 3: Keep default fallback**
 
 When the package or compile flag is absent, `isAvailable` remains false and `generateText` throws `sdkNotLinked`.
 
-- [ ] **Step 4: Update docs**
+- [x] **Step 4: Update docs**
 
 Document that real SDK integration requires adding the LiteRT-LM Swift package, placing the `.litertlm` file in `ModelResources`, and enabling `FITNESSRPG_ENABLE_LITERTLM`.
 
 ### Task 4: Verification And Commit
 
-- [ ] **Step 1: Run full tests**
+- [x] **Step 1: Run full tests**
 
 ```bash
 swift test --package-path native/FitnessRPGCore
 ```
 
-- [ ] **Step 2: Run whitespace check**
+- [x] **Step 2: Run whitespace check**
 
 ```bash
 git diff --check
 ```
 
-- [ ] **Step 3: Build iOS and watchOS**
+- [x] **Step 3: Build iOS and watchOS**
 
 ```bash
 xcodebuild -quiet -project native/FitnessRPG.xcodeproj -scheme FitnessRPG -destination 'generic/platform=iOS' -derivedDataPath /private/tmp/FitnessRPGLiteRTLMBridgeIOS CODE_SIGNING_ALLOWED=NO build
 xcodebuild -quiet -project native/FitnessRPG.xcodeproj -scheme FitnessRPGWatch -destination 'generic/platform=watchOS' -derivedDataPath /private/tmp/FitnessRPGLiteRTLMBridgeWatch CODE_SIGNING_ALLOWED=NO build
 ```
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 Commit message:
 
