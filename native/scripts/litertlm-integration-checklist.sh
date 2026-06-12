@@ -19,6 +19,7 @@ Templates:
   native/AppSources/iOS/ModelRuntime/ModelResources/model-package-manifest.example.json
 
 Validation:
+  native/scripts/model-artifact-git-guard.sh
   native/scripts/litertlm-real-device-preflight.sh
   docs/validation/litertlm-real-device-runbook.md
 USAGE
@@ -71,6 +72,7 @@ XCCONFIG_TEMPLATE="native/Config/LiteRTLMRealRuntime.example.xcconfig"
 MANIFEST_TEMPLATE="native/AppSources/iOS/ModelRuntime/ModelResources/model-package-manifest.example.json"
 RESOURCES_README="native/AppSources/iOS/ModelRuntime/ModelResources/README.md"
 RUNBOOK_FILE="docs/validation/litertlm-real-device-runbook.md"
+GIT_GUARD_SCRIPT="native/scripts/model-artifact-git-guard.sh"
 PREFLIGHT_SCRIPT="native/scripts/litertlm-real-device-preflight.sh"
 
 log "Checking integration kit files"
@@ -79,6 +81,7 @@ require_file "$XCCONFIG_TEMPLATE"
 require_file "$MANIFEST_TEMPLATE"
 require_file "$RESOURCES_README"
 require_file "$RUNBOOK_FILE"
+require_file "$GIT_GUARD_SCRIPT"
 require_file "$PREFLIGHT_SCRIPT"
 
 log "Checking bridge and template content"
@@ -90,7 +93,12 @@ require_text "$MANIFEST_TEMPLATE" "\"fileName\": \"gemma-4-E2B-it.litertlm\"" "m
 require_text "$MANIFEST_TEMPLATE" "\"bundleRelativePath\": \"ModelResources/gemma-4-E2B-it.litertlm\"" "bundle-relative model path"
 require_text "$MANIFEST_TEMPLATE" "\"minimumByteSize\": 1024" "minimum model byte size"
 require_text "$RESOURCES_README" "model-package-manifest.example.json" "manifest template documentation"
+require_text "$RESOURCES_README" "model-artifact-git-guard.sh" "model artifact git guard documentation"
 require_text "$RUNBOOK_FILE" "LiteRT-LM Integration Kit" "integration kit runbook section"
+require_text "$RUNBOOK_FILE" "model-artifact-git-guard.sh" "model artifact git guard runbook step"
+
+log "Checking local model artifact git guard"
+bash "$GIT_GUARD_SCRIPT"
 
 log "Checking current LiteRT-LM fallback wiring"
 preflight_args=(--skip-build --skip-tests)
@@ -108,5 +116,6 @@ Next:
   2. Link the LiteRTLM product to the FitnessRPG iOS target.
   3. Copy the xcconfig template into an active iOS Debug configuration or add FITNESSRPG_ENABLE_LITERTLM manually.
   4. Place the licensed gemma-4-E2B-it.litertlm under ModelResources.
-  5. Rerun this checklist with --require-real-runtime.
+  5. Run native/scripts/model-artifact-git-guard.sh before committing local model setup changes.
+  6. Rerun this checklist with --require-real-runtime.
 NEXT

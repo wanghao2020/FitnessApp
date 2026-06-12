@@ -11,3 +11,11 @@ DerivedData/
 secrets.*
 *.env
 .superpowers/
+
+# Licensed local model artifacts
+native/AppSources/iOS/ModelRuntime/ModelResources/*.litertlm
+native/AppSources/iOS/ModelRuntime/ModelResources/*.task
+native/AppSources/iOS/ModelRuntime/ModelResources/*.tflite
+native/AppSources/iOS/ModelRuntime/ModelResources/*.onnx
+native/AppSources/iOS/ModelRuntime/ModelResources/*.mlmodel
+native/AppSources/iOS/ModelRuntime/ModelResources/*.mlpackage/

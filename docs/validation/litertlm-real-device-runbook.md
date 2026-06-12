@@ -16,6 +16,7 @@ Validate local model fallback diagnostics, DEBUG fixture paths, and real LiteRT-
 Run the default fallback preflight:
 
 ```bash
+bash native/scripts/model-artifact-git-guard.sh
 bash native/scripts/litertlm-integration-checklist.sh
 bash native/scripts/litertlm-real-device-preflight.sh
 ```
@@ -36,6 +37,7 @@ bash native/scripts/litertlm-integration-checklist.sh
 
 The checklist verifies the guarded iOS adapter boundary, the model resource documentation, and these local templates:
 
+- `native/scripts/model-artifact-git-guard.sh`
 - `native/Config/LiteRTLMRealRuntime.example.xcconfig`
 - `native/AppSources/iOS/ModelRuntime/ModelResources/model-package-manifest.example.json`
 
@@ -45,10 +47,12 @@ When the LiteRTLM package URL and licensed model artifact are confirmed:
 2. Link the LiteRTLM product to the `FitnessRPG` iOS target.
 3. Copy `native/Config/LiteRTLMRealRuntime.example.xcconfig` into an active iOS Debug configuration or add `FITNESSRPG_ENABLE_LITERTLM` manually.
 4. Place `gemma-4-E2B-it.litertlm` under `native/AppSources/iOS/ModelRuntime/ModelResources/`.
-5. Record source and checksum notes using `model-package-manifest.example.json` outside git.
-6. Rerun:
+5. Run `bash native/scripts/model-artifact-git-guard.sh` and confirm the model artifact remains local and ignored.
+6. Record source and checksum notes using `model-package-manifest.example.json` outside git.
+7. Rerun:
 
 ```bash
+bash native/scripts/model-artifact-git-guard.sh
 bash native/scripts/litertlm-integration-checklist.sh --require-real-runtime
 bash native/scripts/litertlm-real-device-preflight.sh --require-real-runtime
 ```
@@ -94,6 +98,7 @@ Expected evidence:
 4. Run:
 
 ```bash
+bash native/scripts/model-artifact-git-guard.sh
 bash native/scripts/litertlm-real-device-preflight.sh --require-real-runtime
 ```
 
@@ -114,6 +119,7 @@ Expected evidence:
 ## Failure Routing
 
 - Missing model package: verify the exact `ModelResources/gemma-4-E2B-it.litertlm` path.
+- Model package appears in Git: run `bash native/scripts/model-artifact-git-guard.sh`, then remove it from the index with `git rm --cached <path>`.
 - Model package too small: replace placeholder with a licensed model package.
 - SDK not linked: confirm the iOS target links LiteRTLM and the package product name appears in the project.
 - Flag not enabled: add `FITNESSRPG_ENABLE_LITERTLM` to iOS Swift flags.

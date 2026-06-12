@@ -8,6 +8,12 @@ Expected future files:
 
 Do not commit large or licensed model files until the model distribution policy is explicit. The Core catalog currently points diagnostics at `ModelResources/gemma-4-E2B-it.litertlm`, so DEBUG builds will report this resource as missing until a real LiteRT-LM model package is provided.
 
+Git ignores local model artifacts in this directory. Before committing model-resource changes, run:
+
+```bash
+bash native/scripts/model-artifact-git-guard.sh
+```
+
 Use `model-package-manifest.example.json` to record the expected package name, bundle path, minimum byte size, license/source notes, and checksum outside git before handing a real model package between machines.
 
 Real execution also requires linking the LiteRT-LM Swift package and enabling the `FITNESSRPG_ENABLE_LITERTLM` compile flag. Without both, the iOS adapter remains unavailable and the app uses deterministic fallback copy.
