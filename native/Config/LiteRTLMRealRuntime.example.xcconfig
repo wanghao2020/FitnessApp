@@ -1,0 +1,9 @@
+// Example only. Do not enable until LiteRTLM is linked to the FitnessRPG iOS target.
+//
+// To use:
+// 1. Add the LiteRTLM Swift package in Xcode.
+// 2. Link the LiteRTLM product to the FitnessRPG iOS target.
+// 3. Copy this file or assign it as the iOS Debug configuration base.
+// 4. Run: bash native/scripts/litertlm-real-device-preflight.sh --require-real-runtime
+
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) FITNESSRPG_ENABLE_LITERTLM

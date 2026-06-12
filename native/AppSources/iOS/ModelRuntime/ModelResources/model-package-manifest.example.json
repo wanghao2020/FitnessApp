@@ -1,0 +1,13 @@
+{
+  "model": "Gemma 4 E2B LiteRT-LM",
+  "fileName": "gemma-4-E2B-it.litertlm",
+  "bundleRelativePath": "ModelResources/gemma-4-E2B-it.litertlm",
+  "minimumByteSize": 1024,
+  "doNotCommitModelFile": true,
+  "licenseSource": "Record the licensed source or internal artifact location outside git.",
+  "checksum": {
+    "algorithm": "sha256",
+    "value": "record-checksum-outside-git"
+  },
+  "validationCommand": "bash native/scripts/litertlm-real-device-preflight.sh --require-real-runtime"
+}

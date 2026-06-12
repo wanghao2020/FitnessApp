@@ -16,12 +16,40 @@ Validate local model fallback diagnostics, DEBUG fixture paths, and real LiteRT-
 Run the default fallback preflight:
 
 ```bash
+bash native/scripts/litertlm-integration-checklist.sh
 bash native/scripts/litertlm-real-device-preflight.sh
 ```
 
 After adding real model assets and SDK wiring, run:
 
 ```bash
+bash native/scripts/litertlm-real-device-preflight.sh --require-real-runtime
+```
+
+## LiteRT-LM Integration Kit
+
+Use the integration checklist before touching Xcode package settings:
+
+```bash
+bash native/scripts/litertlm-integration-checklist.sh
+```
+
+The checklist verifies the guarded iOS adapter boundary, the model resource documentation, and these local templates:
+
+- `native/Config/LiteRTLMRealRuntime.example.xcconfig`
+- `native/AppSources/iOS/ModelRuntime/ModelResources/model-package-manifest.example.json`
+
+When the LiteRTLM package URL and licensed model artifact are confirmed:
+
+1. Add the LiteRTLM Swift package in Xcode.
+2. Link the LiteRTLM product to the `FitnessRPG` iOS target.
+3. Copy `native/Config/LiteRTLMRealRuntime.example.xcconfig` into an active iOS Debug configuration or add `FITNESSRPG_ENABLE_LITERTLM` manually.
+4. Place `gemma-4-E2B-it.litertlm` under `native/AppSources/iOS/ModelRuntime/ModelResources/`.
+5. Record source and checksum notes using `model-package-manifest.example.json` outside git.
+6. Rerun:
+
+```bash
+bash native/scripts/litertlm-integration-checklist.sh --require-real-runtime
 bash native/scripts/litertlm-real-device-preflight.sh --require-real-runtime
 ```
 
