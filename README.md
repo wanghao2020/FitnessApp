@@ -65,6 +65,7 @@ After a Runtime response executes, the panel also shows the generated draft titl
 The WatchConnectivity diagnostics panel also includes device-validation checklist rows for installation, sending, and inbound return so paired-device testing can move from setup to Today send to Watch return without reading console logs first.
 
 DEBUG demo builds can use `--fitnessrpg-demo-seed` to write deterministic Today, History, Memory Review, weekly polish cache, and validation archive data. This gives the native app a concrete showcase path before real HealthKit, WatchConnectivity, or LiteRT-LM resources are available.
+For one-click simulator demos, use the shared `FitnessRPGDemo` Xcode scheme or run `bash native/scripts/demo-seed-simulator-smoke.sh`; see `docs/validation/demo-seed-runbook.md`.
 
 DEBUG model Runtime fixture launch arguments can also simulate ready output, parsing failure, adapter failure, and validator fallback without real model files. Use them together with `--fitnessrpg-show-diagnostics` when validating the Runtime panel, or with `--fitnessrpg-open-history` when validating the History weekly polish path.
 
