@@ -52,10 +52,25 @@ bash native/scripts/demo-seed-simulator-smoke.sh --screenshot /private/tmp/fitne
 - 按钮不重叠，文字没有溢出。
 - 顶部 safe area 和返回按钮没有遮挡内容。
 
+需要一次导出完整 demo 截图库时，传入 `--screenshots-dir`：
+
+```bash
+bash native/scripts/demo-seed-simulator-smoke.sh --screenshots-dir /private/tmp/fitnessrpg-demo-gallery
+```
+
+脚本会输出：
+
+- `/private/tmp/fitnessrpg-demo-gallery/history.png`
+- `/private/tmp/fitnessrpg-demo-gallery/today.png`
+- `/private/tmp/fitnessrpg-demo-gallery/memory.png`
+- `/private/tmp/fitnessrpg-demo-gallery/validation-archive.png`
+
+这四张图覆盖 History 首屏、Today 诊断、Memory Review 和验证报告归档入口。
+
 也可以指定设备：
 
 ```bash
-bash native/scripts/demo-seed-simulator-smoke.sh --device <device-id> --screenshot /private/tmp/fitnessrpg-demo-smoke.png
+bash native/scripts/demo-seed-simulator-smoke.sh --device <device-id> --screenshots-dir /private/tmp/fitnessrpg-demo-gallery
 ```
 
 脚本默认会在截图前等待 2 秒，避免截到 iOS 启动过渡黑屏。较慢的模拟器可以加长等待：

@@ -9,6 +9,7 @@ APP_PATH="$DERIVED_DATA_PATH/Build/Products/Debug-iphonesimulator/FitnessRPG.app
 
 device_id=""
 screenshot_path=""
+screenshots_dir=""
 screenshot_delay_seconds="${FITNESSRPG_DEMO_SCREENSHOT_DELAY:-2}"
 
 usage() {
@@ -22,12 +23,15 @@ captures a screenshot.
 Options:
   --device ID          Use a specific simulator device id.
   --screenshot PATH   Save a simulator screenshot after launch and verification.
+  --screenshots-dir DIR
+                       Save History, Today, Memory, and archive screenshots.
   --screenshot-delay N Wait N seconds before taking a screenshot. Defaults to 2.
   -h, --help          Show this help.
 
 Examples:
   bash native/scripts/demo-seed-simulator-smoke.sh
   bash native/scripts/demo-seed-simulator-smoke.sh --screenshot /private/tmp/fitnessrpg-demo.png
+  bash native/scripts/demo-seed-simulator-smoke.sh --screenshots-dir /private/tmp/fitnessrpg-demo-gallery
 USAGE
 }
 
@@ -47,6 +51,14 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       screenshot_path="$2"
+      shift 2
+      ;;
+    --screenshots-dir)
+      if [[ $# -lt 2 ]]; then
+        echo "--screenshots-dir requires an output directory." >&2
+        exit 1
+      fi
+      screenshots_dir="$2"
       shift 2
       ;;
     --screenshot-delay)
@@ -100,10 +112,26 @@ xcodebuild \
   build >/dev/null
 
 xcrun simctl install "$device_id" "$APP_PATH"
-xcrun simctl launch "$device_id" "$BUNDLE_ID" \
+
+launch_demo() {
+  xcrun simctl terminate "$device_id" "$BUNDLE_ID" >/dev/null 2>&1 || true
+  xcrun simctl launch "$device_id" "$BUNDLE_ID" "$@" >/dev/null
+}
+
+capture_screenshot() {
+  local output_path="$1"
+
+  mkdir -p "$(dirname "$output_path")"
+  sleep "$screenshot_delay_seconds"
+  xcrun simctl io "$device_id" screenshot "$output_path" >/dev/null
+  test -s "$output_path"
+  echo "Screenshot written to $output_path."
+}
+
+launch_demo \
   --fitnessrpg-demo-seed \
   --fitnessrpg-open-history \
-  --fitnessrpg-show-diagnostics >/dev/null
+  --fitnessrpg-show-diagnostics
 
 container_path="$(xcrun simctl get_app_container "$device_id" "$BUNDLE_ID" data)"
 store_path="$container_path/Library/Application Support/FitnessRPG"
@@ -122,11 +150,33 @@ grep -q "demo-seed-local-model" "$weekly_polish"
 grep -q "Demo Seed 验证" "$validation_reports"
 
 if [[ -n "$screenshot_path" ]]; then
-  mkdir -p "$(dirname "$screenshot_path")"
-  sleep "$screenshot_delay_seconds"
-  xcrun simctl io "$device_id" screenshot "$screenshot_path" >/dev/null
-  test -s "$screenshot_path"
-  echo "Screenshot written to $screenshot_path."
+  capture_screenshot "$screenshot_path"
+fi
+
+if [[ -n "$screenshots_dir" ]]; then
+  mkdir -p "$screenshots_dir"
+
+  launch_demo \
+    --fitnessrpg-demo-seed \
+    --fitnessrpg-open-history \
+    --fitnessrpg-show-diagnostics
+  capture_screenshot "$screenshots_dir/history.png"
+
+  launch_demo \
+    --fitnessrpg-demo-seed \
+    --fitnessrpg-show-diagnostics
+  capture_screenshot "$screenshots_dir/today.png"
+
+  launch_demo \
+    --fitnessrpg-demo-seed \
+    --fitnessrpg-open-memory-review \
+    --fitnessrpg-show-diagnostics
+  capture_screenshot "$screenshots_dir/memory.png"
+
+  launch_demo \
+    --fitnessrpg-demo-seed \
+    --fitnessrpg-open-validation-report-archive
+  capture_screenshot "$screenshots_dir/validation-archive.png"
 fi
 
 echo "FitnessRPGDemo smoke passed on simulator $device_id."
