@@ -46,6 +46,7 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 - `--fitnessrpg-open-latest-history-detail`: launch History and open the latest day detail.
 - `--fitnessrpg-open-memory-review`: launch directly into Memory Review.
 - `--fitnessrpg-show-diagnostics`: show the Today WatchConnectivity and model Runtime/resource diagnostics panels in DEBUG builds.
+- `--fitnessrpg-open-validation-report-archive`: enable diagnostics and open the saved validation report archive sheet for screenshots.
 - `--fitnessrpg-model-fixture-ready`: in DEBUG diagnostics, run a successful local model fixture response.
 - `--fitnessrpg-model-fixture-parsing-failure`: in DEBUG diagnostics, run a fixture response that fails raw text parsing.
 - `--fitnessrpg-model-fixture-adapter-failure`: in DEBUG diagnostics, run a fixture response that fails at the adapter layer.
@@ -53,7 +54,7 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 
 ## Future Integration Points
 
-- Real-device WatchConnectivity validation can now start from the DEBUG checklist rows: confirm iPhone support/pairing/Watch App installation, send Today to Watch, complete Watch steps, then verify inbound return and History persistence.
+- Real-device WatchConnectivity validation can now start with `bash native/scripts/watchconnectivity-real-device-preflight.sh`, then follow `docs/validation/watchconnectivity-real-device-runbook.md`: confirm iPhone support/pairing/Watch App installation, send Today to Watch, complete Watch steps, then verify inbound return and History persistence.
 - HealthKit permission and data-coverage action rows can be validated on real devices before adding deeper onboarding.
 - LiteRT-LM / Gemma SDK execution can be enabled by linking the Swift package, placing `ModelResources/gemma-4-E2B-it.litertlm`, and setting `FITNESSRPG_ENABLE_LITERTLM`.
 

@@ -86,7 +86,7 @@ These records are context, not runtime app assets.
 
 Recommended sequence:
 
-1. Run paired-device WatchConnectivity validation on real hardware: install both targets, launch iOS with `--fitnessrpg-show-diagnostics`, confirm the installation checklist row, send Today to Watch, complete Watch steps, then confirm the inbound checklist row and History write.
+1. Run paired-device WatchConnectivity validation on real hardware: first run `bash native/scripts/watchconnectivity-real-device-preflight.sh`, then follow `docs/validation/watchconnectivity-real-device-runbook.md` to install both targets, launch iOS with `--fitnessrpg-show-diagnostics`, send Today to Watch, complete Watch steps, confirm inbound return, and save baseline/final validation reports.
 2. Validate the HealthKit permission and data-coverage action rows on real devices, then add deeper onboarding only if those fallback notices are not enough.
 3. Add the LiteRT-LM Swift package and licensed `gemma-4-E2B-it.litertlm` resource, then enable `FITNESSRPG_ENABLE_LITERTLM` for real-device model execution.
 4. Run an end-to-end real-device pass using the DEBUG validation overview across WatchConnectivity, HealthKit fallback/action rows, Runtime diagnostics, and History weekly polish cache controls.
