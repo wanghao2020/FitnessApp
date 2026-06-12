@@ -25,6 +25,9 @@ Options:
 Runbook:
   docs/validation/end-to-end-real-device-runbook.md
 
+Model Artifact Guard:
+  native/scripts/model-artifact-git-guard.sh
+
 Default DEBUG Run Argument:
   --fitnessrpg-show-diagnostics
 
@@ -89,6 +92,9 @@ require_command bash
 require_command xcodebuild
 require_command xcrun
 require_command swift
+
+log "Checking local model artifact git guard"
+bash native/scripts/model-artifact-git-guard.sh
 
 log "Checking WatchConnectivity wiring"
 bash native/scripts/watchconnectivity-real-device-preflight.sh \

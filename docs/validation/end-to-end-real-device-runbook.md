@@ -22,6 +22,7 @@ bash native/scripts/end-to-end-real-device-preflight.sh
 ```
 
 This runs the three domain wiring checks, then runs Core tests and iOS/watchOS generic builds once.
+It also runs `native/scripts/model-artifact-git-guard.sh` so local licensed model files can stay in `ModelResources` without being tracked or staged.
 
 If the pass must require real LiteRT-LM execution instead of fallback Runtime diagnostics, run:
 
