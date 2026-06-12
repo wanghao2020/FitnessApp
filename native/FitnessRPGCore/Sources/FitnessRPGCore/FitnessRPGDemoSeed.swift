@@ -12,22 +12,51 @@ public struct FitnessRPGDemoSeedPresentationEvidence: Equatable, Sendable {
     }
 }
 
+public enum FitnessRPGDemoSeedPresentationDestination: String, Equatable, Sendable {
+    case today
+    case history
+    case memory
+    case diagnostics
+}
+
+public struct FitnessRPGDemoSeedPresentationAction: Equatable, Sendable {
+    public let title: String
+    public let detail: String
+    public let systemImageName: String
+    public let destination: FitnessRPGDemoSeedPresentationDestination
+
+    public init(
+        title: String,
+        detail: String,
+        systemImageName: String,
+        destination: FitnessRPGDemoSeedPresentationDestination
+    ) {
+        self.title = title
+        self.detail = detail
+        self.systemImageName = systemImageName
+        self.destination = destination
+    }
+}
+
 public struct FitnessRPGDemoSeedPresentation: Equatable, Sendable {
     public let title: String
     public let subtitle: String
     public let systemImageName: String
     public let evidence: [FitnessRPGDemoSeedPresentationEvidence]
+    public let actions: [FitnessRPGDemoSeedPresentationAction]
 
     public init(
         title: String,
         subtitle: String,
         systemImageName: String,
-        evidence: [FitnessRPGDemoSeedPresentationEvidence]
+        evidence: [FitnessRPGDemoSeedPresentationEvidence],
+        actions: [FitnessRPGDemoSeedPresentationAction]
     ) {
         self.title = title
         self.subtitle = subtitle
         self.systemImageName = systemImageName
         self.evidence = evidence
+        self.actions = actions
     }
 }
 
@@ -294,6 +323,32 @@ public struct FitnessRPGDemoSeed: Equatable, Sendable {
                     title: "Diagnostics",
                     value: "2 条验证报告",
                     systemImageName: "waveform.path.ecg.rectangle"
+                )
+            ],
+            actions: [
+                FitnessRPGDemoSeedPresentationAction(
+                    title: "Today",
+                    detail: "查看今日任务",
+                    systemImageName: "target",
+                    destination: .today
+                ),
+                FitnessRPGDemoSeedPresentationAction(
+                    title: "History",
+                    detail: "查看周回顾",
+                    systemImageName: "clock.arrow.circlepath",
+                    destination: .history
+                ),
+                FitnessRPGDemoSeedPresentationAction(
+                    title: "Memory",
+                    detail: "查看记忆草稿",
+                    systemImageName: "book.closed",
+                    destination: .memory
+                ),
+                FitnessRPGDemoSeedPresentationAction(
+                    title: "Diagnostics",
+                    detail: "回到 Today 查看诊断",
+                    systemImageName: "stethoscope",
+                    destination: .diagnostics
                 )
             ]
         )

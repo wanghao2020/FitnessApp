@@ -119,7 +119,10 @@ struct TodayCommandCenterView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     if let presentation = persistenceModel.demoSeedPresentation {
-                        DemoSeedPresentationBanner(presentation: presentation)
+                        DemoSeedPresentationBanner(
+                            presentation: presentation,
+                            actionHandler: handleDemoPresentationAction
+                        )
                     }
 
                     TodayHeroCard(
@@ -189,13 +192,15 @@ struct TodayCommandCenterView: View {
                 case .history:
                     HistoryView(
                         persistenceModel: persistenceModel,
-                        modelRuntimeFixtureMode: modelRuntimeFixtureMode
+                        modelRuntimeFixtureMode: modelRuntimeFixtureMode,
+                        demoActionHandler: handleDemoPresentationAction
                     )
                 case .latestHistoryDetail:
                     HistoryView(
                         persistenceModel: persistenceModel,
                         initialDisplay: .latestDetail,
-                        modelRuntimeFixtureMode: modelRuntimeFixtureMode
+                        modelRuntimeFixtureMode: modelRuntimeFixtureMode,
+                        demoActionHandler: handleDemoPresentationAction
                     )
                 case .memoryReview:
                     MemoryReviewView(persistenceModel: persistenceModel)
@@ -237,6 +242,17 @@ struct TodayCommandCenterView: View {
             .task(id: modelRuntimeFixtureMode) {
                 await refreshModelRuntimeFixtureResponse()
             }
+        }
+    }
+
+    private func handleDemoPresentationAction(_ destination: FitnessRPGDemoSeedPresentationDestination) {
+        switch destination {
+        case .today, .diagnostics:
+            navigationPath = []
+        case .history:
+            navigationPath = [.history]
+        case .memory:
+            navigationPath = [.memoryReview]
         }
     }
 

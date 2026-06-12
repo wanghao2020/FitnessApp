@@ -10,17 +10,20 @@ struct HistoryView: View {
     @ObservedObject var persistenceModel: TodayPersistenceModel
     let initialDisplay: HistoryInitialDisplay
     let modelRuntimeFixtureMode: ModelRuntimeDebugFixtureMode?
+    let demoActionHandler: (FitnessRPGDemoSeedPresentationDestination) -> Void
     @State private var weeklyPolishResponse: ModelRuntimeResponse?
     @State private var isRegeneratingWeeklyPolish = false
 
     init(
         persistenceModel: TodayPersistenceModel,
         initialDisplay: HistoryInitialDisplay = .list,
-        modelRuntimeFixtureMode: ModelRuntimeDebugFixtureMode? = nil
+        modelRuntimeFixtureMode: ModelRuntimeDebugFixtureMode? = nil,
+        demoActionHandler: @escaping (FitnessRPGDemoSeedPresentationDestination) -> Void = { _ in }
     ) {
         self.persistenceModel = persistenceModel
         self.initialDisplay = initialDisplay
         self.modelRuntimeFixtureMode = modelRuntimeFixtureMode
+        self.demoActionHandler = demoActionHandler
     }
 
     var body: some View {
@@ -53,7 +56,10 @@ struct HistoryView: View {
         List {
             if let presentation = persistenceModel.demoSeedPresentation {
                 Section {
-                    DemoSeedPresentationBanner(presentation: presentation)
+                    DemoSeedPresentationBanner(
+                        presentation: presentation,
+                        actionHandler: demoActionHandler
+                    )
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                         .listRowBackground(Color.clear)
                 }
@@ -157,6 +163,7 @@ struct HistoryView: View {
 
 struct DemoSeedPresentationBanner: View {
     let presentation: FitnessRPGDemoSeedPresentation
+    let actionHandler: (FitnessRPGDemoSeedPresentationDestination) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -205,6 +212,44 @@ struct DemoSeedPresentationBanner: View {
                     .frame(maxWidth: .infinity, minHeight: 42, alignment: .topLeading)
                     .padding(8)
                     .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8))
+                }
+            }
+
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible(), spacing: 8),
+                    GridItem(.flexible(), spacing: 8)
+                ],
+                alignment: .leading,
+                spacing: 8
+            ) {
+                ForEach(presentation.actions, id: \.destination) { action in
+                    Button {
+                        actionHandler(action.destination)
+                    } label: {
+                        HStack(alignment: .center, spacing: 8) {
+                            Image(systemName: action.systemImageName)
+                                .font(.caption.weight(.semibold))
+                                .frame(width: 18, height: 18)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(action.title)
+                                    .font(.caption.weight(.semibold))
+                                    .lineLimit(1)
+                                Text(action.detail)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.82)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .padding(.horizontal, 10)
+                        .background(Color.blue.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.blue)
+                    .accessibilityLabel("\(action.title)：\(action.detail)")
                 }
             }
         }
