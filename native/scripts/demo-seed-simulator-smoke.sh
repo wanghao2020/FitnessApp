@@ -13,6 +13,7 @@ screenshots_dir=""
 screenshot_delay_seconds="${FITNESSRPG_DEMO_SCREENSHOT_DELAY:-2}"
 gallery_manifest_path=""
 gallery_index_path=""
+run_build=1
 
 usage() {
   cat <<'USAGE'
@@ -28,6 +29,7 @@ Options:
   --screenshots-dir DIR
                        Save gallery screenshots plus manifest.md and index.html.
   --screenshot-delay N Wait N seconds before taking a screenshot. Defaults to 2.
+  --skip-build        Reuse the existing DerivedData app build.
   -h, --help          Show this help.
 
 Examples:
@@ -71,6 +73,10 @@ while [[ $# -gt 0 ]]; do
       screenshot_delay_seconds="$2"
       shift 2
       ;;
+    --skip-build)
+      run_build=0
+      shift
+      ;;
     -h|--help)
       usage
       exit 0
@@ -105,13 +111,18 @@ if [[ -z "$device_id" ]]; then
   exit 1
 fi
 
-xcodebuild \
-  -project "$PROJECT_PATH" \
-  -scheme FitnessRPGDemo \
-  -destination "platform=iOS Simulator,id=$device_id" \
-  -derivedDataPath "$DERIVED_DATA_PATH" \
-  CODE_SIGNING_ALLOWED=NO \
-  build >/dev/null
+if [[ "$run_build" -eq 1 ]]; then
+  xcodebuild \
+    -project "$PROJECT_PATH" \
+    -scheme FitnessRPGDemo \
+    -destination "platform=iOS Simulator,id=$device_id" \
+    -derivedDataPath "$DERIVED_DATA_PATH" \
+    CODE_SIGNING_ALLOWED=NO \
+    build >/dev/null
+elif [[ ! -d "$APP_PATH" ]]; then
+  echo "Missing existing app build at $APP_PATH. Run without --skip-build first." >&2
+  exit 1
+fi
 
 xcrun simctl install "$device_id" "$APP_PATH"
 

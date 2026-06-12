@@ -82,6 +82,14 @@ bash native/scripts/demo-seed-simulator-smoke.sh --device <device-id> --screensh
 bash native/scripts/demo-seed-simulator-smoke.sh --screenshot /private/tmp/fitnessrpg-demo-smoke.png --screenshot-delay 4
 ```
 
+如果已经运行过一次完整 smoke，并且只想快速重新采集截图或 `index.html`，可以跳过构建：
+
+```bash
+bash native/scripts/demo-seed-simulator-smoke.sh --skip-build --screenshots-dir /private/tmp/fitnessrpg-demo-gallery
+```
+
+`--skip-build` 仍会重新安装当前 DerivedData 里的 `FitnessRPG.app`。如果构建产物不存在，脚本会提示先运行不带 `--skip-build` 的完整 smoke。
+
 旧的位置参数仍然兼容：
 
 ```bash
