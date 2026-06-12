@@ -285,6 +285,8 @@ private struct TodayHeroCard: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
 
+            TodayNextFocusRow(summary: summary, tint: tint)
+
             HStack(spacing: 8) {
                 TodayInlineMetric(
                     title: "Readiness",
@@ -307,6 +309,35 @@ private struct TodayHeroCard: View {
         .padding(14)
         .background(.regularMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+private struct TodayNextFocusRow: View {
+    let summary: TodayCommandCenterSummary
+    let tint: Color
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: summary.nextFocusSystemImage)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(tint)
+                .frame(width: 28, height: 28)
+                .background(tint.opacity(0.14))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(summary.nextFocusHeadline)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(tint)
+                    .lineLimit(2)
+                Text(summary.nextFocusDetail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 

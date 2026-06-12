@@ -7,6 +7,9 @@ public struct TodayCommandCenterSummary: Equatable, Sendable {
     public let rewardSummary: String
     public let primaryActionLabel: String
     public let primaryActionSystemImage: String
+    public let nextFocusHeadline: String
+    public let nextFocusDetail: String
+    public let nextFocusSystemImage: String
 
     public init(
         readiness: ReadinessResult,
@@ -27,5 +30,19 @@ public struct TodayCommandCenterSummary: Equatable, Sendable {
             : quest.attributeRewards.joined(separator: " / ")
         self.primaryActionLabel = "发送到 Watch"
         self.primaryActionSystemImage = "applewatch"
+
+        if executionLogCount <= 0 {
+            self.nextFocusHeadline = "下一步：发送到 Watch"
+            self.nextFocusDetail = "把 \(totalSteps) 个步骤同步到手表。"
+            self.nextFocusSystemImage = "applewatch"
+        } else if executionLogCount < totalSteps {
+            self.nextFocusHeadline = "下一步：继续 Watch 执行"
+            self.nextFocusDetail = "已回传 \(executionLogCount)/\(totalSteps) 步，完成剩余步骤后回到 iPhone。"
+            self.nextFocusSystemImage = "figure.run"
+        } else {
+            self.nextFocusHeadline = "下一步：查看 History"
+            self.nextFocusDetail = "今日 Watch 记录已收齐，查看结果与故事进度。"
+            self.nextFocusSystemImage = "clock.arrow.circlepath"
+        }
     }
 }

@@ -861,6 +861,38 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(summary.primaryActionSystemImage, "applewatch")
     }
 
+    func testTodayCommandCenterSummaryBuildsNextFocusForWatchProgress() {
+        let readiness = ReadinessEngine.evaluate(MockHealthProfiles.green)
+        let quest = QuestEngine.quest(for: readiness, storyNode: "回声训练厅")
+
+        let notStarted = TodayCommandCenterSummary(
+            readiness: readiness,
+            quest: quest,
+            executionLogCount: 0
+        )
+        XCTAssertEqual(notStarted.nextFocusHeadline, "下一步：发送到 Watch")
+        XCTAssertEqual(notStarted.nextFocusDetail, "把 3 个步骤同步到手表。")
+        XCTAssertEqual(notStarted.nextFocusSystemImage, "applewatch")
+
+        let inProgress = TodayCommandCenterSummary(
+            readiness: readiness,
+            quest: quest,
+            executionLogCount: 1
+        )
+        XCTAssertEqual(inProgress.nextFocusHeadline, "下一步：继续 Watch 执行")
+        XCTAssertEqual(inProgress.nextFocusDetail, "已回传 1/3 步，完成剩余步骤后回到 iPhone。")
+        XCTAssertEqual(inProgress.nextFocusSystemImage, "figure.run")
+
+        let completed = TodayCommandCenterSummary(
+            readiness: readiness,
+            quest: quest,
+            executionLogCount: 3
+        )
+        XCTAssertEqual(completed.nextFocusHeadline, "下一步：查看 History")
+        XCTAssertEqual(completed.nextFocusDetail, "今日 Watch 记录已收齐，查看结果与故事进度。")
+        XCTAssertEqual(completed.nextFocusSystemImage, "clock.arrow.circlepath")
+    }
+
     func testHealthySignalsMapToGreenLeaningSummary() {
         let summary = HealthSummaryMapper.summary(
             from: HealthSignals(
