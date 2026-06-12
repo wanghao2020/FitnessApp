@@ -499,6 +499,7 @@
 				CFBundleDisplayName = "Fitness RPG";
 				CODE_SIGN_ENTITLEMENTS = AppSources/iOS/FitnessRPG.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 4J87DT3T95;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Fitness RPG uses Apple Health data to estimate readiness and adapt training intensity.";
@@ -521,6 +522,7 @@
 				CFBundleDisplayName = "Fitness RPG";
 				CODE_SIGN_ENTITLEMENTS = AppSources/iOS/FitnessRPG.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 4J87DT3T95;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Fitness RPG uses Apple Health data to estimate readiness and adapt training intensity.";
@@ -542,6 +544,7 @@
 			buildSettings = {
 				CFBundleDisplayName = "Fitness RPG Watch";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 4J87DT3T95;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG Watch";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.hao.fitnessrpg;
@@ -563,6 +566,7 @@
 			buildSettings = {
 				CFBundleDisplayName = "Fitness RPG Watch";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 4J87DT3T95;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG Watch";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.hao.fitnessrpg;
