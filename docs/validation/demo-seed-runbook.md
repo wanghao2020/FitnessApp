@@ -61,11 +61,12 @@ bash native/scripts/demo-seed-simulator-smoke.sh --screenshots-dir /private/tmp/
 脚本会输出：
 
 - `/private/tmp/fitnessrpg-demo-gallery/history.png`
+- `/private/tmp/fitnessrpg-demo-gallery/history-detail.png`
 - `/private/tmp/fitnessrpg-demo-gallery/today.png`
 - `/private/tmp/fitnessrpg-demo-gallery/memory.png`
 - `/private/tmp/fitnessrpg-demo-gallery/validation-archive.png`
 
-这四张图覆盖 History 首屏、Today 诊断、Memory Review 和验证报告归档入口。
+这五张图覆盖 History 首屏、最新训练详情、Today 诊断、Memory Review 和验证报告归档入口。
 
 也可以指定设备：
 

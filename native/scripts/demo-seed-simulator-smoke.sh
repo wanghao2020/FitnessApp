@@ -24,7 +24,7 @@ Options:
   --device ID          Use a specific simulator device id.
   --screenshot PATH   Save a simulator screenshot after launch and verification.
   --screenshots-dir DIR
-                       Save History, Today, Memory, and archive screenshots.
+                       Save History, detail, Today, Memory, and archive screenshots.
   --screenshot-delay N Wait N seconds before taking a screenshot. Defaults to 2.
   -h, --help          Show this help.
 
@@ -161,6 +161,12 @@ if [[ -n "$screenshots_dir" ]]; then
     --fitnessrpg-open-history \
     --fitnessrpg-show-diagnostics
   capture_screenshot "$screenshots_dir/history.png"
+
+  launch_demo \
+    --fitnessrpg-demo-seed \
+    --fitnessrpg-open-latest-history-detail \
+    --fitnessrpg-show-diagnostics
+  capture_screenshot "$screenshots_dir/history-detail.png"
 
   launch_demo \
     --fitnessrpg-demo-seed \
