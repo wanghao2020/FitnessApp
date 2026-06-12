@@ -22,7 +22,7 @@ When a Runtime response has executed, the panel also shows the resulting draft t
 The WatchConnectivity panel includes three real-device checklist rows: installation readiness, send path, and inbound return. Use them with `--fitnessrpg-show-diagnostics` when validating paired hardware.
 
 DEBUG demo builds can seed a complete deterministic showcase with `--fitnessrpg-demo-seed`. It writes Today, History, Memory Review, weekly polish cache, and validation archive data so the app can be demonstrated before real HealthKit, WatchConnectivity, or LiteRT-LM files are available.
-For one-click simulator demos, use the shared `FitnessRPGDemo` Xcode scheme or run `bash native/scripts/demo-seed-simulator-smoke.sh`; see `docs/validation/demo-seed-runbook.md`.
+For one-click simulator demos, use the shared `FitnessRPGDemo` Xcode scheme or run `bash native/scripts/demo-seed-simulator-smoke.sh`; pass `--screenshot /private/tmp/fitnessrpg-demo-smoke.png` when you want reproducible UI evidence. See `docs/validation/demo-seed-runbook.md`.
 
 DEBUG builds also support local model Runtime fixture launch arguments. These simulate ready resources and deterministic adapter output without linking LiteRT/Gemma or packaging model files, so the Runtime panel and History weekly polish path can exercise ready, parsing failure, adapter failure, and validator fallback paths.
 
@@ -65,7 +65,7 @@ Run the deterministic simulator demo from the repository root:
 bash native/scripts/demo-seed-simulator-smoke.sh
 ```
 
-The script builds `FitnessRPGDemo`, installs it on a booted iPhone simulator, launches History with diagnostics, and checks the seeded JSON persistence files.
+The script builds `FitnessRPGDemo`, installs it on a booted iPhone simulator, launches History with diagnostics, and checks the seeded JSON persistence files. Add `--screenshot /private/tmp/fitnessrpg-demo-smoke.png` to save the rendered demo screen during the same pass.
 
 ## Future Integration Points
 

@@ -1,42 +1,78 @@
-# Demo Seed Runbook
+# Demo Seed 运行手册
 
-Use this runbook when you need a concrete native demo before real HealthKit, WatchConnectivity, or LiteRT-LM resources are available.
+当真实 HealthKit、WatchConnectivity 或 LiteRT-LM 资源还没有接入时，用这份手册打开一个可重复的 native demo。
 
-## Xcode Path
+## Xcode 路径
 
-1. Open `native/FitnessRPG.xcodeproj`.
-2. Select the shared scheme `FitnessRPGDemo`.
-3. Run on an iPhone simulator.
-4. Expected first screen: History opens with seeded weekly summary and recent training rows.
-5. Expected data:
-   - `2026-06-12` completed Today record.
-   - Weekly summary title `演示周报：保守推进已闭环`.
-   - Memory Review entries for seeded Watch results.
-   - Diagnostics visible from Today because `--fitnessrpg-show-diagnostics` is enabled.
+1. 打开 `native/FitnessRPG.xcodeproj`。
+2. 选择共享 scheme：`FitnessRPGDemo`。
+3. 在 iPhone 模拟器上运行。
+4. 预期首屏：直接进入 History，展示已种子的周回顾和训练记录。
+5. 预期 demo banner：
+   - 顶部显示 `演示模式`。
+   - evidence 区展示 Today、History、Memory、Diagnostics 四个状态。
+   - action 区展示 Today、History、Memory、Diagnostics 四个路径按钮。
+6. 预期数据：
+   - `2026-06-12` 今日训练已完成。
+   - 周回顾标题为 `演示周报：保守推进已闭环`。
+   - Memory Review 中有 Watch 执行结果生成的记忆草稿。
+   - Today 可显示 Diagnostics，因为 scheme 默认启用 `--fitnessrpg-show-diagnostics`。
 
-## CLI Smoke Path
+## CLI Smoke 路径
 
-Run from the repository root:
+从仓库根目录运行：
 
 ```bash
 bash native/scripts/demo-seed-simulator-smoke.sh
 ```
 
-The script finds a booted iPhone simulator or boots `iPhone 17`, builds `FitnessRPGDemo`, installs the app, launches with demo arguments, and verifies these JSON files:
+脚本会查找已启动的 iPhone 模拟器；如果没有，就启动 `iPhone 17`。随后它会构建 `FitnessRPGDemo`、安装 app、用 demo 参数启动，并验证这些 JSON 文件：
 
 - `training-days.json`
 - `weekly-summary-polish-entries.json`
 - `validation-reports.json`
 
-Pass output:
+通过输出：
 
 ```text
 FitnessRPGDemo smoke passed on simulator <device-id>.
 ```
 
-## Manual Launch Arguments
+## 截图证据
 
-If you use the regular `FitnessRPG` scheme, add these Debug launch arguments manually:
+需要同时留存 UI 证据时，传入 `--screenshot`：
+
+```bash
+bash native/scripts/demo-seed-simulator-smoke.sh --screenshot /private/tmp/fitnessrpg-demo-smoke.png
+```
+
+预期截图应能看到 History 首屏、`演示模式` banner、四个 evidence 状态块，以及四个路径按钮。人工确认重点：
+
+- 中文没有乱码。
+- 按钮不重叠，文字没有溢出。
+- 顶部 safe area 和返回按钮没有遮挡内容。
+
+也可以指定设备：
+
+```bash
+bash native/scripts/demo-seed-simulator-smoke.sh --device <device-id> --screenshot /private/tmp/fitnessrpg-demo-smoke.png
+```
+
+脚本默认会在截图前等待 2 秒，避免截到 iOS 启动过渡黑屏。较慢的模拟器可以加长等待：
+
+```bash
+bash native/scripts/demo-seed-simulator-smoke.sh --screenshot /private/tmp/fitnessrpg-demo-smoke.png --screenshot-delay 4
+```
+
+旧的位置参数仍然兼容：
+
+```bash
+bash native/scripts/demo-seed-simulator-smoke.sh <device-id>
+```
+
+## 手动启动参数
+
+如果使用普通 `FitnessRPG` scheme，手动添加这些 Debug launch arguments：
 
 ```text
 --fitnessrpg-demo-seed
