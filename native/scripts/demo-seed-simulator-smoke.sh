@@ -11,6 +11,7 @@ device_id=""
 screenshot_path=""
 screenshots_dir=""
 screenshot_delay_seconds="${FITNESSRPG_DEMO_SCREENSHOT_DELAY:-2}"
+gallery_manifest_path=""
 
 usage() {
   cat <<'USAGE'
@@ -128,6 +129,41 @@ capture_screenshot() {
   echo "Screenshot written to $output_path."
 }
 
+write_gallery_manifest_header() {
+  gallery_manifest_path="$screenshots_dir/manifest.md"
+
+  {
+    echo "# FitnessRPG Demo Screenshot Gallery"
+    echo
+    echo "- Generated: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    echo "- Simulator: $device_id"
+    echo "- Bundle ID: $BUNDLE_ID"
+    echo "- Screenshot delay: ${screenshot_delay_seconds}s"
+    echo
+    echo "| Screen | File | Launch arguments | Verification |"
+    echo "| --- | --- | --- | --- |"
+  } > "$gallery_manifest_path"
+}
+
+append_gallery_manifest_row() {
+  local screen="$1"
+  local filename="$2"
+  local launch_arguments="$3"
+
+  echo "| $screen | \`$filename\` | \`$launch_arguments\` | file exists and is non-empty |" >> "$gallery_manifest_path"
+}
+
+capture_gallery_screen() {
+  local screen="$1"
+  local filename="$2"
+  shift 2
+  local launch_arguments="$*"
+
+  launch_demo "$@"
+  capture_screenshot "$screenshots_dir/$filename"
+  append_gallery_manifest_row "$screen" "$filename" "$launch_arguments"
+}
+
 launch_demo \
   --fitnessrpg-demo-seed \
   --fitnessrpg-open-history \
@@ -155,34 +191,42 @@ fi
 
 if [[ -n "$screenshots_dir" ]]; then
   mkdir -p "$screenshots_dir"
+  write_gallery_manifest_header
 
-  launch_demo \
+  capture_gallery_screen \
+    "History" \
+    "history.png" \
     --fitnessrpg-demo-seed \
     --fitnessrpg-open-history \
     --fitnessrpg-show-diagnostics
-  capture_screenshot "$screenshots_dir/history.png"
 
-  launch_demo \
+  capture_gallery_screen \
+    "History detail" \
+    "history-detail.png" \
     --fitnessrpg-demo-seed \
     --fitnessrpg-open-latest-history-detail \
     --fitnessrpg-show-diagnostics
-  capture_screenshot "$screenshots_dir/history-detail.png"
 
-  launch_demo \
+  capture_gallery_screen \
+    "Today" \
+    "today.png" \
     --fitnessrpg-demo-seed \
     --fitnessrpg-show-diagnostics
-  capture_screenshot "$screenshots_dir/today.png"
 
-  launch_demo \
+  capture_gallery_screen \
+    "Memory Review" \
+    "memory.png" \
     --fitnessrpg-demo-seed \
     --fitnessrpg-open-memory-review \
     --fitnessrpg-show-diagnostics
-  capture_screenshot "$screenshots_dir/memory.png"
 
-  launch_demo \
+  capture_gallery_screen \
+    "Validation archive" \
+    "validation-archive.png" \
     --fitnessrpg-demo-seed \
     --fitnessrpg-open-validation-report-archive
-  capture_screenshot "$screenshots_dir/validation-archive.png"
+
+  echo "Manifest written to $gallery_manifest_path."
 fi
 
 echo "FitnessRPGDemo smoke passed on simulator $device_id."
