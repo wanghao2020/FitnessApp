@@ -117,7 +117,7 @@ xcodebuild -quiet -project native/FitnessRPG.xcodeproj -scheme FitnessRPGWatch -
 
 Launch with `--fitnessrpg-open-validation-report-archive` and screenshot `/private/tmp/fitnessrpg-validation-report-viewer.png`.
 
-- [ ] **Step 4: Commit and push**
+- [x] **Step 4: Commit and push**
 
 Commit message:
 
