@@ -177,6 +177,22 @@ final class TodayPersistenceModel: ObservableObject {
         }
     }
 
+    func applyDemoSeed(_ seed: FitnessRPGDemoSeed = .showcase) {
+        do {
+            try store.saveDemoSeed(seed)
+            todayRecord = seed.todayRecord
+            storyProgression = seed.storyProgression
+            publishHistory(from: seed.trainingDays)
+            publishMemoryReview(from: seed.memoryEntries, records: seed.trainingDays)
+            validationReportEntries = seed.validationReportEntries.sorted { left, right in
+                left.createdAt > right.createdAt
+            }
+            storageStatusText = statusText("已加载演示数据。")
+        } catch {
+            storageStatusText = "演示数据加载失败：\(error.localizedDescription)"
+        }
+    }
+
     func saveValidationReport(
         _ report: RealDeviceValidationReport,
         headline: String,

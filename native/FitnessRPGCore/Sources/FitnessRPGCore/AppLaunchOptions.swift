@@ -36,6 +36,10 @@ public enum AppLaunchOptions {
         arguments.contains("--fitnessrpg-open-validation-report-archive")
     }
 
+    public static func seedsDemoData(arguments: [String]) -> Bool {
+        arguments.contains("--fitnessrpg-demo-seed")
+    }
+
     public static func modelRuntimeDebugFixtureMode(arguments: [String]) -> ModelRuntimeDebugFixtureMode? {
         if arguments.contains("--fitnessrpg-model-fixture-adapter-failure") {
             return .adapterFailure

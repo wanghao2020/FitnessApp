@@ -130,6 +130,19 @@ final class JSONFitnessRPGStoreTests: XCTestCase {
         XCTAssertNil(loaded.warning)
     }
 
+    func testSavingDemoSeedWritesAllDemoCollections() throws {
+        let store = try temporaryStore()
+        let seed = FitnessRPGDemoSeed.showcase
+
+        try store.saveDemoSeed(seed)
+
+        XCTAssertEqual(store.loadTrainingDays().value, seed.trainingDays)
+        XCTAssertEqual(store.loadStoryProgression().value, seed.storyProgression)
+        XCTAssertEqual(store.loadMemoryEntries().value, seed.memoryEntries)
+        XCTAssertEqual(store.loadWeeklySummaryPolishEntries().value, seed.weeklySummaryPolishEntries)
+        XCTAssertEqual(store.loadValidationReportEntries().value, seed.validationReportEntries)
+    }
+
     func testCorruptJSONFallsBackWithWarning() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)

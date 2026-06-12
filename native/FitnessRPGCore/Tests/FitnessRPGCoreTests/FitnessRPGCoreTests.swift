@@ -831,6 +831,35 @@ final class FitnessRPGCoreTests: XCTestCase {
         )
     }
 
+    func testAppLaunchOptionsParseDemoSeedArgument() {
+        XCTAssertFalse(
+            AppLaunchOptions.seedsDemoData(arguments: ["FitnessRPG"])
+        )
+        XCTAssertTrue(
+            AppLaunchOptions.seedsDemoData(arguments: ["FitnessRPG", "--fitnessrpg-demo-seed"])
+        )
+    }
+
+    func testFitnessRPGDemoSeedProvidesCompleteShowcaseData() {
+        let seed = FitnessRPGDemoSeed.showcase
+        let todayRecord = seed.todayRecord
+
+        XCTAssertEqual(todayRecord?.date, "2026-06-12")
+        XCTAssertEqual(todayRecord?.workoutResult?.completionState, .completed)
+        XCTAssertEqual(todayRecord?.storyProgression?.currentNodeID, seed.storyProgression.currentNodeID)
+        XCTAssertGreaterThanOrEqual(seed.trainingDays.count, 4)
+        XCTAssertGreaterThanOrEqual(seed.memoryEntries.count, 3)
+        XCTAssertGreaterThanOrEqual(seed.validationReportEntries.count, 2)
+
+        let summary = WeeklyTrainingSummaryBuilder.summary(from: seed.trainingDays)
+        XCTAssertNotNil(
+            WeeklySummaryPolishCache.entry(
+                for: summary,
+                in: seed.weeklySummaryPolishEntries
+            )
+        )
+    }
+
     func testAppNavigationDisplayUsesLocalizedHistoryLabels() {
         XCTAssertEqual(AppNavigationDisplay.todayTitle, "Fitness RPG")
         XCTAssertEqual(AppNavigationDisplay.historyTitle, "训练历史")

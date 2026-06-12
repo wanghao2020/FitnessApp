@@ -23,7 +23,11 @@ struct FitnessRPGApp: App {
             )
             .task {
                 await healthViewModel.loadHealthSummary()
-                persistenceModel.loadOrCreateToday(readiness: healthViewModel.readiness)
+                if Self.debugSeedsDemoData {
+                    persistenceModel.applyDemoSeed()
+                } else {
+                    persistenceModel.loadOrCreateToday(readiness: healthViewModel.readiness)
+                }
                 if let record = persistenceModel.todayRecord {
                     watchSyncModel.send(quest: record.quest, readinessColor: record.readiness.color)
                 }
@@ -50,6 +54,14 @@ struct FitnessRPGApp: App {
     private static var debugOpensValidationReportArchive: Bool {
         #if DEBUG
         AppLaunchOptions.opensValidationReportArchive(arguments: ProcessInfo.processInfo.arguments)
+        #else
+        false
+        #endif
+    }
+
+    private static var debugSeedsDemoData: Bool {
+        #if DEBUG
+        AppLaunchOptions.seedsDemoData(arguments: ProcessInfo.processInfo.arguments)
         #else
         false
         #endif

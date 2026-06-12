@@ -76,6 +76,14 @@ public final class JSONFitnessRPGStore: @unchecked Sendable {
         try write(entries, filename: "validation-reports.json")
     }
 
+    public func saveDemoSeed(_ seed: FitnessRPGDemoSeed) throws {
+        try saveTrainingDays(seed.trainingDays)
+        try saveStoryProgression(seed.storyProgression)
+        try saveMemoryEntries(seed.memoryEntries)
+        try saveWeeklySummaryPolishEntries(seed.weeklySummaryPolishEntries)
+        try saveValidationReportEntries(seed.validationReportEntries)
+    }
+
     public func appendMemoryEntry(_ entry: MemoryEntry) throws {
         var entries = loadMemoryEntries().value
         entries.append(entry)

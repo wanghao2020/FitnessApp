@@ -21,6 +21,8 @@ DEBUG diagnostics can also show a real-device validation overview plus WatchConn
 When a Runtime response has executed, the panel also shows the resulting draft title and next action so model, fixture, and fallback runs can be inspected without opening logs.
 The WatchConnectivity panel includes three real-device checklist rows: installation readiness, send path, and inbound return. Use them with `--fitnessrpg-show-diagnostics` when validating paired hardware.
 
+DEBUG demo builds can seed a complete deterministic showcase with `--fitnessrpg-demo-seed`. It writes Today, History, Memory Review, weekly polish cache, and validation archive data so the app can be demonstrated before real HealthKit, WatchConnectivity, or LiteRT-LM files are available.
+
 DEBUG builds also support local model Runtime fixture launch arguments. These simulate ready resources and deterministic adapter output without linking LiteRT/Gemma or packaging model files, so the Runtime panel and History weekly polish path can exercise ready, parsing failure, adapter failure, and validator fallback paths.
 
 The iOS target now owns local durable state through a JSON persistence store. It restores the same daily quest for the local day, persists Watch execution logs and resolved workout results, stores memory drafts, and advances deterministic RPG story progression. History and Memory Review expose those persisted records in the app. History now includes a deterministic weekly summary and next-week plan built from persisted training records, plus a cached local model polish section when provider output passes validation. The cached weekly polish section can be regenerated or cleared from History. The watchOS target stays non-persistent in this pass.
@@ -48,6 +50,7 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 - `--fitnessrpg-open-memory-review`: launch directly into Memory Review.
 - `--fitnessrpg-show-diagnostics`: show the Today WatchConnectivity and model Runtime/resource diagnostics panels in DEBUG builds.
 - `--fitnessrpg-open-validation-report-archive`: enable diagnostics and open the saved validation report archive sheet for screenshots.
+- `--fitnessrpg-demo-seed`: seed deterministic Today, History, Memory Review, weekly polish, and validation archive demo data in DEBUG builds.
 - `--fitnessrpg-model-fixture-ready`: in DEBUG diagnostics, run a successful local model fixture response.
 - `--fitnessrpg-model-fixture-parsing-failure`: in DEBUG diagnostics, run a fixture response that fails raw text parsing.
 - `--fitnessrpg-model-fixture-adapter-failure`: in DEBUG diagnostics, run a fixture response that fails at the adapter layer.
