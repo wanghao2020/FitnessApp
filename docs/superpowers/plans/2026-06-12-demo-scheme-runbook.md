@@ -8,6 +8,8 @@
 
 **Tech Stack:** Xcode shared schemes, `xcodebuild`, `xcrun simctl`, POSIX shell, existing JSON persistence files.
 
+**Execution status:** Implemented in `4ee4561 chore(native): add demo seed scheme`.
+
 ---
 
 ## Files
@@ -73,7 +75,7 @@ git diff --check
 
 Expected: scheme is listed, smoke script confirms JSON seed data, and diff check passes.
 
-- [ ] **Step 8: Commit and push**
+- [x] **Step 8: Commit and push**
 
 Run:
 

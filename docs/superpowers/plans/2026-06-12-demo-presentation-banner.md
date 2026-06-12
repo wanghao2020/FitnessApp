@@ -8,6 +8,8 @@
 
 **Tech Stack:** Swift Package domain models, SwiftUI, existing JSON demo seed path, Xcode simulator smoke.
 
+**Execution status:** Implemented in `35c4db5 feat(native): show demo presentation banner`.
+
 ---
 
 ## Files
@@ -55,6 +57,6 @@ bash native/scripts/demo-seed-simulator-smoke.sh
 git diff --check
 ```
 
-- [ ] **Step 7: Commit and push**
+- [x] **Step 7: Commit and push**
 
 Commit message: `feat(native): show demo presentation banner`
