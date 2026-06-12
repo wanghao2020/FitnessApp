@@ -860,6 +860,20 @@ final class FitnessRPGCoreTests: XCTestCase {
         )
     }
 
+    func testFitnessRPGDemoSeedProvidesPresentationBanner() {
+        let presentation = FitnessRPGDemoSeed.showcase.presentation
+
+        XCTAssertEqual(presentation.title, "演示模式")
+        XCTAssertEqual(presentation.systemImageName, "sparkles.rectangle.stack")
+        XCTAssertEqual(presentation.evidence.map(\.title), [
+            "Today",
+            "History",
+            "Memory",
+            "Diagnostics"
+        ])
+        XCTAssertTrue(presentation.subtitle.contains("确定性数据"))
+    }
+
     func testAppNavigationDisplayUsesLocalizedHistoryLabels() {
         XCTAssertEqual(AppNavigationDisplay.todayTitle, "Fitness RPG")
         XCTAssertEqual(AppNavigationDisplay.historyTitle, "训练历史")

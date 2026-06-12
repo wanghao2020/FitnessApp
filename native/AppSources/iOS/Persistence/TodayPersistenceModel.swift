@@ -14,6 +14,7 @@ final class TodayPersistenceModel: ObservableObject {
     @Published private(set) var memoryReviewEntries: [MemoryReviewEntry] = []
     @Published private(set) var memoryReviewLoadErrorText: String?
     @Published private(set) var validationReportEntries: [RealDeviceValidationReportEntry] = []
+    @Published private(set) var demoSeedPresentation: FitnessRPGDemoSeedPresentation?
 
     private let store: JSONFitnessRPGStore
     private let calendar: Calendar
@@ -187,6 +188,7 @@ final class TodayPersistenceModel: ObservableObject {
             validationReportEntries = seed.validationReportEntries.sorted { left, right in
                 left.createdAt > right.createdAt
             }
+            demoSeedPresentation = seed.presentation
             storageStatusText = statusText("已加载演示数据。")
         } catch {
             storageStatusText = "演示数据加载失败：\(error.localizedDescription)"
@@ -221,6 +223,7 @@ final class TodayPersistenceModel: ObservableObject {
     }
 
     func loadOrCreateToday(readiness: ReadinessResult, date: Date = Date()) {
+        demoSeedPresentation = nil
         let key = Self.dayKey(for: date, calendar: calendar)
         guard var records = loadSafeTrainingDays() else {
             return

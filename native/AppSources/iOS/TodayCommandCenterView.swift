@@ -118,6 +118,10 @@ struct TodayCommandCenterView: View {
         NavigationStack(path: $navigationPath) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
+                    if let presentation = persistenceModel.demoSeedPresentation {
+                        DemoSeedPresentationBanner(presentation: presentation)
+                    }
+
                     TodayHeroCard(
                         summary: todaySummary,
                         sourceNote: sourceNote,

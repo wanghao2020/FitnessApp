@@ -1,5 +1,36 @@
 import Foundation
 
+public struct FitnessRPGDemoSeedPresentationEvidence: Equatable, Sendable {
+    public let title: String
+    public let value: String
+    public let systemImageName: String
+
+    public init(title: String, value: String, systemImageName: String) {
+        self.title = title
+        self.value = value
+        self.systemImageName = systemImageName
+    }
+}
+
+public struct FitnessRPGDemoSeedPresentation: Equatable, Sendable {
+    public let title: String
+    public let subtitle: String
+    public let systemImageName: String
+    public let evidence: [FitnessRPGDemoSeedPresentationEvidence]
+
+    public init(
+        title: String,
+        subtitle: String,
+        systemImageName: String,
+        evidence: [FitnessRPGDemoSeedPresentationEvidence]
+    ) {
+        self.title = title
+        self.subtitle = subtitle
+        self.systemImageName = systemImageName
+        self.evidence = evidence
+    }
+}
+
 public struct FitnessRPGDemoSeed: Equatable, Sendable {
     public let todayRecordID: String
     public let trainingDays: [TrainingDayRecord]
@@ -7,6 +38,7 @@ public struct FitnessRPGDemoSeed: Equatable, Sendable {
     public let memoryEntries: [MemoryEntry]
     public let weeklySummaryPolishEntries: [WeeklySummaryPolishEntry]
     public let validationReportEntries: [RealDeviceValidationReportEntry]
+    public let presentation: FitnessRPGDemoSeedPresentation
 
     public init(
         todayRecordID: String,
@@ -14,7 +46,8 @@ public struct FitnessRPGDemoSeed: Equatable, Sendable {
         storyProgression: StoryProgression,
         memoryEntries: [MemoryEntry],
         weeklySummaryPolishEntries: [WeeklySummaryPolishEntry],
-        validationReportEntries: [RealDeviceValidationReportEntry]
+        validationReportEntries: [RealDeviceValidationReportEntry],
+        presentation: FitnessRPGDemoSeedPresentation
     ) {
         self.todayRecordID = todayRecordID
         self.trainingDays = trainingDays
@@ -22,6 +55,7 @@ public struct FitnessRPGDemoSeed: Equatable, Sendable {
         self.memoryEntries = memoryEntries
         self.weeklySummaryPolishEntries = weeklySummaryPolishEntries
         self.validationReportEntries = validationReportEntries
+        self.presentation = presentation
     }
 
     public var todayRecord: TrainingDayRecord? {
@@ -117,7 +151,8 @@ public struct FitnessRPGDemoSeed: Equatable, Sendable {
             storyProgression: progression,
             memoryEntries: memories,
             weeklySummaryPolishEntries: [polishEntry],
-            validationReportEntries: validationReportEntries()
+            validationReportEntries: validationReportEntries(),
+            presentation: presentation()
         )
     }()
 
@@ -232,6 +267,36 @@ public struct FitnessRPGDemoSeed: Equatable, Sendable {
                 createdAt: demoDate(day: 4, hour: 18)
             )
         ]
+    }
+
+    private static func presentation() -> FitnessRPGDemoSeedPresentation {
+        FitnessRPGDemoSeedPresentation(
+            title: "演示模式",
+            subtitle: "已加载可重复的确定性数据，可直接展示 Today、History、Memory 与 Diagnostics 闭环。",
+            systemImageName: "sparkles.rectangle.stack",
+            evidence: [
+                FitnessRPGDemoSeedPresentationEvidence(
+                    title: "Today",
+                    value: "2026-06-12 完成",
+                    systemImageName: "checkmark.circle.fill"
+                ),
+                FitnessRPGDemoSeedPresentationEvidence(
+                    title: "History",
+                    value: "4 天训练记录",
+                    systemImageName: "clock.arrow.circlepath"
+                ),
+                FitnessRPGDemoSeedPresentationEvidence(
+                    title: "Memory",
+                    value: "4 条记忆草稿",
+                    systemImageName: "book.closed.fill"
+                ),
+                FitnessRPGDemoSeedPresentationEvidence(
+                    title: "Diagnostics",
+                    value: "2 条验证报告",
+                    systemImageName: "waveform.path.ecg.rectangle"
+                )
+            ]
+        )
     }
 
     private static func demoDate(day: Int, hour: Int) -> Date {

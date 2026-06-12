@@ -51,6 +51,14 @@ struct HistoryView: View {
 
     private var historyList: some View {
         List {
+            if let presentation = persistenceModel.demoSeedPresentation {
+                Section {
+                    DemoSeedPresentationBanner(presentation: presentation)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowBackground(Color.clear)
+                }
+            }
+
             Section {
                 WeeklyTrainingSummaryCard(
                     summary: persistenceModel.weeklyTrainingSummary,
@@ -144,6 +152,73 @@ struct HistoryView: View {
     private func clearWeeklyPolishCache() {
         persistenceModel.clearWeeklySummaryPolishEntry()
         weeklyPolishResponse = nil
+    }
+}
+
+struct DemoSeedPresentationBanner: View {
+    let presentation: FitnessRPGDemoSeedPresentation
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: presentation.systemImageName)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.orange)
+                    .frame(width: 30, height: 30)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(presentation.title)
+                        .font(.system(.headline, design: .rounded, weight: .bold))
+                    Text(presentation.subtitle)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible(), spacing: 8),
+                    GridItem(.flexible(), spacing: 8)
+                ],
+                alignment: .leading,
+                spacing: 8
+            ) {
+                ForEach(presentation.evidence, id: \.title) { item in
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: item.systemImageName)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.blue)
+                            .frame(width: 18, height: 18)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.title)
+                                .font(.caption.weight(.semibold))
+                                .lineLimit(1)
+                            Text(item.value)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.82)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 42, alignment: .topLeading)
+                    .padding(8)
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8))
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.blue.opacity(0.08))
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.blue.opacity(0.18), lineWidth: 1)
+        }
+        .accessibilityElement(children: .contain)
     }
 }
 
