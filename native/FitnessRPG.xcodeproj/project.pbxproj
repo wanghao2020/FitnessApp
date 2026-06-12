@@ -503,6 +503,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Fitness RPG uses Apple Health data to estimate readiness and adapt training intensity.";
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hao.fitnessrpg;
 				PRODUCT_NAME = FitnessRPG;
@@ -523,6 +525,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Fitness RPG";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Fitness RPG uses Apple Health data to estimate readiness and adapt training intensity.";
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hao.fitnessrpg;
 				PRODUCT_NAME = FitnessRPG;
