@@ -2223,6 +2223,50 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertTrue(report.body.contains("History：3 条记录；周回顾缓存：已生成"))
     }
 
+    func testRealDeviceValidationReportArchivePrependsAndLimitsEntries() {
+        let existing = (0..<3).map { index in
+            RealDeviceValidationReportEntry(
+                headline: "旧报告 \(index)",
+                body: "body-\(index)",
+                createdAt: Date(timeIntervalSince1970: Double(index))
+            )
+        }
+
+        let updated = RealDeviceValidationReportArchive.upserting(
+            report: RealDeviceValidationReport(body: "new-body"),
+            headline: "新报告",
+            in: existing,
+            createdAt: Date(timeIntervalSince1970: 10),
+            maxCount: 3
+        )
+
+        XCTAssertEqual(updated.map(\.headline), ["新报告", "旧报告 2", "旧报告 1"])
+        XCTAssertEqual(updated.first?.body, "new-body")
+        XCTAssertEqual(updated.first?.id, "validation-report-10")
+    }
+
+    func testRealDeviceValidationReportArchiveReplacesSameTimestamp() {
+        let existing = [
+            RealDeviceValidationReportEntry(
+                headline: "旧报告",
+                body: "old",
+                createdAt: Date(timeIntervalSince1970: 10)
+            )
+        ]
+
+        let updated = RealDeviceValidationReportArchive.upserting(
+            report: RealDeviceValidationReport(body: "new"),
+            headline: "新报告",
+            in: existing,
+            createdAt: Date(timeIntervalSince1970: 10),
+            maxCount: 20
+        )
+
+        XCTAssertEqual(updated.count, 1)
+        XCTAssertEqual(updated[0].headline, "新报告")
+        XCTAssertEqual(updated[0].body, "new")
+    }
+
     private func makeHistoryRecord(
         date: String,
         readinessColor: ReadinessColor,

@@ -13,6 +13,7 @@ final class TodayPersistenceModel: ObservableObject {
     @Published private(set) var weeklySummaryPolishEntry: WeeklySummaryPolishEntry?
     @Published private(set) var memoryReviewEntries: [MemoryReviewEntry] = []
     @Published private(set) var memoryReviewLoadErrorText: String?
+    @Published private(set) var validationReportEntries: [RealDeviceValidationReportEntry] = []
 
     private let store: JSONFitnessRPGStore
     private let calendar: Calendar
@@ -33,6 +34,7 @@ final class TodayPersistenceModel: ObservableObject {
         } else {
             self.initialStoryWarningText = nil
         }
+        reloadValidationReports()
     }
 
     var todayQuest: DailyQuest? {
@@ -159,6 +161,46 @@ final class TodayPersistenceModel: ObservableObject {
 
         if let warning = loadedRecords.warning {
             storageStatusText = "本地训练记录读取失败，记忆来源信息可能不完整：\(warning)"
+        }
+    }
+
+    func reloadValidationReports() {
+        let loadedEntries = store.loadValidationReportEntries()
+        if let warning = loadedEntries.warning {
+            validationReportEntries = []
+            storageStatusText = "本地实机验证报告读取失败：\(warning)"
+            return
+        }
+
+        validationReportEntries = loadedEntries.value.sorted { left, right in
+            left.createdAt > right.createdAt
+        }
+    }
+
+    func saveValidationReport(
+        _ report: RealDeviceValidationReport,
+        headline: String,
+        date: Date = Date()
+    ) {
+        let loadedEntries = store.loadValidationReportEntries()
+        if let warning = loadedEntries.warning {
+            storageStatusText = "本地实机验证报告读取失败：\(warning)"
+            return
+        }
+
+        let updatedEntries = RealDeviceValidationReportArchive.upserting(
+            report: report,
+            headline: headline,
+            in: loadedEntries.value,
+            createdAt: date
+        )
+
+        do {
+            try store.saveValidationReportEntries(updatedEntries)
+            validationReportEntries = updatedEntries
+            storageStatusText = statusText("已保存实机验证报告。")
+        } catch {
+            storageStatusText = "实机验证报告保存失败：\(error.localizedDescription)"
         }
     }
 

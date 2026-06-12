@@ -129,8 +129,14 @@ struct TodayCommandCenterView: View {
                     if showsDiagnostics {
                         RealDeviceValidationChecklistPanel(
                             checklist: realDeviceValidationChecklist,
-                            report: realDeviceValidationReport
-                        )
+                            report: realDeviceValidationReport,
+                            savedReportCount: persistenceModel.validationReportEntries.count
+                        ) {
+                            persistenceModel.saveValidationReport(
+                                realDeviceValidationReport,
+                                headline: realDeviceValidationChecklist.headline
+                            )
+                        }
                         ModelRuntimeDiagnosticsPanel(summary: modelRuntimeDiagnostics)
                         WatchConnectivityDiagnosticsPanel(snapshot: watchSyncModel.diagnosticsSnapshot)
                     }
@@ -365,7 +371,10 @@ private struct TodayQuestActionCard: View {
 private struct RealDeviceValidationChecklistPanel: View {
     let checklist: RealDeviceValidationChecklist
     let report: RealDeviceValidationReport
+    let savedReportCount: Int
+    let saveReportAction: () -> Void
     @State private var didCopyReport = false
+    @State private var didSaveReport = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -385,22 +394,38 @@ private struct RealDeviceValidationChecklistPanel: View {
 
                         Spacer(minLength: 8)
 
-                        Button {
-                            UIPasteboard.general.string = report.body
-                            didCopyReport = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
-                                didCopyReport = false
+                        HStack(spacing: 6) {
+                            Button {
+                                UIPasteboard.general.string = report.body
+                                didCopyReport = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+                                    didCopyReport = false
+                                }
+                            } label: {
+                                Label(
+                                    didCopyReport ? "已复制" : "复制报告",
+                                    systemImage: didCopyReport ? "checkmark.circle.fill" : "doc.on.doc.fill"
+                                )
                             }
-                        } label: {
-                            Label(
-                                didCopyReport ? "已复制" : "复制报告",
-                                systemImage: didCopyReport ? "checkmark.circle.fill" : "doc.on.doc.fill"
-                            )
+                            .accessibilityLabel(didCopyReport ? "实机验证报告已复制" : "复制实机验证报告")
+
+                            Button {
+                                saveReportAction()
+                                didSaveReport = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+                                    didSaveReport = false
+                                }
+                            } label: {
+                                Label(
+                                    didSaveReport ? "已保存" : "保存报告",
+                                    systemImage: didSaveReport ? "checkmark.circle.fill" : "tray.and.arrow.down.fill"
+                                )
+                            }
+                            .accessibilityLabel(didSaveReport ? "实机验证报告已保存" : "保存实机验证报告")
                         }
                         .font(.caption.weight(.semibold))
                         .buttonStyle(.bordered)
                         .controlSize(.small)
-                        .accessibilityLabel(didCopyReport ? "实机验证报告已复制" : "复制实机验证报告")
                     }
 
                     Text(checklist.headline)
@@ -410,6 +435,12 @@ private struct RealDeviceValidationChecklistPanel: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
+                    if savedReportCount > 0 {
+                        Text("已保存 \(savedReportCount) 份验证报告。")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
             }
 

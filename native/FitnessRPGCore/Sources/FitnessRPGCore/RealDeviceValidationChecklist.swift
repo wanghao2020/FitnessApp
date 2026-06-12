@@ -37,6 +37,56 @@ public struct RealDeviceValidationReport: Equatable, Sendable {
     }
 }
 
+public struct RealDeviceValidationReportEntry: Codable, Equatable, Identifiable, Sendable {
+    public let id: String
+    public let headline: String
+    public let body: String
+    public let createdAt: Date
+
+    public init(
+        headline: String,
+        body: String,
+        createdAt: Date = Date()
+    ) {
+        self.id = Self.id(for: createdAt)
+        self.headline = headline
+        self.body = body
+        self.createdAt = createdAt
+    }
+
+    private static func id(for date: Date) -> String {
+        "validation-report-\(Int(date.timeIntervalSince1970))"
+    }
+}
+
+public enum RealDeviceValidationReportArchive {
+    public static func upserting(
+        report: RealDeviceValidationReport,
+        headline: String,
+        in entries: [RealDeviceValidationReportEntry],
+        createdAt: Date = Date(),
+        maxCount: Int = 20
+    ) -> [RealDeviceValidationReportEntry] {
+        guard maxCount > 0 else {
+            return []
+        }
+
+        let newEntry = RealDeviceValidationReportEntry(
+            headline: headline,
+            body: report.body,
+            createdAt: createdAt
+        )
+        let filteredEntries = entries.filter { entry in
+            entry.id != newEntry.id
+        }
+        let sortedEntries = filteredEntries.sorted { left, right in
+            left.createdAt > right.createdAt
+        }
+
+        return Array(([newEntry] + sortedEntries).prefix(maxCount))
+    }
+}
+
 public enum RealDeviceValidationReportBuilder {
     public static func report(
         checklist: RealDeviceValidationChecklist,

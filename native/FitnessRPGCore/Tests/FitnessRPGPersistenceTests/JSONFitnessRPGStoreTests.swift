@@ -115,6 +115,21 @@ final class JSONFitnessRPGStoreTests: XCTestCase {
         XCTAssertNil(loaded.warning)
     }
 
+    func testSavingValidationReportEntriesCanBeLoadedAgain() throws {
+        let store = try temporaryStore()
+        let entry = RealDeviceValidationReportEntry(
+            headline: "实机验证还有阻塞项",
+            body: "Fitness RPG 实机验证报告",
+            createdAt: Date(timeIntervalSince1970: 10)
+        )
+
+        try store.saveValidationReportEntries([entry])
+        let loaded = store.loadValidationReportEntries()
+
+        XCTAssertEqual(loaded.value, [entry])
+        XCTAssertNil(loaded.warning)
+    }
+
     func testCorruptJSONFallsBackWithWarning() throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
