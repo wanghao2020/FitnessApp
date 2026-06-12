@@ -57,7 +57,7 @@ Both targets link the local `FitnessRPGCore` package product; the iOS target als
 
 - Real-device WatchConnectivity validation can now start with `bash native/scripts/watchconnectivity-real-device-preflight.sh`, then follow `docs/validation/watchconnectivity-real-device-runbook.md`: confirm iPhone support/pairing/Watch App installation, send Today to Watch, complete Watch steps, then verify inbound return and History persistence.
 - HealthKit permission and data-coverage action rows can be validated with `bash native/scripts/healthkit-real-device-preflight.sh` and `docs/validation/healthkit-real-device-runbook.md` before adding deeper onboarding.
-- LiteRT-LM / Gemma SDK execution can be enabled by linking the Swift package, placing `ModelResources/gemma-4-E2B-it.litertlm`, and setting `FITNESSRPG_ENABLE_LITERTLM`.
+- LiteRT-LM / Gemma SDK execution can now start with `bash native/scripts/litertlm-real-device-preflight.sh`, then follow `docs/validation/litertlm-real-device-runbook.md` before linking the Swift package, placing `ModelResources/gemma-4-E2B-it.litertlm`, and setting `FITNESSRPG_ENABLE_LITERTLM`.
 
 ## Verification
 
