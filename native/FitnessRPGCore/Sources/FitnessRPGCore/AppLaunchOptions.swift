@@ -29,6 +29,11 @@ public enum AppLaunchOptions {
 
     public static func showsDiagnostics(arguments: [String]) -> Bool {
         arguments.contains("--fitnessrpg-show-diagnostics")
+            || opensValidationReportArchive(arguments: arguments)
+    }
+
+    public static func opensValidationReportArchive(arguments: [String]) -> Bool {
+        arguments.contains("--fitnessrpg-open-validation-report-archive")
     }
 
     public static func modelRuntimeDebugFixtureMode(arguments: [String]) -> ModelRuntimeDebugFixtureMode? {

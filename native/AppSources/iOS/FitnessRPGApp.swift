@@ -18,6 +18,7 @@ struct FitnessRPGApp: App {
                 persistenceModel: persistenceModel,
                 initialDestination: Self.debugInitialDestination,
                 showsDiagnostics: Self.debugShowsDiagnostics,
+                opensValidationReportArchive: Self.debugOpensValidationReportArchive,
                 modelRuntimeFixtureMode: Self.debugModelRuntimeFixtureMode
             )
             .task {
@@ -41,6 +42,14 @@ struct FitnessRPGApp: App {
     private static var debugShowsDiagnostics: Bool {
         #if DEBUG
         AppLaunchOptions.showsDiagnostics(arguments: ProcessInfo.processInfo.arguments)
+        #else
+        false
+        #endif
+    }
+
+    private static var debugOpensValidationReportArchive: Bool {
+        #if DEBUG
+        AppLaunchOptions.opensValidationReportArchive(arguments: ProcessInfo.processInfo.arguments)
         #else
         false
         #endif

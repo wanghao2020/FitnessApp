@@ -795,6 +795,20 @@ final class FitnessRPGCoreTests: XCTestCase {
         )
     }
 
+    func testAppLaunchOptionsOpenValidationReportArchiveFromArguments() {
+        let arguments = ["FitnessRPG", "--fitnessrpg-open-validation-report-archive"]
+
+        XCTAssertFalse(
+            AppLaunchOptions.opensValidationReportArchive(arguments: ["FitnessRPG"])
+        )
+        XCTAssertTrue(
+            AppLaunchOptions.opensValidationReportArchive(arguments: arguments)
+        )
+        XCTAssertTrue(
+            AppLaunchOptions.showsDiagnostics(arguments: arguments)
+        )
+    }
+
     func testAppLaunchOptionsParseModelRuntimeDebugFixtureModes() {
         XCTAssertNil(
             AppLaunchOptions.modelRuntimeDebugFixtureMode(arguments: ["FitnessRPG"])
@@ -2265,6 +2279,36 @@ final class FitnessRPGCoreTests: XCTestCase {
         XCTAssertEqual(updated.count, 1)
         XCTAssertEqual(updated[0].headline, "新报告")
         XCTAssertEqual(updated[0].body, "new")
+    }
+
+    func testRealDeviceValidationReportArchiveProvidesEmptyStateCopy() {
+        XCTAssertEqual(RealDeviceValidationReportArchive.emptyStateTitle, "暂无保存报告")
+        XCTAssertEqual(
+            RealDeviceValidationReportArchive.emptyStateDetail,
+            "在实机验证总览保存报告后，会在这里按时间倒序显示。"
+        )
+        XCTAssertEqual(RealDeviceValidationReportArchive.emptyStateSystemImageName, "tray")
+    }
+
+    func testRealDeviceValidationReportEntryProvidesArchiveDisplayText() {
+        let entry = RealDeviceValidationReportEntry(
+            headline: "实机验证还有阻塞项",
+            body: "Fitness RPG 实机验证报告\n生成时间：1970-01-01T00:00:00Z",
+            createdAt: Date(timeIntervalSince1970: 0)
+        )
+
+        XCTAssertEqual(entry.createdAtLabel, "1970-01-01T00:00:00Z")
+        XCTAssertEqual(entry.bodyPreview, "Fitness RPG 实机验证报告")
+    }
+
+    func testRealDeviceValidationReportEntryUsesFallbackPreviewForBlankBody() {
+        let entry = RealDeviceValidationReportEntry(
+            headline: "空报告",
+            body: "\n  \n",
+            createdAt: Date(timeIntervalSince1970: 0)
+        )
+
+        XCTAssertEqual(entry.bodyPreview, "无报告正文")
     }
 
     private func makeHistoryRecord(

@@ -57,9 +57,28 @@ public struct RealDeviceValidationReportEntry: Codable, Equatable, Identifiable,
     private static func id(for date: Date) -> String {
         "validation-report-\(Int(date.timeIntervalSince1970))"
     }
+
+    public var createdAtLabel: String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.string(from: createdAt)
+    }
+
+    public var bodyPreview: String {
+        let firstLine = body
+            .split(whereSeparator: \.isNewline)
+            .map { String($0).trimmingCharacters(in: .whitespacesAndNewlines) }
+            .first { !$0.isEmpty }
+
+        return firstLine ?? "无报告正文"
+    }
 }
 
 public enum RealDeviceValidationReportArchive {
+    public static let emptyStateTitle = "暂无保存报告"
+    public static let emptyStateDetail = "在实机验证总览保存报告后，会在这里按时间倒序显示。"
+    public static let emptyStateSystemImageName = "tray"
+
     public static func upserting(
         report: RealDeviceValidationReport,
         headline: String,

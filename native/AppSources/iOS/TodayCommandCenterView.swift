@@ -10,6 +10,7 @@ struct TodayCommandCenterView: View {
     @ObservedObject var watchSyncModel: WatchQuestSyncModel
     @ObservedObject var persistenceModel: TodayPersistenceModel
     let showsDiagnostics: Bool
+    let opensValidationReportArchive: Bool
     let modelRuntimeFixtureMode: ModelRuntimeDebugFixtureMode?
     @State private var modelRuntimeResponse: ModelRuntimeResponse?
     @State private var navigationPath: [AppLaunchDestination]
@@ -23,6 +24,7 @@ struct TodayCommandCenterView: View {
         persistenceModel: TodayPersistenceModel,
         initialDestination: AppLaunchDestination = .today,
         showsDiagnostics: Bool = false,
+        opensValidationReportArchive: Bool = false,
         modelRuntimeFixtureMode: ModelRuntimeDebugFixtureMode? = nil
     ) {
         self.readiness = readiness
@@ -32,6 +34,7 @@ struct TodayCommandCenterView: View {
         self.watchSyncModel = watchSyncModel
         self.persistenceModel = persistenceModel
         self.showsDiagnostics = showsDiagnostics
+        self.opensValidationReportArchive = opensValidationReportArchive
         self.modelRuntimeFixtureMode = modelRuntimeFixtureMode
         _navigationPath = State(initialValue: initialDestination == .today ? [] : [initialDestination])
     }
@@ -130,7 +133,8 @@ struct TodayCommandCenterView: View {
                         RealDeviceValidationChecklistPanel(
                             checklist: realDeviceValidationChecklist,
                             report: realDeviceValidationReport,
-                            savedReportCount: persistenceModel.validationReportEntries.count
+                            savedReports: persistenceModel.validationReportEntries,
+                            opensArchiveOnAppear: opensValidationReportArchive
                         ) {
                             persistenceModel.saveValidationReport(
                                 realDeviceValidationReport,
@@ -371,10 +375,17 @@ private struct TodayQuestActionCard: View {
 private struct RealDeviceValidationChecklistPanel: View {
     let checklist: RealDeviceValidationChecklist
     let report: RealDeviceValidationReport
-    let savedReportCount: Int
+    let savedReports: [RealDeviceValidationReportEntry]
+    let opensArchiveOnAppear: Bool
     let saveReportAction: () -> Void
     @State private var didCopyReport = false
     @State private var didSaveReport = false
+    @State private var showsReportArchive = false
+    @State private var didOpenArchiveOnAppear = false
+
+    private var savedReportCount: Int {
+        savedReports.count
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -436,10 +447,22 @@ private struct RealDeviceValidationChecklistPanel: View {
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                     if savedReportCount > 0 {
-                        Text("已保存 \(savedReportCount) 份验证报告。")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text("已保存 \(savedReportCount) 份验证报告。")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+
+                            Button {
+                                showsReportArchive = true
+                            } label: {
+                                Label("查看归档", systemImage: "list.bullet.rectangle")
+                            }
+                            .font(.caption.weight(.semibold))
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                            .accessibilityLabel("查看实机验证报告归档")
+                        }
                     }
                 }
             }
@@ -456,6 +479,150 @@ private struct RealDeviceValidationChecklistPanel: View {
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .accessibilityElement(children: .contain)
         .accessibilityLabel("实机验证总览")
+        .sheet(isPresented: $showsReportArchive) {
+            ValidationReportArchiveSheet(entries: savedReports)
+        }
+        .task(id: opensArchiveOnAppear) {
+            guard opensArchiveOnAppear, !didOpenArchiveOnAppear else {
+                return
+            }
+
+            didOpenArchiveOnAppear = true
+            showsReportArchive = true
+        }
+    }
+}
+
+private struct ValidationReportArchiveSheet: View {
+    let entries: [RealDeviceValidationReportEntry]
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if entries.isEmpty {
+                    ValidationReportArchiveEmptyStateView()
+                } else {
+                    List {
+                        Section {
+                            ForEach(entries) { entry in
+                                NavigationLink {
+                                    ValidationReportArchiveDetailView(entry: entry)
+                                } label: {
+                                    ValidationReportArchiveRow(entry: entry)
+                                }
+                            }
+                        } header: {
+                            Label("已保存报告", systemImage: "tray.full")
+                        }
+                    }
+                    .listStyle(.insetGrouped)
+                }
+            }
+            .navigationTitle("验证报告归档")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("完成") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct ValidationReportArchiveEmptyStateView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: RealDeviceValidationReportArchive.emptyStateSystemImageName)
+                .font(.system(size: 42, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
+
+            VStack(spacing: 6) {
+                Text(RealDeviceValidationReportArchive.emptyStateTitle)
+                    .font(.headline)
+                Text(RealDeviceValidationReportArchive.emptyStateDetail)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(24)
+        .background(Color(.systemGroupedBackground))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct ValidationReportArchiveRow: View {
+    let entry: RealDeviceValidationReportEntry
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(entry.headline)
+                .font(.subheadline.weight(.semibold))
+                .lineLimit(2)
+            Text(entry.createdAtLabel)
+                .font(.caption.monospacedDigit().weight(.semibold))
+                .foregroundStyle(.secondary)
+            Text(entry.bodyPreview)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+        }
+        .padding(.vertical, 6)
+    }
+}
+
+private struct ValidationReportArchiveDetailView: View {
+    let entry: RealDeviceValidationReportEntry
+    @State private var didCopyReport = false
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(entry.headline)
+                        .font(.system(.title3, design: .rounded, weight: .bold))
+                        .lineLimit(3)
+                    Text(entry.createdAtLabel)
+                        .font(.caption.monospacedDigit().weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+
+                Text(entry.body)
+                    .font(.system(.footnote, design: .monospaced))
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .background(.quaternary.opacity(0.7))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+        }
+        .navigationTitle("报告详情")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    UIPasteboard.general.string = entry.body
+                    didCopyReport = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+                        didCopyReport = false
+                    }
+                } label: {
+                    Label(
+                        didCopyReport ? "已复制" : "复制",
+                        systemImage: didCopyReport ? "checkmark.circle.fill" : "doc.on.doc.fill"
+                    )
+                }
+                .accessibilityLabel(didCopyReport ? "验证报告已复制" : "复制验证报告")
+            }
+        }
     }
 }
 
